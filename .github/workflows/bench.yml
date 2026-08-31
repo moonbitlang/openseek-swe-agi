@@ -219,10 +219,28 @@ jobs:
             gh release upload viewers "bench-${date}-${task}.html" --clobber
           done
 
+      # Retire viewer assets older than 90 days — the asset name carries its
+      # date, so age needs no API timestamps. The dashboard reads the manifest
+      # below and stops linking a day once its viewer is gone.
+      - name: GC old session viewers
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cutoff="$(date -u -d '90 days ago' +%F)"
+          gh release view viewers --json assets --jq '.assets[].name' 2>/dev/null |
+          while read -r name; do
+            day="${name#bench-}"
+            day="${day:0:10}"
+            if [[ "$day" < "$cutoff" ]]; then
+              echo "retiring $name (before $cutoff)"
+              gh release delete-asset viewers "$name" --yes
+            fi
+          done
+
       # Publish the dashboard: the static renderer plus every committed stats
-      # file (including today's) merged into one data.json, and the full
-      # session-viewer archive pulled back from the release. Requires the
-      # repo's Pages source to be set to "GitHub Actions".
+      # file (including today's) merged into one data.json, the surviving
+      # session-viewer archive pulled back from the release, and a manifest of
+      # which viewers exist. Requires Pages source set to "GitHub Actions".
       - name: Build site
         env:
           GH_TOKEN: ${{ github.token }}
@@ -232,6 +250,7 @@ jobs:
           jq -s 'flatten | sort_by(.date)' stats/*.json > _site/data.json
           gh release download viewers --dir _site/viewer \
             --pattern 'bench-*.html' || echo "no viewers published yet"
+          ls _site/viewer | jq -R . | jq -s . > _site/viewers.json
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

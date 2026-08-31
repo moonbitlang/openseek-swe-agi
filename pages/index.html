@@ -366,8 +366,13 @@ function stepsChart(points) {
   });
 }
 
-// Session-viewer archive published per task-day beside the dashboard.
+// Session-viewer archive published per task-day beside the dashboard. The
+// manifest (viewers.json) lists which task-days still exist — old ones are
+// GC'd from the release; with no manifest (local preview) links stay on.
+let VIEWERS = null;
 const viewerHref = (date, task) => `viewer/bench-${date}-${task}.html`;
+const viewerExists = (date, task) =>
+  VIEWERS === null || VIEWERS.has(`bench-${date}-${task}.html`);
 
 // The per-run tool-call rail: one segment per call, in session order.
 function rail(run) {
@@ -395,7 +400,7 @@ function runTable(runs, date, task) {
     const t = run.test_result, c = run.check_result;
     const runCell = el("td");
     const runName = run.dir.replace(/^tasks\//, "");
-    if (run.session_id) {
+    if (run.session_id && viewerExists(date, task)) {
       const link = el("a", "run-link mono", runName);
       link.href = `${viewerHref(date, task)}#s=${encodeURIComponent(run.session_id)}`;
       link.target = "_blank";
@@ -539,11 +544,13 @@ function taskCard(task, records) {
   head.append(el("span", "task-name", task));
   head.append(el("span", "task-latest",
     `${latest.date}: ${latest.passed}/${latest.k} passed · tests ${pct(latest.testRatio)}`));
-  const viewer = el("a", "run-link", "sessions ↗");
-  viewer.href = viewerHref(latest.date, task);
-  viewer.target = "_blank";
-  viewer.rel = "noopener";
-  head.append(viewer);
+  if (viewerExists(latest.date, task)) {
+    const viewer = el("a", "run-link", "sessions ↗");
+    viewer.href = viewerHref(latest.date, task);
+    viewer.target = "_blank";
+    viewer.rel = "noopener";
+    head.append(viewer);
+  }
   card.append(head);
 
   const legend = el("div", "legend");
@@ -571,6 +578,9 @@ async function boot() {
     subtitle.textContent = "failed to load data.json";
     return;
   }
+  try {
+    VIEWERS = new Set(await (await fetch("viewers.json")).json());
+  } catch {}
   if (!Array.isArray(records) || records.length === 0) {
     subtitle.textContent = "no benchmark data yet";
     document.getElementById("tasks").append(el("div", "empty", "Stats will appear after the first daily run."));
