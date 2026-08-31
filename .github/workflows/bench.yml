@@ -1,0 +1,186 @@
+name: bench
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # Runs everyday 14:00 UTC+8
+  workflow_dispatch:
+
+# One benchmark at a time: overlapping runs would race on the stats commit.
+concurrency:
+  group: bench
+  cancel-in-progress: false
+
+jobs:
+  # Resolve the openseek commit under test once, so every task in the matrix
+  # benchmarks the same agent even if openseek's HEAD moves mid-run.
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      openseek_commit: ${{ steps.head.outputs.sha }}
+    steps:
+      - name: Resolve openseek HEAD
+        id: head
+        run: |
+          sha="$(git ls-remote https://github.com/moonbitlang/openseek.git HEAD | cut -f1)"
+          test -n "$sha"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "benchmarking openseek $sha"
+
+  bench:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        task: [csv]
+    env:
+      TASK: ${{ matrix.task }}
+      OPENSEEK_COMMIT: ${{ needs.prepare.outputs.openseek_commit }}
+    steps:
+      - name: Require DEEPSEEK secret
+        env:
+          DEEPSEEK: ${{ secrets.DEEPSEEK }}
+        run: |
+          test -n "$DEEPSEEK" || {
+            echo "::error::the DEEPSEEK repository secret is not set"; exit 1; }
+
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - name: Pin openseek to the resolved HEAD
+        run: |
+          git -C openseek fetch --depth 1 origin "$OPENSEEK_COMMIT"
+          git -C openseek checkout --quiet "$OPENSEEK_COMMIT"
+
+      - name: Set up MoonBit
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s -- latest
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+          moon version --all
+          moon update
+
+      - name: Build the agent
+        run: |
+          (cd openseek && moon build cmd/openseek)
+          moon build tools/grade
+
+      - name: Remove private test cases
+        run: rm -f tasks/"$TASK"/*_priv_test.mbt
+
+      - name: Run the agent
+        id: fleet
+        continue-on-error: true
+        env:
+          DEEPSEEK: ${{ secrets.DEEPSEEK }}
+        run: |
+          cd openseek
+          moon run --target native cmd/openseek -- run \
+            --dir "../tasks/$TASK" \
+            --concurrency 3 \
+            --model deepseek-v4-flash \
+            --max-steps 160 \
+            "$(cat "../tasks/$TASK/TASK.md")"
+
+      - name: Restore private test cases
+        run: git checkout -- "tasks/$TASK"
+
+      - name: Grade runs
+        run: |
+          moon run tools/grade -- "$TASK" > grade.json
+          jq --arg date "$(date -u +%F)" \
+             --arg openseek_commit "$OPENSEEK_COMMIT" \
+             '{date: $date, openseek_commit: $openseek_commit} + .' grade.json \
+            | tee "stats-$TASK.json"
+
+      - name: Export HTML
+        continue-on-error: true
+        run: |
+          cd openseek
+          moon build cmd/viz_app --target js
+          moon run inspect -- --search-dir ../tasks --export "../bench-$TASK.html"
+
+      - name: Pack run directories
+        run: |
+          shopt -s nullglob
+          dirs=(tasks/"$TASK"_run_*)
+          if [ ${#dirs[@]} -gt 0 ]; then
+            tar czf "runs-$TASK.tgz" \
+              --exclude='_build' --exclude='.mooncakes' "${dirs[@]}"
+          fi
+
+      - name: Upload run artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: runs-${{ matrix.task }}
+          path: |
+            runs-${{ matrix.task }}.tgz
+            bench-${{ matrix.task }}.html
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Upload stats
+        uses: actions/upload-artifact@v4
+        with:
+          name: stats-${{ matrix.task }}
+          path: stats-${{ matrix.task }}.json
+          retention-days: 14
+
+      - name: Fail if the fleet crashed
+        if: steps.fleet.outcome == 'failure'
+        run: |
+          echo "::error::openseek fleet exited nonzero; partial results were still graded and uploaded"
+          exit 1
+
+  # Commits the day's stats plus the tested openseek submodule pin in one
+  # commit, so every stats file is attributable to an exact agent version.
+  # Runs even when a task failed: a red day still records what it measured.
+  report:
+    needs: [prepare, bench]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      OPENSEEK_COMMIT: ${{ needs.prepare.outputs.openseek_commit }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - name: Download stats
+        uses: actions/download-artifact@v4
+        with:
+          pattern: stats-*
+          path: collected
+          merge-multiple: true
+
+      - name: Merge stats and commit
+        run: |
+          shopt -s nullglob
+          files=(collected/*.json)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "::error::no stats artifacts were produced"; exit 1
+          fi
+          date="$(date -u +%F)"
+          out="stats/${date}-${GITHUB_RUN_NUMBER}.json"
+          mkdir -p stats
+          jq -s 'sort_by(.task)' "${files[@]}" > "$out"
+
+          git -C openseek fetch --depth 1 origin "$OPENSEEK_COMMIT"
+          git -C openseek checkout --quiet "$OPENSEEK_COMMIT"
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898203+github-actions[bot]@users.noreply.github.com'
+          git add openseek "$out"
+          git commit -m "bench: ${date} (openseek ${OPENSEEK_COMMIT:0:9})"
+          for _ in 1 2 3; do
+            git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
+            git pull --rebase origin "${GITHUB_REF_NAME}"
+          done
+          echo "::error::could not push stats after 3 attempts"; exit 1
