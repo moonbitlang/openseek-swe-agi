@@ -4,7 +4,7 @@ test "edge/quotes/double-quote-escape" {
     #|"a""b",c
     #|
   let csv = @csv.parse(csv_text)
-  assert_eq(csv, [["a\"b", "c"]])
+  assert_eq(csv, Doc([["a\"b", "c"]]))
 }
 
 ///|
@@ -13,7 +13,7 @@ test "edge/quotes/multiple-escapes" {
     #|"a""b""c",d
     #|
   let csv = @csv.parse(csv_text)
-  assert_eq(csv, [["a\"b\"c", "d"]])
+  assert_eq(csv, Doc([["a\"b\"c", "d"]]))
 }
 
 ///|
@@ -22,7 +22,7 @@ test "edge/quotes/only-quotes" {
     #|"""",a
     #|
   let csv = @csv.parse(csv_text)
-  assert_eq(csv, [["\"", "a"]])
+  assert_eq(csv, Doc([["\"", "a"]]))
 }
 
 ///|
@@ -31,7 +31,7 @@ test "edge/quotes/quoted-comma" {
     #|"a,b",c
     #|
   let csv = @csv.parse(csv_text)
-  assert_eq(csv, [["a,b", "c"]])
+  assert_eq(csv, Doc([["a,b", "c"]]))
 }
 
 ///|
@@ -41,14 +41,14 @@ test "edge/quotes/quoted-newline" {
     #|b",c
     #|
   let csv = @csv.parse(csv_text)
-  assert_eq(csv, [["a\nb", "c"]])
+  assert_eq(csv, Doc([["a\nb", "c"]]))
 }
 
 ///|
 test "edge/quotes/quoted-crlf" {
   let csv_text = "\"a\r\nb\",c\r\n"
   let csv = @csv.parse(csv_text)
-  assert_eq(csv, [["a\r\nb", "c"]])
+  assert_eq(csv, Doc([["a\r\nb", "c"]]))
 }
 
 ///|
@@ -57,14 +57,14 @@ test "edge/empty/all-empty-fields" {
     #|,,
     #|
   let csv = @csv.parse(csv_text)
-  assert_eq(csv, [["", "", ""]])
+  assert_eq(csv, Doc([["", "", ""]]))
 }
 
 ///|
 test "edge/empty/single-empty-field" {
   let csv_text = "\n"
   let csv = @csv.parse(csv_text)
-  assert_eq(csv, [[""]])
+  assert_eq(csv, Doc([[""]]))
 }
 
 ///|
@@ -73,20 +73,20 @@ test "edge/empty/quoted-empty" {
     #|"","",""
     #|
   let csv = @csv.parse(csv_text)
-  assert_eq(csv, [["", "", ""]])
+  assert_eq(csv, Doc([["", "", ""]]))
 }
 
 ///|
 test "edge/line-endings/lf-only" {
   let csv_text = "a,b\nc,d\n"
   let csv = @csv.parse(csv_text)
-  assert_eq(csv, [["a", "b"], ["c", "d"]])
+  assert_eq(csv, Doc([["a", "b"], ["c", "d"]]))
 }
 
 ///|
 test "quickcheck: roundtrips" {
   @quickcheck.check(
-    (doc : @csv.Doc) => @csv.parse(@csv.print(doc)) == doc,
+    (doc : Doc) => @csv.parse(@csv.print(doc)) == doc,
     count=300,
   )
 }
