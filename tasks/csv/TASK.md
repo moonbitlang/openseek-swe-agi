@@ -16,8 +16,7 @@ for specific test strings.
 A proper implementation will have:
 
 - A state machine / lexer that handles commas, quotes, and record boundaries
-- A parser that produces a structured `Csv` value
-- A deterministic JSON encoding layer via `Csv::to_test_json()` used by tests
+- A parser that produces the records as `Array[Array[String]]`
 
 **Important mindset**: If the test suite were regenerated with different literal
 values or different newline/quoting placement, your implementation should still
@@ -31,8 +30,6 @@ Build incrementally:
 2. **Unquoted fields**: comma separation and empty fields.
 3. **Quoted fields**: `""` escaping and commas/newlines inside quotes.
 4. **Error detection**: reject malformed quoting patterns required by invalid tests.
-5. **JSON encoding**: implement `Csv::to_test_json()` exactly as specified in
-   `csv_spec.mbt` so snapshot tests match.
 
 Run tests frequently while adding features.
 
@@ -73,8 +70,8 @@ Implementation notes:
 - Do **not** modify the following files:
   - `csv_spec.mbt` - API specification
   - `specs/` folder - Reference documents
-  - `*_pub_test.mbt` - Public test files (`csv_valid_pub_test.mbt`, `csv_invalid_pub_test.mbt`)
-  - `*_priv_test.mbt` - Private test files (`csv_valid_priv_test.mbt`, `csv_invalid_priv_test.mbt`)
+  - `*_pub_test.mbt` - Public test files (`csv_pub_test.mbt`)
+  - `*_priv_test.mbt` - Private test files (`csv_priv_test.mbt`)
 - Implement the required declarations by adding new `.mbt` files as needed.
 - **You may add additional test files** (e.g., xxx_test.mbt) if needed for testing and maintenance purposes
   - Create additional test files (e.g., `xxx_test.mbt`) to validate edge cases
@@ -83,9 +80,7 @@ Implementation notes:
 
 Required entry points:
 
-- `@csv.parse(input : StringView) -> Result[Csv, ParseError]`
-- `@csv.ParseError::to_string(self) -> String`
-- `@csv.Csv::to_test_json(self) -> Json`
+- `@csv.parse(input : StringView) -> Array[Array[String]] raise`
 
 ## Behavioral rules
 
@@ -96,15 +91,13 @@ Required entry points:
   - `"` inside unquoted fields
   - non-separator text after a closing quote
   - backslash-escaped quotes (`\"`) are not supported
-- `Csv::to_test_json()` must match the encoding contract in `csv_spec.mbt`.
+- The returned records must follow the field semantics documented in `csv_spec.mbt`.
 
 ## Test execution
 
 ```bash
 moon test
 ```
-
-Use `moon test --update` only if you intentionally change snapshots.
 
 
 ## Constraints
@@ -115,7 +108,7 @@ Use `moon test --update` only if you intentionally change snapshots.
 
 The model should keep running until all tests pass.
 
-- **Public tests** (`*_pub_test.mbt`): 10 cases, visible in this repository for development and debugging
+- **Public tests** (`*_pub_test.mbt`): 12 cases (including two property-based tests), visible in this repository for development and debugging
 - **Private tests** (`*_priv_test.mbt`): 88 additional cases, vendored as ordinary files in this local task and run by `moon test`
 
 **CRITICAL - Full Suite Evaluation**:
@@ -165,7 +158,7 @@ inputs within the supported dialect.
   package. Tests call root-package APIs such as `@csv.parse`, so those
   declarations must be implemented or forwarded from the root package.
 - You may organize implementation across root-level files by functional area
-  (for example, scanning, parsing, JSON encoding, and data types).
+  (for example, scanning, parsing, and data types).
 - If you create subdirectories as separate MoonBit packages, wire them through
   package configuration and keep root-package implementations, `pub using`
   re-exports, or forwarding functions so the required root `@csv` APIs remain
@@ -201,10 +194,7 @@ csv/
 │   └── lexer.mbt
 ├── parser/
 │   └── parser.mbt
-├── json/
-│   └── encoder.mbt
 └── types/
-    ├── csv.mbt
     └── error.mbt
 ```
 
@@ -219,7 +209,7 @@ Your implementation must include a `README.md` file that documents:
 - **Project overview**: What this parser implements and its purpose
 - **Architecture**: High-level design decisions and module organization
 - **Implementation approach**: Key algorithms, data structures, and parsing strategy
-- **Usage examples**: How to use the API (parsing code, generating JSON)
+- **Usage examples**: How to use the API (parsing code)
 - **Testing**: How to run tests and interpret results
 - **Design decisions**: Rationale for important technical choices
 

@@ -4,7 +4,7 @@ test "edge/quotes/double-quote-escape" {
     #|"a""b",c
     #|
   let csv = @csv.parse(csv_text)
-  json_inspect(csv.to_test_json(), content={ "records": [["a\"b", "c"]] })
+  assert_eq(csv, [["a\"b", "c"]])
 }
 
 ///|
@@ -13,7 +13,7 @@ test "edge/quotes/multiple-escapes" {
     #|"a""b""c",d
     #|
   let csv = @csv.parse(csv_text)
-  json_inspect(csv.to_test_json(), content={ "records": [["a\"b\"c", "d"]] })
+  assert_eq(csv, [["a\"b\"c", "d"]])
 }
 
 ///|
@@ -22,7 +22,7 @@ test "edge/quotes/only-quotes" {
     #|"""",a
     #|
   let csv = @csv.parse(csv_text)
-  json_inspect(csv.to_test_json(), content={ "records": [["\"", "a"]] })
+  assert_eq(csv, [["\"", "a"]])
 }
 
 ///|
@@ -31,7 +31,7 @@ test "edge/quotes/quoted-comma" {
     #|"a,b",c
     #|
   let csv = @csv.parse(csv_text)
-  json_inspect(csv.to_test_json(), content={ "records": [["a,b", "c"]] })
+  assert_eq(csv, [["a,b", "c"]])
 }
 
 ///|
@@ -41,14 +41,14 @@ test "edge/quotes/quoted-newline" {
     #|b",c
     #|
   let csv = @csv.parse(csv_text)
-  json_inspect(csv.to_test_json(), content={ "records": [["a\nb", "c"]] })
+  assert_eq(csv, [["a\nb", "c"]])
 }
 
 ///|
 test "edge/quotes/quoted-crlf" {
   let csv_text = "\"a\r\nb\",c\r\n"
   let csv = @csv.parse(csv_text)
-  json_inspect(csv.to_test_json(), content={ "records": [["a\r\nb", "c"]] })
+  assert_eq(csv, [["a\r\nb", "c"]])
 }
 
 ///|
@@ -57,14 +57,14 @@ test "edge/empty/all-empty-fields" {
     #|,,
     #|
   let csv = @csv.parse(csv_text)
-  json_inspect(csv.to_test_json(), content={ "records": [["", "", ""]] })
+  assert_eq(csv, [["", "", ""]])
 }
 
 ///|
 test "edge/empty/single-empty-field" {
   let csv_text = "\n"
   let csv = @csv.parse(csv_text)
-  json_inspect(csv.to_test_json(), content={ "records": [[""]] })
+  assert_eq(csv, [[""]])
 }
 
 ///|
@@ -73,14 +73,62 @@ test "edge/empty/quoted-empty" {
     #|"","",""
     #|
   let csv = @csv.parse(csv_text)
-  json_inspect(csv.to_test_json(), content={ "records": [["", "", ""]] })
+  assert_eq(csv, [["", "", ""]])
 }
 
 ///|
 test "edge/line-endings/lf-only" {
   let csv_text = "a,b\nc,d\n"
   let csv = @csv.parse(csv_text)
-  json_inspect(csv.to_test_json(), content={
-    "records": [["a", "b"], ["c", "d"]],
+  assert_eq(csv, [["a", "b"], ["c", "d"]])
+}
+
+///|
+/// Minimal RFC 4180 field escaper for the roundtrip property: quote when the
+/// field contains a structural char, double the quotes inside; an empty field
+/// is always quoted so a one-empty-field record stays distinguishable from an
+/// empty document.
+fn escape_field(f : String) -> String {
+  let mut needs_quoting = f.is_empty()
+  for c in f {
+    if c is (',' | '"' | '\n' | '\r') {
+      needs_quoting = true
+    }
+  }
+  if !needs_quoting {
+    return f
+  }
+  let sb = StringBuilder()
+  sb.write_char('"')
+  for c in f {
+    if c == '"' {
+      sb.write_char('"')
+    }
+    sb.write_char(c)
+  }
+  sb.write_char('"')
+  sb.to_string()
+}
+
+///|
+test "qc/roundtrips" {
+  @quickcheck.check(
+    (fields : Array[String]) => {
+      let line = fields.map(escape_field).join(",")
+      @csv.parse(line) == [fields]
+    },
+    filter=(fields : Array[String]) => !fields.is_empty(),
+    count=200,
+  )
+}
+
+///|
+test "qc/never-panics" {
+  @quickcheck.check((s : String) => {
+    try @csv.parse(s) catch {
+      _ => true
+    } noraise {
+      _ => true
+    }
   })
 }

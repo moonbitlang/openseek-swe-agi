@@ -1,64 +1,46 @@
 ///|
-declare pub(all) type Csv
-
-///|
-/// Parse CSV text into a structured Csv value
+/// Parse CSV text into records of fields
 ///
 /// Parameters:
 ///
 /// - `input`: CSV text as StringView
 ///
-/// Returns:
+/// Returns the parsed records, in input order: each record is an array of
+/// field values. All field values are plain strings; no type inference is
+/// performed.
 ///
-/// - `Ok(Csv)`: Successfully parsed CSV data
-/// - `Err(ParseError)`: Parse error with details
-declare pub fn parse(input : StringView) -> Csv raise
-
-///|
-/// JSON encoding for CSV test validation
-/// ---------------------------------------
-/// The CSV data is encoded to JSON for test verification following this schema:
+/// Raises a parse error on malformed input (unterminated quotes, `"` inside
+/// unquoted fields, non-separator text after a closing quote, inconsistent
+/// field counts).
 ///
-/// - CSV records correspond to JSON arrays of arrays
-/// - Each record is a JSON array of field values (strings)
-/// - Empty fields are represented as empty strings ("")
-/// - The result is a JSON object with a "records" field
+/// Field semantics:
+///
+/// - Empty fields are empty strings ("")
+/// - Quoted fields have their surrounding quotes removed
+/// - Escaped quotes (`""`) within quoted fields are unescaped
+/// - Line breaks within quoted fields are preserved
 ///
 /// Examples:
 ///
-///     CSV                     JSON
+///     CSV                     records
 ///
-///     a,b,c                   {"records": [
-///     1,2,3                     ["a", "b", "c"],
-///                               ["1", "2", "3"]
-///                             ]}
+///     a,b,c                   [["a", "b", "c"],
+///     1,2,3                    ["1", "2", "3"]]
 ///
 /// <!-- -->
 ///
-///     name,age                {"records": [
-///     Alice,30                  ["name", "age"],
-///     Bob,25                    ["Alice", "30"],
-///                               ["Bob", "25"]
-///                             ]}
+///     name,age                [["name", "age"],
+///     Alice,30                 ["Alice", "30"],
+///     Bob,25                   ["Bob", "25"]]
 ///
 /// <!-- -->
 ///
-///     a,"b,c",d               {"records": [
-///     1,"2,3",4                 ["a", "b,c", "d"],
-///                               ["1", "2,3", "4"]
-///                             ]}
+///     a,"b,c",d               [["a", "b,c", "d"],
+///     1,"2,3",4                ["1", "2,3", "4"]]
 ///
 /// <!-- -->
 ///
-///     empty,,fields           {"records": [
-///     ,middle,                  ["empty", "", "fields"],
-///                               ["", "middle", ""]
-///                             ]}
+///     empty,,fields           [["empty", "", "fields"],
+///     ,middle,                 ["", "middle", ""]]
 ///
-/// Note that:
-/// - All field values are JSON strings
-/// - Quoted fields have quotes removed in the JSON representation
-/// - Escaped quotes within fields are unescaped
-/// - Line breaks within quoted fields are preserved
-///
-declare pub fn Csv::to_test_json(self : Csv) -> Json
+declare pub fn parse(input : StringView) -> Array[Array[String]] raise
