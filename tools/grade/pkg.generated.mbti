@@ -6,11 +6,9 @@ package "openseek-bench-tools/grade"
 // Errors
 
 // Types and methods
-type RunStats derive(ToJson)
+type CheckResult derive(ToJson)
 
-type SessionStats
-
-type StopReason derive(ToJson)
+type RunStats
 
 type TaskStats derive(ToJson)
 

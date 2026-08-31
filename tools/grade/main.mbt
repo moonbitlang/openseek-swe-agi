@@ -92,6 +92,8 @@ async fn collect_run_stats(
     fail("expect exactly 1 session log, but got: \{@debug.Repr(logs)}")
   }
   let parsed = @session_log.parse_events(@fs.read_file(primary).text())
+  // The viewer deep-links sessions by id (`#s=<id>` in the exported HTML).
+  let session_id = parsed.header.map(header => header.id)
   let tool_call_stats : Map[String, ToolCallStats] = Map([])
   let mut start_ms = None
   let mut stop_ms = None
@@ -127,6 +129,7 @@ async fn collect_run_stats(
   }
   {
     dir: run_dir,
+    session_id,
     steps: parsed.events.count_if(event => event.is_agent_step()),
     elapsed,
     tool_call_stats,
@@ -139,6 +142,7 @@ async fn collect_run_stats(
 ///|
 struct RunStats {
   dir : String
+  session_id : String?
   steps : Int
   elapsed : Double
   // tool_call: name -> stats
@@ -159,6 +163,10 @@ impl ToJson for RunStats with fn to_json(self) {
   }
   {
     "dir": self.dir,
+    "session_id": match self.session_id {
+      Some(id) => Json::string(id)
+      None => Json::null()
+    },
     "steps": self.steps,
     "elapsed": self.elapsed,
     "tool_call_stats": self.tool_call_stats,

@@ -99,7 +99,17 @@
   .tooltip .tt-date { color: var(--text-primary); font-weight: 600; }
   .tooltip .tt-row { display: flex; align-items: center; gap: 6px; }
 
-  table { border-collapse: collapse; width: 100%; margin-top: 16px; font-size: 13px; }
+  .tables { display: flex; gap: 40px; flex-wrap: wrap; align-items: flex-start; }
+  .tables > div { flex: 1; min-width: 260px; }
+  .table-title { margin: 16px 0 0; font-size: 12px; color: var(--text-muted); }
+  a.run-link {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--text-muted);
+    text-underline-offset: 2px;
+  }
+  a.run-link:hover { text-decoration-color: inherit; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
   th { text-align: left; color: var(--text-muted); font-weight: 500; }
   th, td { padding: 6px 12px 6px 0; border-bottom: 1px solid var(--border); }
   tr:last-child td { border-bottom: none; }
@@ -254,8 +264,11 @@ function ttRow(color, text) {
   return row;
 }
 
+// Session-viewer archive published per task-day beside the dashboard.
+const viewerHref = (date, task) => `viewer/bench-${date}-${task}.html`;
+
 // Per-run detail for the most recent day: the accessible table view.
-function runTable(runs) {
+function runTable(runs, date, task) {
   const table = el("table");
   const head = el("tr");
   for (const [name, numeric] of [["run", false], ["tests", true], ["warn", true],
@@ -266,7 +279,18 @@ function runTable(runs) {
   for (const run of runs) {
     const row = el("tr");
     const t = run.test_result, c = run.check_result;
-    row.append(el("td", "mono", run.dir.replace(/^tasks\//, "")));
+    const runCell = el("td");
+    const runName = run.dir.replace(/^tasks\//, "");
+    if (run.session_id) {
+      const link = el("a", "run-link mono", runName);
+      link.href = `${viewerHref(date, task)}#s=${encodeURIComponent(run.session_id)}`;
+      link.target = "_blank";
+      link.rel = "noopener";
+      runCell.append(link);
+    } else {
+      runCell.append(el("span", "mono", runName));
+    }
+    row.append(runCell);
     row.append(el("td", "num", `${t.passed}/${t.total}`));
     row.append(el("td", "num", String(c.warnings)));
     row.append(el("td", "num", String(c.errors)));
@@ -286,6 +310,37 @@ function runTable(runs) {
   return table;
 }
 
+// Tool-call outcomes aggregated across the day's runs.
+function toolTable(runs) {
+  const agg = new Map();
+  for (const run of runs) {
+    for (const [tool, s] of Object.entries(run.tool_call_stats)) {
+      const cur = agg.get(tool) || { calls: 0, failed: 0 };
+      cur.calls += s.passed + s.failed;
+      cur.failed += s.failed;
+      agg.set(tool, cur);
+    }
+  }
+  const table = el("table");
+  const head = el("tr");
+  head.append(el("th", "", "tool"), el("th", "num", "calls"), el("th", "num", "failed"));
+  table.append(head);
+  for (const [tool, s] of [...agg.entries()].sort((a, b) => b[1].calls - a[1].calls)) {
+    const row = el("tr");
+    row.append(el("td", "mono", tool));
+    row.append(el("td", "num", String(s.calls)));
+    row.append(el("td", "num", String(s.failed)));
+    table.append(row);
+  }
+  return table;
+}
+
+function titled(title, node) {
+  const wrap = el("div");
+  wrap.append(el("div", "table-title", title), node);
+  return wrap;
+}
+
 function taskCard(task, records) {
   const points = records.map(toPoint);
   const latest = points[points.length - 1];
@@ -295,11 +350,21 @@ function taskCard(task, records) {
   head.append(el("span", "task-name", task));
   head.append(el("span", "task-latest",
     `${latest.date}: ${latest.passed}/${latest.k} passed · tests ${pct(latest.testRatio)}`));
+  const viewer = el("a", "run-link", "sessions ↗");
+  viewer.href = viewerHref(latest.date, task);
+  viewer.target = "_blank";
+  viewer.rel = "noopener";
+  head.append(viewer);
   card.append(head);
 
   const legend = el("div", "legend");
   legend.append(ttRow("var(--series-pass)", "pass@k"), ttRow("var(--series-tests)", "avg tests passed"));
-  card.append(legend, chart(points), runTable(latest.runs));
+  const tables = el("div", "tables");
+  tables.append(
+    titled(`runs · ${latest.date}`, runTable(latest.runs, latest.date, task)),
+    titled("tool calls", toolTable(latest.runs)),
+  );
+  card.append(legend, chart(points), tables);
   return card;
 }
 

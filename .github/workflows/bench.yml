@@ -164,6 +164,13 @@ jobs:
           path: collected
           merge-multiple: true
 
+      - name: Download session viewers
+        uses: actions/download-artifact@v4
+        with:
+          pattern: runs-*
+          path: collected-runs
+          merge-multiple: true
+
       - name: Merge stats and commit
         run: |
           shopt -s nullglob
@@ -189,14 +196,42 @@ jobs:
           done
           echo "::error::could not push stats after 3 attempts"; exit 1
 
+      # Viewer HTML is heavy and never enters git history: it lives as assets
+      # on a single rolling "viewers" release (durable, no expiry), keyed
+      # bench-<date>-<task>.html — the name the dashboard links to.
+      - name: Publish session viewers
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          shopt -s nullglob
+          files=(collected-runs/bench-*.html)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "no viewer HTML this run"; exit 0
+          fi
+          date="$(date -u +%F)"
+          gh release view viewers >/dev/null 2>&1 ||
+            gh release create viewers --title "Session viewers" --latest=false \
+              --notes "Standalone session-viewer archives, one asset per task-day."
+          for f in "${files[@]}"; do
+            task="$(basename "$f" .html)"
+            task="${task#bench-}"
+            cp "$f" "bench-${date}-${task}.html"
+            gh release upload viewers "bench-${date}-${task}.html" --clobber
+          done
+
       # Publish the dashboard: the static renderer plus every committed stats
-      # file (including today's) merged into one data.json. Requires the
+      # file (including today's) merged into one data.json, and the full
+      # session-viewer archive pulled back from the release. Requires the
       # repo's Pages source to be set to "GitHub Actions".
       - name: Build site
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          mkdir -p _site
+          mkdir -p _site/viewer
           cp pages/index.html _site/
           jq -s 'flatten | sort_by(.date)' stats/*.json > _site/data.json
+          gh release download viewers --dir _site/viewer \
+            --pattern 'bench-*.html' || echo "no viewers published yet"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
