@@ -80,6 +80,13 @@ struct ToolCallStats {
 } derive(ToJson)
 
 ///|
+/// One entry per tool call, in session order — the dashboard's per-run rail.
+struct ToolCall {
+  tool : String
+  ok : Bool
+} derive(ToJson)
+
+///|
 async fn collect_run_stats(
   run_dir~ : String,
   test_result~ : TestResult,
@@ -95,6 +102,7 @@ async fn collect_run_stats(
   // The viewer deep-links sessions by id (`#s=<id>` in the exported HTML).
   let session_id = parsed.header.map(header => header.id)
   let tool_call_stats : Map[String, ToolCallStats] = Map([])
+  let tool_calls : Array[ToolCall] = []
   let mut start_ms = None
   let mut stop_ms = None
   let mut stop_reason = None
@@ -107,6 +115,7 @@ async fn collect_run_stats(
     match event.item() {
       Tool(result) => {
         let name = result.tool_name()
+        tool_calls.push({ tool: name, ok: !result.is_error(), })
         let passed = if result.is_error() { 0 } else { 1 }
         let failed = 1 - passed
         if tool_call_stats.get(name) is Some(stat) {
@@ -133,6 +142,7 @@ async fn collect_run_stats(
     steps: parsed.events.count_if(event => event.is_agent_step()),
     elapsed,
     tool_call_stats,
+    tool_calls,
     test_result,
     check_result,
     stop_reason,
@@ -147,6 +157,7 @@ struct RunStats {
   elapsed : Double
   // tool_call: name -> stats
   tool_call_stats : Map[String, ToolCallStats]
+  tool_calls : Array[ToolCall]
   test_result : TestResult
   check_result : CheckResult
   stop_reason : @agent_session.TurnTerminal?
@@ -170,6 +181,7 @@ impl ToJson for RunStats with fn to_json(self) {
     "steps": self.steps,
     "elapsed": self.elapsed,
     "tool_call_stats": self.tool_call_stats,
+    "tool_calls": self.tool_calls,
     "test_result": self.test_result,
     "check_result": self.check_result,
     "stop_reason": stop_reason,

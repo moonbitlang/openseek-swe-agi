@@ -16,6 +16,9 @@
     --text-muted: #8a897f;
     --series-pass: #2a78d6;   /* categorical slot 1: pass@k */
     --series-tests: #eb6834;  /* categorical slot 2: test pass ratio */
+    --series-tools: #1baf7a;  /* categorical slot 3: tool-call pass rate */
+    --series-steps: #4a3aa7;  /* categorical slot 7: avg steps (own panel) */
+    --rail-ok: #d9d8d3;
     --status-good: #0ca30c;
     --status-serious: #ec835a;
     --status-critical: #d03b3b;
@@ -32,6 +35,9 @@
       --text-muted: #8a897f;
       --series-pass: #3987e5;
       --series-tests: #d95926;
+      --series-tools: #199e70;
+      --series-steps: #9085e9;
+      --rail-ok: #454542;
     }
   }
   :root[data-theme="dark"] {
@@ -45,6 +51,9 @@
     --text-muted: #8a897f;
     --series-pass: #3987e5;
     --series-tests: #d95926;
+    --series-tools: #199e70;
+    --series-steps: #9085e9;
+    --rail-ok: #454542;
   }
 
   body {
@@ -70,7 +79,6 @@
   .task-latest { color: var(--text-secondary); }
 
   .legend { display: flex; gap: 16px; margin: 12px 0 4px; color: var(--text-secondary); font-size: 12px; }
-  .legend span { display: inline-flex; align-items: center; gap: 6px; }
   .swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
 
   .chart-wrap { position: relative; }
@@ -97,11 +105,11 @@
     z-index: 2;
   }
   .tooltip .tt-date { color: var(--text-primary); font-weight: 600; }
-  .tooltip .tt-row { display: flex; align-items: center; gap: 6px; }
+  .tooltip .tt-row, .legend .tt-row { display: flex; align-items: center; gap: 6px; }
 
   .tables { display: flex; gap: 40px; flex-wrap: wrap; align-items: flex-start; }
-  .tables > div { flex: 1; min-width: 260px; }
-  .table-title { margin: 16px 0 0; font-size: 12px; color: var(--text-muted); }
+  .tables > div { flex: 1; min-width: 300px; }
+  .table-title { margin: 16px 0 4px; font-size: 12px; color: var(--text-muted); }
   a.run-link {
     color: inherit;
     text-decoration: underline;
@@ -109,15 +117,40 @@
     text-underline-offset: 2px;
   }
   a.run-link:hover { text-decoration-color: inherit; }
+
   table { border-collapse: collapse; width: 100%; font-size: 13px; }
   th { text-align: left; color: var(--text-muted); font-weight: 500; }
   th, td { padding: 6px 12px 6px 0; border-bottom: 1px solid var(--border); }
+  tr.has-rail td { border-bottom: none; padding-bottom: 2px; }
+  tr.rail-row td { padding: 0 12px 10px 0; }
   tr:last-child td { border-bottom: none; }
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   .stop { display: inline-flex; align-items: center; gap: 6px; }
   .stop-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
   .mono { font-family: ui-monospace, monospace; font-size: 12px; }
   .empty { color: var(--text-muted); padding: 48px 0; text-align: center; }
+
+  .rail { display: flex; gap: 1px; height: 12px; }
+  .rail span {
+    flex: 1 1 0;
+    min-width: 1px;
+    background: var(--rail-ok);
+    border-radius: 1px;
+    transition: opacity 0.1s;
+  }
+  .rail span.fail { background: var(--status-critical); }
+  .rail span.dim { opacity: 0.15; }
+
+  .tool-row {
+    display: grid;
+    grid-template-columns: minmax(72px, auto) 1fr max-content;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+  }
+  .bar-track { background: var(--grid); border-radius: 3px; height: 8px; }
+  .bar-fill { background: var(--series-tools); border-radius: 3px; height: 8px; }
+  .tool-value { color: var(--text-secondary); font-size: 12px; font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
@@ -154,38 +187,45 @@ const svgEl = (tag, attrs) => {
 // One chart point per task-day record.
 function toPoint(rec) {
   const k = rec.runs.length;
-  const testRatio = k === 0 ? 0 :
-    rec.runs.reduce((acc, run) => {
-      const t = run.test_result;
-      return acc + (t.total > 0 ? t.passed / t.total : 0);
-    }, 0) / k;
+  const mean = f => (k === 0 ? 0 : rec.runs.reduce((acc, run) => acc + f(run), 0) / k);
+  let toolOk = 0, toolAll = 0;
+  for (const run of rec.runs) {
+    for (const s of Object.values(run.tool_call_stats)) {
+      toolOk += s.passed;
+      toolAll += s.passed + s.failed;
+    }
+  }
   return {
     date: rec.date,
     commit: (rec.openseek_commit || "").slice(0, 9),
     k,
     passed: rec.passed,
     passRate: k === 0 ? 0 : rec.passed / k,
-    testRatio,
+    testRatio: mean(run => {
+      const t = run.test_result;
+      return t.total > 0 ? t.passed / t.total : 0;
+    }),
+    toolRate: toolAll > 0 ? toolOk / toolAll : 0,
+    avgSteps: mean(run => run.steps),
     warnings: rec.runs.reduce((acc, run) => acc + run.check_result.warnings, 0),
     runs: rec.runs,
   };
 }
 
-// Line + dot chart of the two proportions, with crosshair + tooltip.
-function chart(points) {
-  const W = 880, H = 220, PAD = { l: 40, r: 96, t: 12, b: 26 };
+// Generic line+dot panel: one y-scale, crosshair, tooltip, direct end labels.
+function chart(points, series, { height, ymax, ticks, fmt, tooltipRows }) {
+  const W = 880, H = height, PAD = { l: 40, r: 100, t: 12, b: 26 };
   const iw = W - PAD.l - PAD.r, ih = H - PAD.t - PAD.b;
   const x = i => points.length === 1
     ? PAD.l + iw / 2
     : PAD.l + (iw * i) / (points.length - 1);
-  const y = v => PAD.t + ih * (1 - v);
+  const y = v => PAD.t + ih * (1 - v / ymax);
 
   const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
-  for (const v of [0, 0.5, 1]) {
-    const line = svgEl("line", { x1: PAD.l, x2: W - PAD.r, y1: y(v), y2: y(v), class: "grid-line" });
-    svg.append(line);
+  for (const v of ticks) {
+    svg.append(svgEl("line", { x1: PAD.l, x2: W - PAD.r, y1: y(v), y2: y(v), class: "grid-line" }));
     const label = svgEl("text", { x: PAD.l - 8, y: y(v) + 4, "text-anchor": "end", class: "axis-label" });
-    label.textContent = pct(v);
+    label.textContent = fmt(v);
     svg.append(label);
   }
   // Sparse x labels: first, last, and roughly every sixth in between.
@@ -200,27 +240,26 @@ function chart(points) {
   const crosshair = svgEl("line", { y1: PAD.t, y2: PAD.t + ih, class: "crosshair" });
   svg.append(crosshair);
 
-  const series = [["passRate", "var(--series-pass)", "pass@k"], ["testRatio", "var(--series-tests)", "tests"]];
-  // Direct labels at the line ends, nudged apart when the lines converge.
+  // Direct labels at the line ends, pushed apart when lines converge.
   const last = points[points.length - 1];
-  const ends = series.map(([key]) => y(last[key]));
-  if (Math.abs(ends[0] - ends[1]) < 14) {
-    const mid = (ends[0] + ends[1]) / 2;
-    ends[0] = mid + (ends[0] >= ends[1] ? 7 : -7);
-    ends[1] = mid + (ends[0] >= ends[1] ? -7 : 7);
+  const ends = series
+    .map((s, i) => ({ i, v: y(last[s.key]) }))
+    .sort((a, b) => a.v - b.v);
+  for (let i = 1; i < ends.length; i++) {
+    if (ends[i].v - ends[i - 1].v < 14) ends[i].v = ends[i - 1].v + 14;
   }
-  series.forEach(([key, color, name], s) => {
+  const endY = new Map(ends.map(e => [e.i, e.v]));
+
+  series.forEach((s, i) => {
     if (points.length > 1) {
-      const path = points.map((p, i) => `${i ? "L" : "M"}${x(i)},${y(p[key])}`).join("");
-      svg.append(svgEl("path", { d: path, class: "series-line", stroke: color }));
+      const path = points.map((p, j) => `${j ? "L" : "M"}${x(j)},${y(p[s.key])}`).join("");
+      svg.append(svgEl("path", { d: path, class: "series-line", stroke: s.color }));
     }
-    points.forEach((p, i) => {
-      svg.append(svgEl("circle", { cx: x(i), cy: y(p[key]), r: 4, fill: color, class: "dot" }));
+    points.forEach((p, j) => {
+      svg.append(svgEl("circle", { cx: x(j), cy: y(p[s.key]), r: 4, fill: s.color, class: "dot" }));
     });
-    const label = svgEl("text", {
-      x: x(points.length - 1) + 10, y: ends[s] + 4, class: "end-label",
-    });
-    label.textContent = `${name} ${pct(last[key])}`;
+    const label = svgEl("text", { x: x(points.length - 1) + 10, y: endY.get(i) + 4, class: "end-label" });
+    label.textContent = `${s.label} ${fmt(last[s.key])}`;
     svg.append(label);
   });
 
@@ -237,13 +276,7 @@ function chart(points) {
     crosshair.setAttribute("x1", x(best));
     crosshair.setAttribute("x2", x(best));
     crosshair.style.visibility = "visible";
-
-    tooltip.replaceChildren(
-      el("div", "tt-date", `${p.date} · ${p.commit}`),
-      ttRow("var(--series-pass)", `pass@${p.k}: ${p.passed}/${p.k}`),
-      ttRow("var(--series-tests)", `tests: ${pct(p.testRatio)}`),
-      el("div", "tt-row", `check warnings: ${p.warnings}`),
-    );
+    tooltip.replaceChildren(el("div", "tt-date", `${p.date} · ${p.commit}`), ...tooltipRows(p));
     tooltip.style.visibility = "visible";
     const left = (x(best) / W) * rect.width;
     tooltip.style.left = `${Math.min(left + 12, rect.width - tooltip.offsetWidth - 4)}px`;
@@ -264,8 +297,56 @@ function ttRow(color, text) {
   return row;
 }
 
+const RATE_SERIES = [
+  { key: "passRate", color: "var(--series-pass)", label: "pass@k" },
+  { key: "testRatio", color: "var(--series-tests)", label: "tests" },
+  { key: "toolRate", color: "var(--series-tools)", label: "tools" },
+];
+
+function ratesChart(points) {
+  return chart(points, RATE_SERIES, {
+    height: 220,
+    ymax: 1,
+    ticks: [0, 0.5, 1],
+    fmt: pct,
+    tooltipRows: p => [
+      ttRow("var(--series-pass)", `pass@${p.k}: ${p.passed}/${p.k}`),
+      ttRow("var(--series-tests)", `tests: ${pct(p.testRatio)}`),
+      ttRow("var(--series-tools)", `tool calls: ${pct(p.toolRate)}`),
+      el("div", "tt-row", `check warnings: ${p.warnings}`),
+    ],
+  });
+}
+
+function stepsChart(points) {
+  const max = Math.max(20, ...points.map(p => p.avgSteps));
+  const ymax = Math.ceil(max / 20) * 20;
+  return chart(points, [{ key: "avgSteps", color: "var(--series-steps)", label: "avg steps" }], {
+    height: 140,
+    ymax,
+    ticks: [0, ymax / 2, ymax],
+    fmt: v => String(Math.round(v)),
+    tooltipRows: p => [
+      ttRow("var(--series-steps)", `avg steps: ${Math.round(p.avgSteps)}`),
+      el("div", "tt-row", `runs: ${p.runs.map(run => run.steps).join(" / ")}`),
+    ],
+  });
+}
+
 // Session-viewer archive published per task-day beside the dashboard.
 const viewerHref = (date, task) => `viewer/bench-${date}-${task}.html`;
+
+// The per-run tool-call rail: one segment per call, in session order.
+function rail(run) {
+  const strip = el("div", "rail");
+  (run.tool_calls || []).forEach((call, i) => {
+    const seg = el("span", call.ok ? "" : "fail");
+    seg.dataset.tool = call.tool;
+    seg.title = `#${i + 1} ${call.tool}${call.ok ? "" : " · failed"}`;
+    strip.append(seg);
+  });
+  return strip;
+}
 
 // Per-run detail for the most recent day: the accessible table view.
 function runTable(runs, date, task) {
@@ -306,33 +387,54 @@ function runTable(runs, date, task) {
     cell.append(stop);
     row.append(cell);
     table.append(row);
+
+    if ((run.tool_calls || []).length > 0) {
+      row.className = "has-rail";
+      const railRow = el("tr", "rail-row");
+      const cell = el("td");
+      cell.colSpan = 7;
+      cell.append(rail(run));
+      railRow.append(cell);
+      table.append(railRow);
+    }
   }
   return table;
 }
 
-// Tool-call outcomes aggregated across the day's runs.
-function toolTable(runs) {
+// Per-tool pass-rate bars for the latest day; hovering a tool highlights its
+// calls on every run rail in the same card.
+function toolBars(runs, card) {
   const agg = new Map();
   for (const run of runs) {
     for (const [tool, s] of Object.entries(run.tool_call_stats)) {
-      const cur = agg.get(tool) || { calls: 0, failed: 0 };
+      const cur = agg.get(tool) || { ok: 0, calls: 0 };
+      cur.ok += s.passed;
       cur.calls += s.passed + s.failed;
-      cur.failed += s.failed;
       agg.set(tool, cur);
     }
   }
-  const table = el("table");
-  const head = el("tr");
-  head.append(el("th", "", "tool"), el("th", "num", "calls"), el("th", "num", "failed"));
-  table.append(head);
+  const wrap = el("div");
   for (const [tool, s] of [...agg.entries()].sort((a, b) => b[1].calls - a[1].calls)) {
-    const row = el("tr");
-    row.append(el("td", "mono", tool));
-    row.append(el("td", "num", String(s.calls)));
-    row.append(el("td", "num", String(s.failed)));
-    table.append(row);
+    const rate = s.calls > 0 ? s.ok / s.calls : 0;
+    const row = el("div", "tool-row");
+    row.append(el("span", "mono", tool));
+    const track = el("div", "bar-track");
+    const fill = el("div", "bar-fill");
+    fill.style.width = `${rate * 100}%`;
+    track.append(fill);
+    row.append(track);
+    row.append(el("span", "tool-value", `${pct(rate)} · ${s.calls} calls`));
+    row.addEventListener("mouseenter", () => {
+      for (const seg of card.querySelectorAll(".rail span")) {
+        seg.classList.toggle("dim", seg.dataset.tool !== tool);
+      }
+    });
+    row.addEventListener("mouseleave", () => {
+      for (const seg of card.querySelectorAll(".rail span")) seg.classList.remove("dim");
+    });
+    wrap.append(row);
   }
-  return table;
+  return wrap;
 }
 
 function titled(title, node) {
@@ -358,13 +460,17 @@ function taskCard(task, records) {
   card.append(head);
 
   const legend = el("div", "legend");
-  legend.append(ttRow("var(--series-pass)", "pass@k"), ttRow("var(--series-tests)", "avg tests passed"));
+  legend.append(
+    ttRow("var(--series-pass)", "pass@k"),
+    ttRow("var(--series-tests)", "avg tests passed"),
+    ttRow("var(--series-tools)", "tool-call pass rate"),
+  );
   const tables = el("div", "tables");
   tables.append(
     titled(`runs · ${latest.date}`, runTable(latest.runs, latest.date, task)),
-    titled("tool calls", toolTable(latest.runs)),
+    titled("tool calls · pass rate", toolBars(latest.runs, card)),
   );
-  card.append(legend, chart(points), tables);
+  card.append(legend, ratesChart(points), stepsChart(points), tables);
   return card;
 }
 
