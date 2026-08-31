@@ -4,3 +4,6 @@ _build/
 
 # SeekMoon
 .openseek/
+
+# Results
+tasks/*_run_*/
