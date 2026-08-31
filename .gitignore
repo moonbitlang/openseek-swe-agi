@@ -1,0 +1,6 @@
+# MoonBit
+.mooncakes/
+_build/
+
+# SeekMoon
+.openseek/
