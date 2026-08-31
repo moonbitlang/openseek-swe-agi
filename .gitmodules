@@ -1,0 +1,3 @@
+[submodule "openseek"]
+	path = openseek
+	url = https://github.com/moonbitlang/openseek
