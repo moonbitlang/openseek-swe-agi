@@ -185,7 +185,7 @@ test "edge/boundary/long-field" {
   let csv_text = long_value + ",b\n"
   // Just verify it parses and has correct structure
   match @csv.parse(csv_text) {
-    [[first, second]] => {
+    Doc([[first, second]]) => {
       assert_eq(first.length(), 1000)
       assert_eq(second, "b")
     }
@@ -198,7 +198,7 @@ test "edge/boundary/long-quoted-field" {
   let long_value = "a".repeat(1000)
   let csv_text = "\"" + long_value + "\",b\n"
   match @csv.parse(csv_text) {
-    [[first, second]] => {
+    Doc([[first, second]]) => {
       assert_eq(first.length(), 1000)
       assert_eq(second, "b")
     }

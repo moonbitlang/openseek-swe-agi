@@ -1,4 +1,12 @@
 ///|
+pub(all) struct Doc(Array[Array[String]]) derive(Eq, Debug)
+
+///|
+pub fn Doc::length(self : Doc) -> Int {
+  self.0.length()
+}
+
+///|
 /// Parse CSV text into records of fields
 ///
 /// Parameters:
@@ -43,4 +51,7 @@
 ///     empty,,fields           [["empty", "", "fields"],
 ///     ,middle,                 ["", "middle", ""]]
 ///
-declare pub fn parse(input : StringView) -> Array[Array[String]] raise
+declare pub fn parse(input : StringView) -> Doc raise
+
+///|
+declare pub fn print(doc : Doc) -> String
