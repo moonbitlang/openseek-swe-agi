@@ -1,0 +1,23 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "openseek-bench-tools/grade"
+
+// Values
+
+// Errors
+
+// Types and methods
+type RunStats derive(ToJson)
+
+type SessionStats
+
+type StopReason derive(ToJson)
+
+type TaskStats derive(ToJson)
+
+type TestResult derive(ToJson)
+
+type ToolCallStats derive(ToJson)
+
+// Type aliases
+
+// Traits

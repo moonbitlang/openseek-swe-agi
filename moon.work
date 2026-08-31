@@ -1,3 +1,6 @@
 members = [
-  "./tasks/csv",
+  "./tools",
+  "./openseek",
+  "./openseek/protocol",
+  "./openseek/editor",
 ]
