@@ -1,0 +1,23 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "uri"
+
+// Values
+
+// Errors
+
+// Types and methods
+type Uri
+pub fn Uri::fragment(Self) -> String?
+pub fn Uri::host(Self) -> String?
+pub fn Uri::parse(String) -> Self raise
+pub fn Uri::path(Self) -> String
+pub fn Uri::port(Self) -> String?
+pub fn Uri::query(Self) -> String?
+pub fn Uri::resolve(Self, String) -> Self raise
+pub fn Uri::scheme(Self) -> String
+pub fn Uri::to_string(Self) -> String
+pub fn Uri::userinfo(Self) -> String?
+
+// Type aliases
+
+// Traits

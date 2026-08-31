@@ -1,0 +1,28 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "tonyfettes/ini"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/quickcheck",
+  "moonbitlang/core/quickcheck/shrink",
+  "moonbitlang/core/quickcheck/splitmix",
+}
+
+// Values
+pub fn parse(StringView) -> Doc raise
+
+pub fn print(Doc) -> String
+
+// Errors
+
+// Types and methods
+pub(all) struct Doc {
+  global : Map[String, String]
+  sections : Map[String, Map[String, String]]
+} derive(Eq, @debug.Debug)
+pub impl @quickcheck.Arbitrary for Doc
+pub impl @shrink.Shrink for Doc
+
+// Type aliases
+
+// Traits
