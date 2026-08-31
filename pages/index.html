@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenSeek Bench</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface: #fcfcfb;
+    --card: #ffffff;
+    --border: #e4e3df;
+    --grid: #ececea;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #8a897f;
+    --series-pass: #2a78d6;   /* categorical slot 1: pass@k */
+    --series-tests: #eb6834;  /* categorical slot 2: test pass ratio */
+    --status-good: #0ca30c;
+    --status-serious: #ec835a;
+    --status-critical: #d03b3b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface: #1a1a19;
+      --card: #222221;
+      --border: #3a3a38;
+      --grid: #30302e;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted: #8a897f;
+      --series-pass: #3987e5;
+      --series-tests: #d95926;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface: #1a1a19;
+    --card: #222221;
+    --border: #3a3a38;
+    --grid: #30302e;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #8a897f;
+    --series-pass: #3987e5;
+    --series-tests: #d95926;
+  }
+
+  body {
+    margin: 0;
+    background: var(--surface);
+    color: var(--text-primary);
+    font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 920px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 20px; margin: 0; }
+  .subtitle { color: var(--text-secondary); margin: 4px 0 24px; }
+  .subtitle code { font-family: ui-monospace, monospace; font-size: 12px; }
+
+  .task-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px 20px;
+    margin-bottom: 24px;
+  }
+  .task-head { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  .task-name { font-size: 16px; font-weight: 600; }
+  .task-latest { color: var(--text-secondary); }
+
+  .legend { display: flex; gap: 16px; margin: 12px 0 4px; color: var(--text-secondary); font-size: 12px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+  .chart-wrap { position: relative; }
+  svg { display: block; width: 100%; height: auto; }
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .axis-label { fill: var(--text-muted); font-size: 11px; }
+  .end-label { fill: var(--text-secondary); font-size: 11px; }
+  .series-line { fill: none; stroke-width: 2; }
+  .dot { stroke: var(--card); stroke-width: 2; }
+  .crosshair { stroke: var(--border); stroke-width: 1; visibility: hidden; }
+
+  .tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    visibility: hidden;
+    white-space: nowrap;
+    z-index: 2;
+  }
+  .tooltip .tt-date { color: var(--text-primary); font-weight: 600; }
+  .tooltip .tt-row { display: flex; align-items: center; gap: 6px; }
+
+  table { border-collapse: collapse; width: 100%; margin-top: 16px; font-size: 13px; }
+  th { text-align: left; color: var(--text-muted); font-weight: 500; }
+  th, td { padding: 6px 12px 6px 0; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .stop { display: inline-flex; align-items: center; gap: 6px; }
+  .stop-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .mono { font-family: ui-monospace, monospace; font-size: 12px; }
+  .empty { color: var(--text-muted); padding: 48px 0; text-align: center; }
+</style>
+</head>
+<body>
+<main>
+  <h1>OpenSeek Bench</h1>
+  <p class="subtitle" id="subtitle">loading…</p>
+  <div id="tasks"></div>
+</main>
+
+<script>
+"use strict";
+
+const STOP_COLORS = {
+  finished: "var(--status-good)",
+  aborted: "var(--status-critical)",
+  failed: "var(--status-critical)",
+  interrupted: "var(--status-serious)",
+  missing: "var(--status-serious)",
+};
+
+const pct = x => `${Math.round(x * 100)}%`;
+const el = (tag, cls, text) => {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text !== undefined) node.textContent = text;
+  return node;
+};
+const svgEl = (tag, attrs) => {
+  const node = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+  return node;
+};
+
+// One chart point per task-day record.
+function toPoint(rec) {
+  const k = rec.runs.length;
+  const testRatio = k === 0 ? 0 :
+    rec.runs.reduce((acc, run) => {
+      const t = run.test_result;
+      return acc + (t.total > 0 ? t.passed / t.total : 0);
+    }, 0) / k;
+  return {
+    date: rec.date,
+    commit: (rec.openseek_commit || "").slice(0, 9),
+    k,
+    passed: rec.passed,
+    passRate: k === 0 ? 0 : rec.passed / k,
+    testRatio,
+    warnings: rec.runs.reduce((acc, run) => acc + run.check_result.warnings, 0),
+    runs: rec.runs,
+  };
+}
+
+// Line + dot chart of the two proportions, with crosshair + tooltip.
+function chart(points) {
+  const W = 880, H = 220, PAD = { l: 40, r: 96, t: 12, b: 26 };
+  const iw = W - PAD.l - PAD.r, ih = H - PAD.t - PAD.b;
+  const x = i => points.length === 1
+    ? PAD.l + iw / 2
+    : PAD.l + (iw * i) / (points.length - 1);
+  const y = v => PAD.t + ih * (1 - v);
+
+  const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+  for (const v of [0, 0.5, 1]) {
+    const line = svgEl("line", { x1: PAD.l, x2: W - PAD.r, y1: y(v), y2: y(v), class: "grid-line" });
+    svg.append(line);
+    const label = svgEl("text", { x: PAD.l - 8, y: y(v) + 4, "text-anchor": "end", class: "axis-label" });
+    label.textContent = pct(v);
+    svg.append(label);
+  }
+  // Sparse x labels: first, last, and roughly every sixth in between.
+  const step = Math.max(1, Math.ceil(points.length / 6));
+  points.forEach((p, i) => {
+    if (i % step !== 0 && i !== points.length - 1) return;
+    const label = svgEl("text", { x: x(i), y: H - 8, "text-anchor": "middle", class: "axis-label" });
+    label.textContent = p.date.slice(5);
+    svg.append(label);
+  });
+
+  const crosshair = svgEl("line", { y1: PAD.t, y2: PAD.t + ih, class: "crosshair" });
+  svg.append(crosshair);
+
+  const series = [["passRate", "var(--series-pass)", "pass@k"], ["testRatio", "var(--series-tests)", "tests"]];
+  // Direct labels at the line ends, nudged apart when the lines converge.
+  const last = points[points.length - 1];
+  const ends = series.map(([key]) => y(last[key]));
+  if (Math.abs(ends[0] - ends[1]) < 14) {
+    const mid = (ends[0] + ends[1]) / 2;
+    ends[0] = mid + (ends[0] >= ends[1] ? 7 : -7);
+    ends[1] = mid + (ends[0] >= ends[1] ? -7 : 7);
+  }
+  series.forEach(([key, color, name], s) => {
+    if (points.length > 1) {
+      const path = points.map((p, i) => `${i ? "L" : "M"}${x(i)},${y(p[key])}`).join("");
+      svg.append(svgEl("path", { d: path, class: "series-line", stroke: color }));
+    }
+    points.forEach((p, i) => {
+      svg.append(svgEl("circle", { cx: x(i), cy: y(p[key]), r: 4, fill: color, class: "dot" }));
+    });
+    const label = svgEl("text", {
+      x: x(points.length - 1) + 10, y: ends[s] + 4, class: "end-label",
+    });
+    label.textContent = `${name} ${pct(last[key])}`;
+    svg.append(label);
+  });
+
+  const wrap = el("div", "chart-wrap");
+  const tooltip = el("div", "tooltip");
+  wrap.append(svg, tooltip);
+
+  svg.addEventListener("mousemove", event => {
+    const rect = svg.getBoundingClientRect();
+    const mx = ((event.clientX - rect.left) / rect.width) * W;
+    let best = 0;
+    points.forEach((_, i) => { if (Math.abs(x(i) - mx) < Math.abs(x(best) - mx)) best = i; });
+    const p = points[best];
+    crosshair.setAttribute("x1", x(best));
+    crosshair.setAttribute("x2", x(best));
+    crosshair.style.visibility = "visible";
+
+    tooltip.replaceChildren(
+      el("div", "tt-date", `${p.date} · ${p.commit}`),
+      ttRow("var(--series-pass)", `pass@${p.k}: ${p.passed}/${p.k}`),
+      ttRow("var(--series-tests)", `tests: ${pct(p.testRatio)}`),
+      el("div", "tt-row", `check warnings: ${p.warnings}`),
+    );
+    tooltip.style.visibility = "visible";
+    const left = (x(best) / W) * rect.width;
+    tooltip.style.left = `${Math.min(left + 12, rect.width - tooltip.offsetWidth - 4)}px`;
+    tooltip.style.top = "8px";
+  });
+  svg.addEventListener("mouseleave", () => {
+    crosshair.style.visibility = "hidden";
+    tooltip.style.visibility = "hidden";
+  });
+  return wrap;
+}
+
+function ttRow(color, text) {
+  const row = el("div", "tt-row");
+  const swatch = el("span", "swatch");
+  swatch.style.background = color;
+  row.append(swatch, document.createTextNode(text));
+  return row;
+}
+
+// Per-run detail for the most recent day: the accessible table view.
+function runTable(runs) {
+  const table = el("table");
+  const head = el("tr");
+  for (const [name, numeric] of [["run", false], ["tests", true], ["warn", true],
+    ["err", true], ["steps", true], ["elapsed", true], ["stop", false]]) {
+    head.append(el("th", numeric ? "num" : "", name));
+  }
+  table.append(head);
+  for (const run of runs) {
+    const row = el("tr");
+    const t = run.test_result, c = run.check_result;
+    row.append(el("td", "mono", run.dir.replace(/^tasks\//, "")));
+    row.append(el("td", "num", `${t.passed}/${t.total}`));
+    row.append(el("td", "num", String(c.warnings)));
+    row.append(el("td", "num", String(c.errors)));
+    row.append(el("td", "num", String(run.steps)));
+    row.append(el("td", "num", `${Math.round(run.elapsed)}s`));
+    const kind = run.stop_reason ? run.stop_reason.kind : "missing";
+    const stop = el("span", "stop");
+    const dot = el("span", "stop-dot");
+    dot.style.background = STOP_COLORS[kind] || "var(--text-muted)";
+    stop.append(dot, document.createTextNode(kind));
+    const cell = el("td");
+    if (run.stop_reason && kind !== "finished") cell.title = run.stop_reason.message;
+    cell.append(stop);
+    row.append(cell);
+    table.append(row);
+  }
+  return table;
+}
+
+function taskCard(task, records) {
+  const points = records.map(toPoint);
+  const latest = points[points.length - 1];
+  const card = el("section", "task-card");
+
+  const head = el("div", "task-head");
+  head.append(el("span", "task-name", task));
+  head.append(el("span", "task-latest",
+    `${latest.date}: ${latest.passed}/${latest.k} passed · tests ${pct(latest.testRatio)}`));
+  card.append(head);
+
+  const legend = el("div", "legend");
+  legend.append(ttRow("var(--series-pass)", "pass@k"), ttRow("var(--series-tests)", "avg tests passed"));
+  card.append(legend, chart(points), runTable(latest.runs));
+  return card;
+}
+
+async function boot() {
+  const subtitle = document.getElementById("subtitle");
+  let records;
+  try {
+    records = await (await fetch("data.json")).json();
+  } catch {
+    subtitle.textContent = "failed to load data.json";
+    return;
+  }
+  if (!Array.isArray(records) || records.length === 0) {
+    subtitle.textContent = "no benchmark data yet";
+    document.getElementById("tasks").append(el("div", "empty", "Stats will appear after the first daily run."));
+    return;
+  }
+  const byTask = new Map();
+  for (const rec of records) {
+    if (!byTask.has(rec.task)) byTask.set(rec.task, []);
+    byTask.get(rec.task).push(rec);
+  }
+  const last = records[records.length - 1];
+  subtitle.replaceChildren(
+    document.createTextNode(`daily fleet benchmark · latest ${last.date} · openseek `),
+    Object.assign(el("code"), { textContent: (last.openseek_commit || "").slice(0, 9) }),
+  );
+  const tasksRoot = document.getElementById("tasks");
+  for (const [task, recs] of [...byTask.entries()].sort()) {
+    tasksRoot.append(taskCard(task, recs));
+  }
+}
+boot();
+</script>
+</body>
+</html>

@@ -143,8 +143,12 @@ jobs:
     needs: [prepare, bench]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
     permissions:
       contents: write
+      pages: write
+      id-token: write
     env:
       OPENSEEK_COMMIT: ${{ needs.prepare.outputs.openseek_commit }}
     steps:
@@ -184,3 +188,20 @@ jobs:
             git pull --rebase origin "${GITHUB_REF_NAME}"
           done
           echo "::error::could not push stats after 3 attempts"; exit 1
+
+      # Publish the dashboard: the static renderer plus every committed stats
+      # file (including today's) merged into one data.json. Requires the
+      # repo's Pages source to be set to "GitHub Actions".
+      - name: Build site
+        run: |
+          mkdir -p _site
+          cp pages/index.html _site/
+          jq -s 'flatten | sort_by(.date)' stats/*.json > _site/data.json
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy Pages
+        uses: actions/deploy-pages@v4
