@@ -57,10 +57,14 @@ jobs:
           git -C openseek fetch --depth 1 origin "$OPENSEEK_COMMIT"
           git -C openseek checkout --quiet "$OPENSEEK_COMMIT"
 
-      - name: Set up MoonBit
+      - name: Install MoonBit
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s -- latest
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+
+
+      - name: Setup MoonBit
+        run: |
           moon version --all
           moon update
 
