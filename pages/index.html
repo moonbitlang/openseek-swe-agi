@@ -18,6 +18,10 @@
     --series-tests: #eb6834;  /* categorical slot 2: test pass ratio */
     --series-tools: #1baf7a;  /* categorical slot 3: tool-call pass rate */
     --series-steps: #4a3aa7;  /* categorical slot 7: avg steps (own panel) */
+    --cat-4: #eda100;
+    --cat-5: #e87ba4;
+    --cat-6: #008300;
+    --cat-8: #e34948;
     --rail-ok: #d9d8d3;
     --status-good: #0ca30c;
     --status-serious: #ec835a;
@@ -37,6 +41,10 @@
       --series-tests: #d95926;
       --series-tools: #199e70;
       --series-steps: #9085e9;
+      --cat-4: #c98500;
+      --cat-5: #d55181;
+      --cat-6: #008300;
+      --cat-8: #e66767;
       --rail-ok: #454542;
     }
   }
@@ -53,6 +61,10 @@
     --series-tests: #d95926;
     --series-tools: #199e70;
     --series-steps: #9085e9;
+    --cat-4: #c98500;
+    --cat-5: #d55181;
+    --cat-6: #008300;
+    --cat-8: #e66767;
     --rail-ok: #454542;
   }
 
@@ -86,8 +98,9 @@
   .grid-line { stroke: var(--grid); stroke-width: 1; }
   .axis-label { fill: var(--text-muted); font-size: 11px; }
   .end-label { fill: var(--text-secondary); font-size: 11px; }
-  .series-line { fill: none; stroke-width: 2; }
-  .dot { stroke: var(--card); stroke-width: 2; }
+  .series-line { fill: none; stroke-width: 2; transition: opacity 0.1s; }
+  .dot { stroke: var(--card); stroke-width: 2; transition: opacity 0.1s; }
+  .faded { opacity: 0.12; }
   .crosshair { stroke: var(--border); stroke-width: 1; visibility: hidden; }
 
   .tooltip {
@@ -107,8 +120,6 @@
   .tooltip .tt-date { color: var(--text-primary); font-weight: 600; }
   .tooltip .tt-row, .legend .tt-row { display: flex; align-items: center; gap: 6px; }
 
-  .tables { display: flex; gap: 40px; flex-wrap: wrap; align-items: flex-start; }
-  .tables > div { flex: 1; min-width: 300px; }
   .table-title { margin: 16px 0 4px; font-size: 12px; color: var(--text-muted); }
   a.run-link {
     color: inherit;
@@ -141,15 +152,8 @@
   .rail span.fail { background: var(--status-critical); }
   .rail span.dim { opacity: 0.15; }
 
-  .tool-row {
-    display: grid;
-    grid-template-columns: minmax(72px, auto) 1fr max-content;
-    align-items: center;
-    gap: 10px;
-    padding: 4px 0;
-  }
-  .bar-track { background: var(--grid); border-radius: 3px; height: 8px; }
-  .bar-fill { background: var(--series-tools); border-radius: 3px; height: 8px; }
+  .tool-legend { display: flex; flex-wrap: wrap; gap: 2px 24px; margin: 4px 0 8px; }
+  .tool-row { display: flex; align-items: center; gap: 8px; padding: 2px 0; cursor: default; }
   .tool-value { color: var(--text-secondary); font-size: 12px; font-variant-numeric: tabular-nums; }
 </style>
 </head>
@@ -212,7 +216,10 @@ function toPoint(rec) {
   };
 }
 
-// Generic line+dot panel: one y-scale, crosshair, tooltip, direct end labels.
+// Generic line+dot panel: one y-scale, crosshair, tooltip, direct end labels
+// (only when few enough series to stay legible — beyond 4 the legend rules).
+// A series is {get(p), color, label, id?}; a null value breaks the line, so a
+// tool that made no calls that day leaves a gap instead of a fake zero.
 function chart(points, series, { height, ymax, ticks, fmt, tooltipRows }) {
   const W = 880, H = height, PAD = { l: 40, r: 100, t: 12, b: 26 };
   const iw = W - PAD.l - PAD.r, ih = H - PAD.t - PAD.b;
@@ -241,26 +248,52 @@ function chart(points, series, { height, ymax, ticks, fmt, tooltipRows }) {
   svg.append(crosshair);
 
   // Direct labels at the line ends, pushed apart when lines converge.
-  const last = points[points.length - 1];
-  const ends = series
-    .map((s, i) => ({ i, v: y(last[s.key]) }))
-    .sort((a, b) => a.v - b.v);
-  for (let i = 1; i < ends.length; i++) {
-    if (ends[i].v - ends[i - 1].v < 14) ends[i].v = ends[i - 1].v + 14;
+  const lastVal = s => {
+    for (let i = points.length - 1; i >= 0; i--) {
+      const v = s.get(points[i]);
+      if (v !== null) return v;
+    }
+    return null;
+  };
+  const direct = series.length <= 4;
+  const endY = new Map();
+  if (direct) {
+    const ends = series
+      .map((s, i) => ({ i, v: y(lastVal(s) ?? 0) }))
+      .sort((a, b) => a.v - b.v);
+    for (let i = 1; i < ends.length; i++) {
+      if (ends[i].v - ends[i - 1].v < 14) ends[i].v = ends[i - 1].v + 14;
+    }
+    for (const e of ends) endY.set(e.i, e.v);
   }
-  const endY = new Map(ends.map(e => [e.i, e.v]));
 
   series.forEach((s, i) => {
-    if (points.length > 1) {
-      const path = points.map((p, j) => `${j ? "L" : "M"}${x(j)},${y(p[s.key])}`).join("");
-      svg.append(svgEl("path", { d: path, class: "series-line", stroke: s.color }));
+    let d = "";
+    let pen = false;
+    points.forEach((p, j) => {
+      const v = s.get(p);
+      if (v === null) { pen = false; return; }
+      d += `${pen ? "L" : "M"}${x(j)},${y(v)}`;
+      pen = true;
+    });
+    if (d.includes("L")) {
+      const path = svgEl("path", { d, class: "series-line", stroke: s.color });
+      if (s.id) path.dataset.series = s.id;
+      svg.append(path);
     }
     points.forEach((p, j) => {
-      svg.append(svgEl("circle", { cx: x(j), cy: y(p[s.key]), r: 4, fill: s.color, class: "dot" }));
+      const v = s.get(p);
+      if (v === null) return;
+      const dot = svgEl("circle", { cx: x(j), cy: y(v), r: 4, fill: s.color, class: "dot" });
+      if (s.id) dot.dataset.series = s.id;
+      svg.append(dot);
     });
-    const label = svgEl("text", { x: x(points.length - 1) + 10, y: endY.get(i) + 4, class: "end-label" });
-    label.textContent = `${s.label} ${fmt(last[s.key])}`;
-    svg.append(label);
+    const end = lastVal(s);
+    if (direct && end !== null) {
+      const label = svgEl("text", { x: x(points.length - 1) + 10, y: endY.get(i) + 4, class: "end-label" });
+      label.textContent = `${s.label} ${fmt(end)}`;
+      svg.append(label);
+    }
   });
 
   const wrap = el("div", "chart-wrap");
@@ -298,9 +331,9 @@ function ttRow(color, text) {
 }
 
 const RATE_SERIES = [
-  { key: "passRate", color: "var(--series-pass)", label: "pass@k" },
-  { key: "testRatio", color: "var(--series-tests)", label: "tests" },
-  { key: "toolRate", color: "var(--series-tools)", label: "tools" },
+  { get: p => p.passRate, color: "var(--series-pass)", label: "pass@k" },
+  { get: p => p.testRatio, color: "var(--series-tests)", label: "tests" },
+  { get: p => p.toolRate, color: "var(--series-tools)", label: "tools" },
 ];
 
 function ratesChart(points) {
@@ -321,7 +354,7 @@ function ratesChart(points) {
 function stepsChart(points) {
   const max = Math.max(20, ...points.map(p => p.avgSteps));
   const ymax = Math.ceil(max / 20) * 20;
-  return chart(points, [{ key: "avgSteps", color: "var(--series-steps)", label: "avg steps" }], {
+  return chart(points, [{ get: p => p.avgSteps, color: "var(--series-steps)", label: "avg steps" }], {
     height: 140,
     ymax,
     ticks: [0, ymax / 2, ymax],
@@ -401,11 +434,19 @@ function runTable(runs, date, task) {
   return table;
 }
 
-// Per-tool pass-rate bars for the latest day; hovering a tool highlights its
-// calls on every run rail in the same card.
-function toolBars(runs, card) {
+// Fixed slot order from the reference palette; a tool keeps its color for the
+// whole period (identity, not rank), and past eight tools only the busiest
+// eight are drawn.
+const TOOL_COLORS = [
+  "var(--series-pass)", "var(--series-tests)", "var(--series-tools)",
+  "var(--cat-4)", "var(--cat-5)", "var(--cat-6)", "var(--series-steps)",
+  "var(--cat-8)",
+];
+
+// Per-day per-tool aggregate for one chart point.
+function toolAgg(p) {
   const agg = new Map();
-  for (const run of runs) {
+  for (const run of p.runs) {
     for (const [tool, s] of Object.entries(run.tool_call_stats)) {
       const cur = agg.get(tool) || { ok: 0, calls: 0 };
       cur.ok += s.passed;
@@ -413,27 +454,73 @@ function toolBars(runs, card) {
       agg.set(tool, cur);
     }
   }
-  const wrap = el("div");
-  for (const [tool, s] of [...agg.entries()].sort((a, b) => b[1].calls - a[1].calls)) {
-    const rate = s.calls > 0 ? s.ok / s.calls : 0;
-    const row = el("div", "tool-row");
-    row.append(el("span", "mono", tool));
-    const track = el("div", "bar-track");
-    const fill = el("div", "bar-fill");
-    fill.style.width = `${rate * 100}%`;
-    track.append(fill);
-    row.append(track);
-    row.append(el("span", "tool-value", `${pct(rate)} · ${s.calls} calls`));
-    row.addEventListener("mouseenter", () => {
-      for (const seg of card.querySelectorAll(".rail span")) {
-        seg.classList.toggle("dim", seg.dataset.tool !== tool);
-      }
-    });
-    row.addEventListener("mouseleave", () => {
-      for (const seg of card.querySelectorAll(".rail span")) seg.classList.remove("dim");
-    });
-    wrap.append(row);
+  return agg;
+}
+
+// Hovering a tool dims everything else: the other tools' lines and dots, and
+// every non-matching segment on the run rails.
+function highlightTool(card, tool) {
+  for (const seg of card.querySelectorAll(".rail span")) {
+    seg.classList.toggle("dim", tool !== null && seg.dataset.tool !== tool);
   }
+  for (const mark of card.querySelectorAll("[data-series]")) {
+    mark.classList.toggle("faded", tool !== null && mark.dataset.series !== tool);
+  }
+}
+
+// Per-tool pass-rate trend: one line per tool, plus a hoverable legend row
+// carrying the latest day's rate and call volume.
+function toolTrend(points, card) {
+  for (const p of points) p.toolsByDay = toolAgg(p);
+  const totals = new Map();
+  for (const p of points) {
+    for (const [tool, s] of p.toolsByDay) {
+      totals.set(tool, (totals.get(tool) || 0) + s.calls);
+    }
+  }
+  const shown = [...totals.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, TOOL_COLORS.length)
+    .map(entry => entry[0]);
+
+  const series = shown.map((tool, i) => ({
+    id: tool,
+    label: tool,
+    color: TOOL_COLORS[i],
+    get: p => {
+      const s = p.toolsByDay.get(tool);
+      return s && s.calls > 0 ? s.ok / s.calls : null;
+    },
+  }));
+
+  const legend = el("div", "tool-legend");
+  const latest = points[points.length - 1];
+  shown.forEach((tool, i) => {
+    const row = el("div", "tool-row");
+    const swatch = el("span", "swatch");
+    swatch.style.background = TOOL_COLORS[i];
+    const s = latest.toolsByDay.get(tool);
+    const value = s && s.calls > 0
+      ? `${pct(s.ok / s.calls)} · ${s.calls} calls`
+      : "no calls";
+    row.append(swatch, el("span", "mono", tool), el("span", "tool-value", value));
+    row.addEventListener("mouseenter", () => highlightTool(card, tool));
+    row.addEventListener("mouseleave", () => highlightTool(card, null));
+    legend.append(row);
+  });
+
+  const wrap = el("div");
+  wrap.append(legend, chart(points, series, {
+    height: 200,
+    ymax: 1,
+    ticks: [0, 0.5, 1],
+    fmt: pct,
+    tooltipRows: p => shown.flatMap((tool, i) => {
+      const s = p.toolsByDay.get(tool);
+      if (!s || s.calls === 0) return [];
+      return [ttRow(TOOL_COLORS[i], `${tool}: ${pct(s.ok / s.calls)} (${s.calls})`)];
+    }),
+  }));
   return wrap;
 }
 
@@ -465,12 +552,13 @@ function taskCard(task, records) {
     ttRow("var(--series-tests)", "avg tests passed"),
     ttRow("var(--series-tools)", "tool-call pass rate"),
   );
-  const tables = el("div", "tables");
-  tables.append(
+  card.append(
+    legend,
+    ratesChart(points),
+    stepsChart(points),
     titled(`runs · ${latest.date}`, runTable(latest.runs, latest.date, task)),
-    titled("tool calls · pass rate", toolBars(latest.runs, card)),
+    titled("tool calls · pass rate", toolTrend(points, card)),
   );
-  card.append(legend, ratesChart(points), stepsChart(points), tables);
   return card;
 }
 
