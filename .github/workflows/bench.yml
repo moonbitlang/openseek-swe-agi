@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        task: [csv, ini, uri, lua]
+        task: [csv, ini, uri, lua, toml]
     env:
       TASK: ${{ matrix.task }}
       OPENSEEK_COMMIT: ${{ needs.prepare.outputs.openseek_commit }}
