@@ -39,6 +39,12 @@ jobs:
     env:
       TASK: ${{ matrix.task }}
       OPENSEEK_COMMIT: ${{ needs.prepare.outputs.openseek_commit }}
+      # openseek is a workspace and `moon` runs the prebuild of every member,
+      # including ./desktop, which imports moonbit-community/proton. proton's
+      # build.mjs asks pkg-config for gtk+-3.0 and x11 on linux, so it fails
+      # on the runner -- for a native link config nothing here ever uses.
+      # This is proton's own switch for returning an empty config instead.
+      PROTON_CEF_SETUP_BOOTSTRAP: "1"
     steps:
       - name: Require DEEPSEEK secret
         env:
