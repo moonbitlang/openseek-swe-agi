@@ -74,7 +74,9 @@ pub impl Eq for Toml with fn equal(self, other) {
 ///
 /// Parameters:
 ///
-/// - `input`: TOML text as StringView
+/// - `input`: TOML text as StringView. The document is the view's
+///   window; `to_owned()` materializes exactly that. (`StringView::data()`
+///   returns the whole backing string, window and all.)
 ///
 /// Returns the document's root table: a map from top-level keys to values.
 ///

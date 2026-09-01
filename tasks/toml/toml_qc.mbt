@@ -8,13 +8,19 @@
 /// `toml_spec.mbt` for the well-formedness contract.
 ///
 /// Both generators reach the characters a printer must escape — `"`, `\`,
-/// and the control characters, DEL included — in key *and* value position,
-/// so a printer that quotes without escaping fails the round-trip. DEL
-/// matters on its own: U+007F sits above the C0 range, so a printer that
-/// tests `c < 0x20` leaves it raw and emits invalid TOML.
-let qc_control_char : Array[Char] = [
-  '\u{0}', '\u{1}', '\u{8}', '\n', '\u{B}', '\u{C}', '\r', '\u{1F}', '\u{7F}',
-]
+/// and the control characters — in key *and* value position, so a printer
+/// that quotes without escaping fails the round-trip.
+///
+/// The control set is the whole range a basic string must escape:
+/// U+0000-U+0008, U+000A-U+001F and U+007F. Tab (U+0009) is the one
+/// control character that may stand for itself. U+007F is the awkward
+/// member — it sits above C0, so the common `c < 0x20` test leaves it raw
+/// and emits invalid TOML.
+let qc_control_char : @quickcheck.Generator[Char] = @quickcheck.frequency([
+  (1, @quickcheck.char_range('\u{0}', '\u{8}')),
+  (2, @quickcheck.char_range('\u{A}', '\u{1F}')),
+  (1, @quickcheck.pure('\u{7F}')),
+])
 
 ///|
 let qc_key_char : @quickcheck.Generator[Char] = @quickcheck.frequency([
@@ -27,7 +33,7 @@ let qc_key_char : @quickcheck.Generator[Char] = @quickcheck.frequency([
       ' ', '.', '"', '\'', '[', '=', '\\', '\t', '中', 'é', 'Ω',
     ]),
   ),
-  (1, @quickcheck.elements(qc_control_char)),
+  (1, qc_control_char),
 ])
 
 ///|
@@ -36,7 +42,7 @@ let qc_string_char : @quickcheck.Generator[Char] = @quickcheck.frequency([
   (2, @quickcheck.char_range('0', '9')),
   (2, @quickcheck.elements([' ', ',', '=', '#', '"', '\'', '\\', '[', ']'])),
   (1, @quickcheck.elements(['\t', '你', '好', '😀', 'é'])),
-  (1, @quickcheck.elements(qc_control_char)),
+  (1, qc_control_char),
 ])
 
 ///|

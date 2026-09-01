@@ -8459,17 +8459,34 @@ test "valid/integer/radix-signed-max" {
 test "print/escape-roundtrip" {
   // TOML v1.0.0 basic strings must escape `"`, `\\`, and the control
   // characters U+0000-U+0008, U+000A-U+001F and U+007F. Tab (U+0009) is the
-  // one control character allowed to stand for itself.
-  let specials = [
-    '\u{0}', '\u{1}', '\u{8}', '\t', '\n', '\u{B}', '\u{C}', '\r', '\u{1F}', '\u{7F}',
-    '"', '\\',
-  ]
+  // one control character allowed to stand for itself. Every member of the
+  // ranges is checked, so a printer must derive its escapes from the ranges
+  // themselves.
+  let specials = ['"', '\\']
+  for n in 0x00..<=0x08 {
+    specials.push(Int::unsafe_to_char(n))
+  }
+  for n in 0x0A..<=0x1F {
+    specials.push(Int::unsafe_to_char(n))
+  }
+  specials.push('\u{7F}')
   for c in specials {
     let s = String::from_array(['a', c, 'b'])
     // the same character in key position and in value position
     let doc : Map[String, @toml.Toml] = Map([(s, String(s))])
     assert_eq(@toml.parse(@toml.print(doc)), doc)
   }
+}
+
+///|
+test "parse/stringview-window" {
+  // `parse` takes a StringView: the document is the view's window. The
+  // backing string carries text that is not TOML on both sides, so a parse
+  // that widens to `StringView::data()` sees a syntax error.
+  let backing = "@@@ not toml @@@\na = 1\n@@@ also not toml @@@"
+  let start = backing.find("a = 1").unwrap()
+  let view = backing[start:start + 6]
+  assert_eq(@toml.parse(view), { "a": Integer(1) })
 }
 
 ///|
