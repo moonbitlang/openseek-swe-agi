@@ -69,7 +69,7 @@ jobs:
 
       - name: Build the agent
         run: |
-          (cd openseek && moon build cmd/openseek)
+          moon -C openseek build cmd/openseek
           moon build tools/grade
 
       - name: Remove private test cases
@@ -81,13 +81,12 @@ jobs:
         env:
           DEEPSEEK: ${{ secrets.DEEPSEEK }}
         run: |
-          cd openseek
-          moon run --target native cmd/openseek -- run \
+          moon -C openseek run --target native cmd/openseek -- run \
             --dir "../tasks/$TASK" \
             --concurrency 3 \
             --model deepseek-v4-flash \
-            --max-steps 160 \
-            "$(cat "../tasks/$TASK/TASK.md")"
+            --max-steps 600 \
+            "$(cat "tasks/$TASK/TASK.md")"
 
       - name: Restore private test cases
         run: git checkout -- "tasks/$TASK"
@@ -103,9 +102,8 @@ jobs:
       - name: Export HTML
         continue-on-error: true
         run: |
-          cd openseek
-          moon build cmd/viz_app --target js
-          moon run inspect -- --search-dir ../tasks --export "../bench-$TASK.html"
+          moon -C openseek build cmd/viz_app --target js
+          moon -C openseek run inspect -- --search-dir ../tasks --export "../bench-$TASK.html"
 
       - name: Pack run directories
         run: |
