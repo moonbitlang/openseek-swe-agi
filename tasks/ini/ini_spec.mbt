@@ -32,13 +32,14 @@ pub(all) struct Doc {
 /// - Whitespace around keys, separators, and unquoted values is trimmed
 /// - Quoted values keep whitespace and `;`/`#` verbatim and lose the
 ///   surrounding quotes
-/// - `"..."` decodes `\"`, `\\`, `\n`, `\r` and `\t`, and is therefore the
-///   only carrier for a value holding both a line break and a separator
-/// - `'...'` is raw except for `\'`, which yields an apostrophe and is the
-///   only way to put one inside single quotes
-/// - An unquoted value decodes the same escapes as `"..."`
-/// - Any other escape is left alone, backslash included: `C:\Program` is
-///   itself, because `\P` decodes to nothing else
+/// - Each carrier decodes its own set and leaves every other sequence
+///   exactly as written, backslash included — `C:\Program` is itself,
+///   because `\P` decodes to nothing else:
+///   - unquoted: `\\`, `\n`, `\r`, `\t`
+///   - `"..."`: those, and `\"`. This is the only carrier for a value
+///     holding both a line break and a separator
+///   - `'...'`: `\\` and `\'` only, so `'a\nb'` keeps its backslash and
+///     `\'` is the one way to hold an apostrophe between single quotes
 /// - `;` and `#` start comments (full-line, or inline after whitespace in an
 ///   unquoted value)
 /// - A trailing `\` continues an unquoted value onto the next line, joining

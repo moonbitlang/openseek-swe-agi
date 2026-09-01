@@ -1280,6 +1280,56 @@ test "print/roundtrip-awkward-values" {
 }
 
 ///|
+test "valid/escape-matrix" {
+  // Every cell of the escape table in specs/ini.md. A carrier decodes its
+  // own set and leaves every other sequence exactly as written, backslash
+  // included -- which is why `C:\\Program Files` needs no quoting.
+  let cases : Array[(String, String)] = [
+    ("v=a\\nb\n", "a\nb"),
+    ("v=\"a\\nb\"\n", "a\nb"),
+    ("v='a\\nb'\n", "a\\nb"),
+    ("v=a\\rb\n", "a\rb"),
+    ("v=\"a\\rb\"\n", "a\rb"),
+    ("v='a\\rb'\n", "a\\rb"),
+    ("v=a\\tb\n", "a\tb"),
+    ("v=\"a\\tb\"\n", "a\tb"),
+    ("v='a\\tb'\n", "a\\tb"),
+    ("v=a\\\\b\n", "a\\b"),
+    ("v=\"a\\\\b\"\n", "a\\b"),
+    ("v='a\\\\b'\n", "a\\b"),
+    ("v=a\\\"b\n", "a\\\"b"),
+    ("v=\"a\\\"b\"\n", "a\"b"),
+    ("v='a\\\"b'\n", "a\\\"b"),
+    ("v=a\\'b\n", "a\\'b"),
+    ("v=\"a\\'b\"\n", "a\\'b"),
+    ("v='a\\'b'\n", "a'b"),
+    ("v=a\\0b\n", "a\\0b"),
+    ("v=\"a\\0b\"\n", "a\\0b"),
+    ("v='a\\0b'\n", "a\\0b"),
+    ("v=a\\qb\n", "a\\qb"),
+    ("v=\"a\\qb\"\n", "a\\qb"),
+    ("v='a\\qb'\n", "a\\qb"),
+  ]
+  for c in cases {
+    let (text, want) = c
+    let doc = @ini.parse(text)
+    assert_eq(doc.global.get("v"), Some(want))
+  }
+}
+
+///|
+test "valid/continuation-run-of-four" {
+  // The last row of the run-length table: four trailing backslashes are two
+  // escaped literals and no marker, so the next line stands on its own.
+  let ini_text =
+    #|k=a\\\\
+    #|b=1
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, { global: { "k": "a\\\\", "b": "1" }, sections: Map([]), })
+}
+
+///|
 test "valid/continuation-run-of-three" {
   // The run-length table in specs/ini.md, at the case that separates parity
   // from "ends in exactly one backslash": three trailing backslashes are one

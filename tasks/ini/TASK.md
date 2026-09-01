@@ -55,9 +55,9 @@ In scope for this parser implementation:
 - Comments: `;` and `#`, full-line and inline (after whitespace, outside
   quotes)
 - Quoted values (double and single), preserving inner whitespace and comment
-  markers. `"..."` decodes `\" \\ \n \r \t`; `'...'` is raw except `\'`.
-  Any other escape keeps its backslash
-- Escape sequences in unquoted values (`\n`, `\t`, `\\`, ...)
+  markers. Each carrier decodes its own escapes — unquoted `\\ \n \r \t`,
+  `"..."` those plus `\"`, `'...'` only `\\` and `\'` — and anything else
+  keeps its backslash. See the table in `specs/ini.md`
 - Backslash line continuations, and the trailing-backslash runs that are
   escaped literals instead (see `specs/ini.md`)
 - Line endings: LF and CRLF
@@ -126,7 +126,7 @@ moon test
 The model should keep running until all tests pass.
 
 - **Public tests** (`*_pub_test.mbt`): 12 cases (including two property-based tests), visible in this repository for development and debugging
-- **Private tests** (`*_priv_test.mbt`): 98 additional cases that decide the score. They are **withheld while you work** — expect them to be absent from this directory, and do not go looking for them. Your `moon test` therefore exercises the public tests only; the private suite is run against your implementation afterwards.
+- **Private tests** (`*_priv_test.mbt`): 100 additional cases that decide the score. They are **withheld while you work** — expect them to be absent from this directory, and do not go looking for them. Your `moon test` therefore exercises the public tests only; the private suite is run against your implementation afterwards.
 
 **CRITICAL - Full Suite Evaluation**:
 

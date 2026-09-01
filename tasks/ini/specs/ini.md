@@ -213,15 +213,23 @@ continuation marker and joining the next line.
 
 ### Escape decoding
 
-`"..."` and unquoted values decode `\"`, `\\`, `\n`, `\r` and `\t`. `'...'`
-decodes only `\'`, which is the one way to put an apostrophe inside single
-quotes; everything else between single quotes is raw.
+Each carrier decodes its own set:
 
-Any sequence that is not one of those is left exactly as written, backslash
-and all — `path=C:\Program Files` is itself, because `\P` decodes to nothing
-else. This is what lets Windows paths be written plainly, and it is why the
-trailing-backslash rule above has to count the run rather than ask whether a
-backslash is "an escape".
+| sequence | unquoted | `"..."` | `'...'` |
+|---|---|---|---|
+| `\n` `\r` `\t` | decoded | decoded | as written |
+| `\\` | `\` | `\` | `\` |
+| `\"` | as written | `"` | as written |
+| `\'` | as written | as written | `'` |
+| anything else | as written | as written | as written |
+
+"As written" means the backslash survives too — `path=C:\Program Files` is
+itself, because `\P` decodes to nothing else. This is what lets Windows
+paths be written plainly, and it is why the trailing-backslash rule above
+has to count the run rather than ask whether a backslash is "an escape".
+
+`\'` is the one way to hold an apostrophe between single quotes, and `\"`
+the one way to hold a quotation mark between double quotes.
 
 ## Inline comment stripping rules
 
