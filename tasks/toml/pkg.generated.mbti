@@ -3,10 +3,15 @@ package "toml"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/quickcheck",
+  "moonbitlang/core/quickcheck/shrink",
+  "moonbitlang/core/quickcheck/splitmix",
 }
 
 // Values
 pub fn parse(StringView) -> Map[String, Toml] raise
+
+pub fn print(Map[String, Toml]) -> String
 
 // Errors
 
@@ -37,6 +42,8 @@ pub(all) enum Toml {
   Table(Map[String, Toml])
 } derive(@debug.Debug)
 pub impl Eq for Toml
+pub impl @quickcheck.Arbitrary for Toml
+pub impl @shrink.Shrink for Toml
 
 // Type aliases
 

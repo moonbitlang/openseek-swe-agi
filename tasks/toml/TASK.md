@@ -58,6 +58,8 @@ In scope (TOML v1.0.0, exactly):
 - Key/value pairs with bare, quoted, and dotted keys
 - Tables `[a]`, nested tables `[a.b]`, arrays of tables `[[arr]]`
 - Comments (`# ...`) and flexible whitespace; LF and CRLF newlines
+- Printing: `print` serializes a document back to TOML text that parses
+  to an equal document (the exact layout is unspecified)
 - Values:
   - strings: basic, literal, and both multiline forms with the v1.0.0
     escape and control-character rules
@@ -77,38 +79,38 @@ Out of scope (rejected as invalid — these are TOML 1.1 draft features):
 - `\x..` and `\e` string escapes
 - Times and date-times without seconds
 
-Also out of scope (not required):
-
-- A TOML serializer of any kind; only `parse` is required.
-
 ## Required API
 
-Complete the declaration in `toml_spec.mbt`.
+Complete the declarations in `toml_spec.mbt`.
 
 Implementation notes:
 
 - You can **freely decide** the project structure (modules/files), the
   parsing strategy, and any internal data structures.
 - Do **not** modify the following files:
-  - `toml_spec.mbt` - API specification (types, `Eq`, and `parse`)
+  - `toml_spec.mbt` - API specification (types, `Eq`, `parse`, `print`)
+  - `toml_qc.mbt` - Property-test generators
   - `specs/` folder - Reference documents
   - `*_pub_test.mbt` - Public test file (`toml_pub_test.mbt`)
   - `*_priv_test.mbt` - Private test file (`toml_priv_test.mbt`)
-- Implement the required declaration by adding new `.mbt` files as needed.
+- Implement the required declarations by adding new `.mbt` files as needed.
 - **You may add additional test files** (e.g., `xxx_test.mbt`) if needed
   for testing and maintenance purposes:
   - Create test files to validate edge cases
   - Derive test scenarios from `specs/v1.0.0.md`
   - All added tests must remain faithful to TOML v1.0.0
 
-Required entry point:
+Required entry points:
 
 - `@toml.parse(input : StringView) -> Map[String, Toml] raise`
+- `@toml.print(doc : Map[String, Toml]) -> String`
 
 The result types are fixed by the spec: `Toml`, `Date`, and `Time` are
 `pub(all)` types in `toml_spec.mbt` whose values the tests construct
 directly and compare with `assert_eq` (using the `Eq` implementation
-shipped in the spec — floats compare IEEE-style with NaN == NaN).
+shipped in the spec — floats compare IEEE-style with NaN == NaN). The
+property-test generators in `toml_qc.mbt` build documents from these
+types and check `parse(print(doc)) == doc`.
 
 ## Behavioral rules
 
@@ -127,6 +129,10 @@ shipped in the spec — floats compare IEEE-style with NaN == NaN).
   `\u`/`\U` code points, control characters outside strings and in
   single-line strings, bare CR, malformed numbers and datetimes,
   non-calendar dates.
+- `print` emits TOML text whose exact layout is unspecified, but
+  `parse(print(doc)) == doc` must hold for every well-formed document
+  (see `toml_spec.mbt` for the well-formedness contract); the round-trip
+  is checked by a property-based test over generated documents.
 
 ## Test execution
 
@@ -142,8 +148,9 @@ moon test
 
 The model should keep running until all tests pass.
 
-- **Public tests** (`*_pub_test.mbt`): 73 cases, visible in this
-  repository for development and debugging
+- **Public tests** (`*_pub_test.mbt`): 75 cases (including two
+  property-based tests), visible in this repository for development and
+  debugging
 - **Private tests** (`*_priv_test.mbt`): 651 additional cases, vendored
   as ordinary files in this local task and run by `moon test`
 

@@ -16,6 +16,10 @@ The `toml` package expects an implementation that can:
    values for everything below it.
 2. Reject every input that is not a valid TOML v1.0.0 document by raising
    an error (any error type works; tests only assert that `parse` raises).
+3. Print a document back to TOML text with `print`, such that
+   `parse(print(doc)) == doc` for every well-formed document (checked by
+   a property-based test over generated documents; the generators are
+   shipped in `toml_qc.mbt`).
 
 ## Primary references
 
@@ -38,6 +42,7 @@ no less. In particular, features from the unreleased TOML 1.1 drafts are
 
 ```
 parse(input : StringView) -> Map[String, Toml] raise
+print(doc : Map[String, Toml]) -> String
 
 enum Toml {
   String(String)
@@ -149,6 +154,28 @@ The vendored spec is authoritative; highlights the tests lean on:
 - **Inline tables**: `{ k = v, ... }` — single line, no trailing comma,
   no newlines between the braces (values inside may still be multiline
   strings).
+
+## Printing
+
+`print` may choose any layout — only the round-trip contract matters.
+The simplest sufficient strategy is one `key = value` line per root
+entry, with nested tables as inline tables and strings as basic strings
+with escapes. Things to get right:
+
+- Quote keys that are not bare keys (any string — including `""` — is
+  representable as a quoted key).
+- Escape control characters, quotes, and backslashes in basic strings.
+- Floats must round-trip exactly; shortest-representation printing (the
+  usual `Double::to_string`) is sufficient, with `nan`/`inf`/`-inf`
+  spelled as TOML keywords, and a `.0` appended when the representation
+  has neither a dot nor an exponent.
+- Datetimes print in RFC 3339 form (zero-padded fields, `Z` for offset
+  0, fractional seconds only when nonzero).
+
+The well-formedness contract (which documents `print` must round-trip)
+is documented on the `print` declaration in `toml_spec.mbt`: no unpaired
+surrogates in strings or keys, and date/time components within their
+TOML ranges.
 
 ## Error handling
 

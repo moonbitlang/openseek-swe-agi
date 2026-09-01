@@ -103,3 +103,23 @@ pub impl Eq for Toml with fn equal(self, other) {
 ///     a = 2                   ]) }
 ///
 declare pub fn parse(input : StringView) -> Map[String, Toml] raise
+
+///|
+/// Print a document back to TOML text.
+///
+/// The exact text is unspecified, but it must parse back to an equal
+/// document: `parse(print(doc)) == doc` for any well-formed document.
+/// Well-formed means:
+///
+/// - strings and keys contain no unpaired surrogate code units (every
+///   other string is representable via basic-string escapes, and every
+///   string — including `""` — is a legal quoted key);
+/// - `Date`/`Time` components are within their TOML ranges: a real
+///   calendar date with year 1..9999, hour <= 23, minute <= 59,
+///   second <= 59, nanosecond < 1_000_000_000, and an offset within
+///   +/- (23 hours 59 minutes).
+///
+/// Floats must round-trip exactly (shortest-representation printing is
+/// sufficient); `nan` prints as a NaN value, which the shipped `Eq` treats
+/// as equal to any other NaN.
+declare pub fn print(doc : Map[String, Toml]) -> String

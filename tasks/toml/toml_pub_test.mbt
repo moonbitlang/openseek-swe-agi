@@ -758,3 +758,22 @@ test "valid/integer/float64-max" {
     "min_int": Integer(-9007199254740991),
   })
 }
+
+///|
+test "quickcheck: roundtrips" {
+  @quickcheck.check(
+    (doc : Map[String, @toml.Toml]) => @toml.parse(@toml.print(doc)) == doc,
+    count=300,
+  )
+}
+
+///|
+test "quickcheck: parse should never panic" {
+  @quickcheck.check((s : String) => {
+    try @toml.parse(s) catch {
+      _ => true
+    } noraise {
+      _ => true
+    }
+  })
+}
