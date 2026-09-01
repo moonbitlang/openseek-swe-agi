@@ -125,27 +125,28 @@ moon test
 The model should keep running until all tests pass.
 
 - **Public tests** (`*_pub_test.mbt`): 12 cases (including two property-based tests), visible in this repository for development and debugging
-- **Private tests** (`*_priv_test.mbt`): 88 additional cases, vendored as ordinary files in this local task and run by `moon test`
+- **Private tests** (`*_priv_test.mbt`): 88 additional cases that decide the score. They are **withheld while you work** — expect them to be absent from this directory, and do not go looking for them. Your `moon test` therefore exercises the public tests only; the private suite is run against your implementation afterwards.
 
 **CRITICAL - Full Suite Evaluation**:
 
-Passing only the public tests is **INSUFFICIENT** and will result in task failure. The task is complete **only when both public and private test suites in this directory pass**.
+Passing only the public tests is **INSUFFICIENT**. A green `moon test` is necessary but not sufficient: it covers roughly 10% of the cases that decide the outcome. The task is complete only when the private suite passes too — and you cannot run it yourself.
 
 **Why Private Tests Matter**:
 - **Coverage**: Private tests represent 90% of the total evaluation - they are the primary measure of success
 - **Comprehensiveness**: Validate full INI behavior compliance, including edge cases, corner cases, and subtle semantic rules not exposed in public tests
 - **Real-world scenarios**: Test configuration shapes that occur in actual INI files (git config, systemd units, php.ini) but may not be obvious from the spec
-- **Implementation integrity**: Even though these tests are visible here, the goal is a genuine parser, not a lookup table for fixture outputs
+- **Implementation integrity**: you cannot see these cases, so the only way to pass them is a genuine parser rather than a lookup table for the fixtures you can see
 
 **Evaluation Process**:
 
-Make all tests pass locally by running `moon test` in this directory. Iterate
-until they pass, then `finish`.
+Make the public tests pass by running `moon test` in this directory, and
+iterate until they do, then `finish`.
 
-There is **no submission step and no evaluation server** in this environment.
-`moon test` is the grading command for this vendored native workflow.
+There is **no submission step and no evaluation server** in this environment:
+`moon test` is the command you run, and the withheld private tests are run
+against your implementation afterwards.
 
-Because the private tests (~90% of the suite) decide success, a genuine,
+Because the withheld tests (~90% of the suite) decide success, a genuine,
 general implementation is essential: do **not** hardcode or memorize responses
 to the fixtures — build a real parser that works for arbitrary inputs within
 the supported dialect.
