@@ -788,12 +788,14 @@ test "edge/value-starts-with-quote" {
 }
 
 ///|
-test "edge/value-ends-with-backslash" {
+test "invalid/continuation-dangling" {
+  // A lone trailing backslash is the continuation marker whatever the value
+  // holds, so with no line after it there is nothing to join to. Compare
+  // `invalid/backslash-continuation-no-newline`, which is the same shape.
   let ini_text =
     #|path=C:\Windows\
     #|
-  let ini = @ini.parse(ini_text)
-  assert_eq(ini, { global: { "path": "C:\\Windows\\" }, sections: Map([]), })
+  @test.assert_raise(() => @ini.parse(ini_text))
 }
 
 ///|
@@ -1177,14 +1179,228 @@ test "edge/single-quoted-section-name" {
 }
 
 ///|
-test "edge/backslash-at-eol-without-continuation" {
+test "valid/continuation-joins-key-like-line" {
+  // The marker does not care what the next line looks like: a line that
+  // could have been a key/value pair is still joined as continuation text.
   let ini_text =
     #|path=C:\Program Files\
     #|nextkey=value
     #|
   let ini = @ini.parse(ini_text)
   assert_eq(ini, {
+    global: { "path": "C:\\Program Filesnextkey=value" },
+    sections: Map([]),
+  })
+}
+
+///|
+test "valid/escaped-trailing-backslash" {
+  // An even-length run of trailing backslashes is escaped literals, not a
+  // marker, so this value really does end in a backslash and the next line
+  // stands on its own.
+  let ini_text =
+    #|path=C:\Program Files\\
+    #|nextkey=value
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, {
     global: { "path": "C:\\Program Files\\", "nextkey": "value" },
+    sections: Map([]),
+  })
+}
+
+///|
+test "valid/double-quoted-escapes" {
+  // Double quotes process escapes. This is the only carrier for a value that
+  // needs both a line break and a separator: the unquoted form is the only
+  // other way to write a line break, and `key=value=extra` is rejected.
+  let ini_text =
+    #|v="a\nb=c"
+    #|t="x\ty"
+    #|q="she said \"hi\""
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, {
+    global: { "v": "a\nb=c", "t": "x\ty", "q": "she said \"hi\"" },
+    sections: Map([]),
+  })
+}
+
+///|
+test "valid/double-quoted-backslash" {
+  // `\\` inside double quotes is one literal backslash, which is how a
+  // quoted value ends in a backslash without the reader seeing a marker.
+  let ini_text =
+    #|v="a\\b"
+    #|p="C:\\Windows\\"
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, {
+    global: { "v": "a\\b", "p": "C:\\Windows\\" },
+    sections: Map([]),
+  })
+}
+
+///|
+test "valid/astral-value" {
+  // Values are UTF-16 internally; a character outside the BMP is a surrogate
+  // pair and must not be split or dropped by the quoted reader.
+  let ini_text =
+    #|quoted="a 😀 b"
+    #|bare=😀
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, {
+    global: { "quoted": "a 😀 b", "bare": "😀" },
+    sections: Map([]),
+  })
+}
+
+///|
+test "print/roundtrip-awkward-values" {
+  // Each of these forces print to pick a carrier that survives the reader:
+  // separators, a comment marker, whitespace at the ends, a line break, a
+  // trailing backslash, an astral character, and the empty value.
+  let docs : Array[@ini.Doc] = [
+    { global: { "k": "a=b" }, sections: Map([]), },
+    { global: { "k": "a:b" }, sections: Map([]), },
+    { global: { "k": " padded " }, sections: Map([]), },
+    { global: { "k": "a ; not a comment" }, sections: Map([]), },
+    { global: { "k": "a # nor this" }, sections: Map([]), },
+    { global: { "k": "line1\nline2" }, sections: Map([]), },
+    { global: { "k": "C:\\Windows\\" }, sections: Map([]), },
+    { global: { "k": "quote\" and 'quote'" }, sections: Map([]), },
+    { global: { "k": "emoji 😀" }, sections: Map([]), },
+    { global: { "k": "" }, sections: Map([]), },
+    { global: Map([]), sections: { "s": { "k": "a\tb" } }, },
+  ]
+  for doc in docs {
+    assert_eq(@ini.parse(@ini.print(doc)), doc)
+  }
+}
+
+///|
+test "valid/escape-matrix" {
+  // Every cell of the escape table in specs/ini.md. A carrier decodes its
+  // own set and leaves every other sequence exactly as written, backslash
+  // included -- which is why `C:\\Program Files` needs no quoting.
+  let cases : Array[(String, String)] = [
+    ("v=a\\nb\n", "a\nb"),
+    ("v=\"a\\nb\"\n", "a\nb"),
+    ("v='a\\nb'\n", "a\\nb"),
+    ("v=a\\rb\n", "a\rb"),
+    ("v=\"a\\rb\"\n", "a\rb"),
+    ("v='a\\rb'\n", "a\\rb"),
+    ("v=a\\tb\n", "a\tb"),
+    ("v=\"a\\tb\"\n", "a\tb"),
+    ("v='a\\tb'\n", "a\\tb"),
+    ("v=a\\\\b\n", "a\\b"),
+    ("v=\"a\\\\b\"\n", "a\\b"),
+    ("v='a\\\\b'\n", "a\\b"),
+    ("v=a\\\"b\n", "a\\\"b"),
+    ("v=\"a\\\"b\"\n", "a\"b"),
+    ("v='a\\\"b'\n", "a\\\"b"),
+    ("v=a\\'b\n", "a\\'b"),
+    ("v=\"a\\'b\"\n", "a\\'b"),
+    ("v='a\\'b'\n", "a'b"),
+    ("v=a\\0b\n", "a\\0b"),
+    ("v=\"a\\0b\"\n", "a\\0b"),
+    ("v='a\\0b'\n", "a\\0b"),
+    ("v=a\\qb\n", "a\\qb"),
+    ("v=\"a\\qb\"\n", "a\\qb"),
+    ("v='a\\qb'\n", "a\\qb"),
+  ]
+  for c in cases {
+    let (text, want) = c
+    let doc = @ini.parse(text)
+    assert_eq(doc.global.get("v"), Some(want))
+  }
+}
+
+///|
+test "valid/continuation-run-of-four" {
+  // The last row of the run-length table: four trailing backslashes are two
+  // escaped literals and no marker, so the next line stands on its own.
+  let ini_text =
+    #|k=a\\\\
+    #|b=1
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, { global: { "k": "a\\\\", "b": "1" }, sections: Map([]), })
+}
+
+///|
+test "valid/continuation-run-of-three" {
+  // The run-length table in specs/ini.md, at the case that separates parity
+  // from "ends in exactly one backslash": three trailing backslashes are one
+  // escaped literal followed by a marker.
+  let ini_text =
+    #|k=a\\\
+    #|b=1
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, { global: { "k": "a\\b=1" }, sections: Map([]), })
+}
+
+///|
+test "valid/carriage-return-escape" {
+  // `\r` is in the decoded set. Its only other appearance in the suite is a
+  // CRLF line ending, which says nothing about decoding.
+  let ini_text =
+    #|dq="a\rb"
+    #|bare=a\rb
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, {
+    global: { "dq": "a\rb", "bare": "a\rb" },
+    sections: Map([]),
+  })
+}
+
+///|
+test "valid/single-quoted-escaped-quote" {
+  // `\'` is the one escape single quotes decode -- and the only way to put
+  // an apostrophe between them.
+  let ini_text =
+    #|v='it\'s'
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, { global: { "v": "it's" }, sections: Map([]), })
+}
+
+///|
+test "valid/unknown-escapes-keep-backslash" {
+  // Anything that is not a recognised escape is left exactly as written, in
+  // every carrier. This is what lets a Windows path be written plainly.
+  let ini_text =
+    #|bare=C:\Program Files\x
+    #|dq="C:\Program Files\x"
+    #|sq='C:\Program Files\x'
+    #|odd=a\qb
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, {
+    global: {
+      "bare": "C:\\Program Files\\x",
+      "dq": "C:\\Program Files\\x",
+      "sq": "C:\\Program Files\\x",
+      "odd": "a\\qb",
+    },
+    sections: Map([]),
+  })
+}
+
+///|
+test "valid/single-quoted-verbatim" {
+  // Single quotes are raw, so the same text keeps its backslashes. (Whether
+  // `\'` escapes the closing quote is left open -- no fixture pins it.)
+  let ini_text =
+    #|v='a\nb'
+    #|p='C:\Program Files'
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, {
+    global: { "v": "a\\nb", "p": "C:\\Program Files" },
     sections: Map([]),
   })
 }

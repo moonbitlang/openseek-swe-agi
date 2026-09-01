@@ -123,21 +123,23 @@ Rules required by invalid tests:
 - Multiple separators like `key=value=extra` are invalid unless the extra `=`
   appears inside quotes (tests include “value with equals” and “multiple equals
   without quotes”).
+- This rule applies to the line as it is read, before any continuation is
+  joined. A continuation line contributes text, not syntax: its `=`, `:`,
+  quotes and comment markers are ordinary characters of the joined value.
+  `path=C:\Program Files\` followed by `nextkey=value` is one entry whose
+  value is `C:\Program Filesnextkey=value`, not a rejected double separator.
 
 ### Multiline values (backslash continuation)
 
-The suite defines a continuation convention:
-
-- If a line’s value ends with a backslash `\\` and is immediately followed by a
-  newline, the next line continues the same value (tests: `valid/multiline-value-with-backslash`,
-  `valid/complex-multiline`, `valid/long-multiline-value`).
-- A backslash at end-of-input without a following newline is invalid
+- A line whose value ends in an **odd**-length run of trailing backslashes
+  ends in a continuation marker: the marker is removed and the next line is
+  joined on directly. An **even**-length run is escaped literals and the
+  value ends there. "Multiline continuation: concatenation details" below
+  gives the run-length table.
+- A marker with no line after it is invalid
   (`invalid/backslash-continuation-no-newline`).
-- A newline that appears in the middle of a value without a trailing `\\` on the
-  previous line is invalid (`invalid/multiline-without-backslash`).
-
-The precise concatenation rule (whether newlines are preserved or stripped) is
-defined by the expected documents in the tests.
+- A line that is not a continuation and carries no separator is invalid
+  (`invalid/multiline-without-backslash`).
 
 ## Error conditions (must reject)
 
@@ -190,21 +192,44 @@ Newline:
 
 ## Whitespace trimming vs preservation
 
-The tests imply the following policy (treat the expected documents as canonical):
+The policy is:
 
 - Around separators (`=`/`:`): surrounding whitespace is ignored for parsing.
 - In unquoted values:
   - trailing inline comments are stripped
   - internal whitespace is preserved
-  - leading/trailing whitespace is preserved in some “edge” tests; prefer to
-    preserve it unless the test suite expects trimming in a particular case.
+  - leading and trailing whitespace is trimmed (`key=value  ` is `value`);
+    quote the value to keep it. The one exception is a line ending in a
+    continuation marker, where the whitespace before the marker belongs to
+    the joined value — that is where the space in `a \` + `b` comes from.
 - In quoted values:
   - preserve all characters inside quotes (including leading/trailing spaces)
   - comment markers `;` and `#` are literal characters
 
 If you need an explicit rule: preserve value bytes exactly, except for (1)
-removing the surrounding quotes in quoted values, and (2) stripping inline
-comments in unquoted values.
+removing the surrounding quotes in quoted values, (2) stripping inline
+comments in unquoted values, (3) decoding escapes, and (4) removing a
+continuation marker and joining the next line.
+
+### Escape decoding
+
+Each carrier decodes its own set:
+
+| sequence | unquoted | `"..."` | `'...'` |
+|---|---|---|---|
+| `\n` `\r` `\t` | decoded | decoded | as written |
+| `\\` | `\` | `\` | `\` |
+| `\"` | as written | `"` | as written |
+| `\'` | as written | as written | `'` |
+| anything else | as written | as written | as written |
+
+"As written" means the backslash survives too — `path=C:\Program Files` is
+itself, because `\P` decodes to nothing else. This is what lets Windows
+paths be written plainly, and it is why the trailing-backslash rule above
+has to count the run rather than ask whether a backslash is "an escape".
+
+`\'` is the one way to hold an apostrophe between single quotes, and `\"`
+the one way to hold a quotation mark between double quotes.
 
 ## Inline comment stripping rules
 
@@ -219,17 +244,39 @@ Quoted values disable inline comment parsing entirely.
 
 ## Multiline continuation: concatenation details
 
-The suite defines backslash continuation. Make explicit:
+A logical value continued over several lines is stored as a single string.
+The lines are joined **directly**, with no separator: the trailing backslash
+is removed and the next line is appended where it left off. `a\` + `b` is
+`ab`, and the space in `a \` + `b` comes from the value, not the join — the
+whitespace before a continuation marker is kept, so that line yields `a b`.
 
-- If the logical value is continued, the resulting stored value is a single
-  string.
-- Whether to keep or remove the newline between lines is determined by tests.
-  Many INI dialects either:
-  - remove the trailing backslash and join lines directly, or
-  - remove the backslash and join with `\n`.
+Continuation is decided on the raw line, **before** escape processing:
 
-Treat the expected documents in `ini_priv_test.mbt` as authoritative for the
-join rule.
+- Count the backslashes at the end of the line. An **odd**-length run ends in
+  a continuation marker; an **even**-length run is escaped literals and the
+  value ends there.
+- So `path=C:\Program Files\` continues onto the next line — the marker does
+  not care what the value holds or what the next line looks like — while
+  `path=C:\Program Files\\` is the value `C:\Program Files\` and ends.
+- A marker with no line after it has nothing to join to and is an error.
+
+Writing `k=a` with N trailing backslashes, followed by a line `b=1`:
+
+| N | line          | result                                    |
+|---|---------------|-------------------------------------------|
+| 1 | `k=a\`        | `k` = `ab=1` — joined, the line break gone |
+| 2 | `k=a\\`       | `k` = `a\`, `b` = `1`                      |
+| 3 | `k=a\\\`      | `k` = `a\b=1` — one literal, then joined   |
+| 4 | `k=a\\\\`     | `k` = `a\\`, `b` = `1`                     |
+
+A line break that ends a continued line is consumed. A line break *in* the
+value is a different thing and is written with the `\n` escape: `k=a\\\n` is
+`a\` followed by a newline, because its last character is `n`, leaving no
+trailing backslash to act as a marker.
+
+Order matters here. Deciding continuation *after* escapes have collapsed
+`\\` into `\` makes an escaped trailing backslash indistinguishable from a
+marker, and no rule recovers the difference.
 
 ## Keys and sections: validation details
 
