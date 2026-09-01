@@ -54,11 +54,11 @@ In scope for this parser implementation:
 - Key/value entries with `=` and `:` separators
 - Comments: `;` and `#`, full-line and inline (after whitespace, outside
   quotes)
-- Quoted values (double and single), preserving inner whitespace, comment
-  markers, and line breaks; `\"` / `\'` escapes
+- Quoted values (double and single), preserving inner whitespace and comment
+  markers. `'...'` is raw; `"..."` applies `\" \\ \n \r \t`
 - Escape sequences in unquoted values (`\n`, `\t`, `\\`, ...)
-- Backslash line continuations (and the cases that are *not* continuations,
-  such as Windows-path-like values)
+- Backslash line continuations, and the trailing-backslash runs that are
+  escaped literals instead (see `specs/ini.md`)
 - Line endings: LF and CRLF
 
 Out of scope (not required by current tests):
@@ -96,7 +96,7 @@ Required entry points:
 - The document is global entries plus a map of sections: duplicate keys
   and repeated section headers collapse via last-wins (see `ini_spec.mbt`).
 - Whitespace around keys, separators, and unquoted values is trimmed; quoted
-  values are preserved verbatim.
+  values keep theirs.
 - Reject malformed inputs as the invalid tests require:
   - malformed section headers (unclosed, empty, nested brackets, stray
     quotes)
