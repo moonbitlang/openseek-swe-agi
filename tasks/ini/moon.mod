@@ -12,4 +12,4 @@ keywords = [ ]
 
 description = ""
 
-preferred_target = "native"
+preferred_target = "wasm"
