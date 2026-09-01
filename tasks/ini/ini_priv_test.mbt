@@ -1280,6 +1280,34 @@ test "print/roundtrip-awkward-values" {
 }
 
 ///|
+test "valid/continuation-run-of-three" {
+  // The run-length table in specs/ini.md, at the case that separates parity
+  // from "ends in exactly one backslash": three trailing backslashes are one
+  // escaped literal followed by a marker.
+  let ini_text =
+    #|k=a\\\
+    #|b=1
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, { global: { "k": "a\\b=1" }, sections: Map([]), })
+}
+
+///|
+test "valid/carriage-return-escape" {
+  // `\r` is in the decoded set. Its only other appearance in the suite is a
+  // CRLF line ending, which says nothing about decoding.
+  let ini_text =
+    #|dq="a\rb"
+    #|bare=a\rb
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, {
+    global: { "dq": "a\rb", "bare": "a\rb" },
+    sections: Map([]),
+  })
+}
+
+///|
 test "valid/single-quoted-escaped-quote" {
   // `\'` is the one escape single quotes decode -- and the only way to put
   // an apostrophe between them.
