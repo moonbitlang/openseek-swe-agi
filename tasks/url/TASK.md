@@ -87,7 +87,7 @@ Implementation notes:
   parsing strategy, and any internal data structures.
 - Do **not** modify the following files:
   - `url_spec.mbt` - API specification (the `Url` type and its methods)
-  - `url_qc.mbt` - Property-test generators
+  - `url_qc_test.mbt` - Property-test generators
   - `specs/` folder - Reference documents
   - `*_pub_test.mbt` - Public test file (`url_pub_test.mbt`)
   - `*_priv_test.mbt` - Private test file (`url_priv_test.mbt`)
@@ -132,7 +132,7 @@ in place (like the JavaScript `URL` class).
   (same href and same getters) for every `u` produced by a successful
   parse — the standard's idempotence guarantee, checked by a
   property-based test over generated inputs (generators are shipped in
-  `url_qc.mbt`, do not modify).
+  `url_qc_test.mbt`, do not modify).
 
 ## Test execution
 
@@ -247,7 +247,7 @@ url/
 ├── moon.mod
 ├── moon.pkg
 ├── url_spec.mbt           # API specification (do not modify)
-├── url_qc.mbt             # Property-test generators (do not modify)
+├── url_qc_test.mbt             # Property-test generators (do not modify)
 ├── url.mbt                # Url type and API entry points
 ├── parser.mbt             # Basic URL parser state machine
 ├── host.mbt               # Host parsing (domain/IPv4/IPv6/opaque)

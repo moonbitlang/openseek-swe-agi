@@ -1,22 +1,11 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "url"
 
-import {
-  "moonbitlang/core/debug",
-  "moonbitlang/core/quickcheck",
-  "moonbitlang/core/quickcheck/shrink",
-  "moonbitlang/core/quickcheck/splitmix",
-}
-
 // Values
 
 // Errors
 
 // Types and methods
-pub(all) struct QcUrlText(String) derive(@debug.Debug)
-pub impl @quickcheck.Arbitrary for QcUrlText
-pub impl @shrink.Shrink for QcUrlText
-
 pub type Url
 pub fn Url::hash(Self) -> String
 pub fn Url::host(Self) -> String
