@@ -760,6 +760,66 @@ test "valid/integer/float64-max" {
 }
 
 ///|
+test "invalid/integer/int64-overflow-01" {
+  let toml_text =
+    #|# 2^63, one past the signed 64-bit maximum
+    #|v = 9223372036854775808
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
+test "valid/datetime/nanoseconds" {
+  let toml_text =
+    #|# Full nanosecond precision must survive parsing.
+    #|odt = 1979-05-27T07:32:00.123456789Z
+    #|ldt = 1979-05-27T07:32:00.999999999
+    #|lt = 07:32:00.000000001
+    #|
+  let toml = @toml.parse(toml_text)
+  assert_eq(toml, {
+    "odt": Datetime(
+      { year: 1979, month: 5, day: 27, },
+      { hour: 7, minute: 32, second: 0, nanosecond: 123456789, },
+      offset=0,
+    ),
+    "ldt": LocalDatetime({ year: 1979, month: 5, day: 27, }, {
+      hour: 7,
+      minute: 32,
+      second: 0,
+      nanosecond: 999999999,
+    }),
+    "lt": LocalTime({ hour: 7, minute: 32, second: 0, nanosecond: 1, }),
+  })
+}
+
+///|
+test "valid/datetime/leap-second" {
+  let toml_text =
+    #|# RFC 3339: time-second = 2DIGIT ; 00-58, 00-59, 00-60 based on
+    #|#                                ; leap second rules
+    #|offset = 1990-12-31T23:59:60Z
+    #|local = 1990-12-31T23:59:60
+    #|lt = 23:59:60
+    #|
+  let toml = @toml.parse(toml_text)
+  assert_eq(toml, {
+    "offset": Datetime(
+      { year: 1990, month: 12, day: 31, },
+      { hour: 23, minute: 59, second: 60, nanosecond: 0, },
+      offset=0,
+    ),
+    "local": LocalDatetime({ year: 1990, month: 12, day: 31, }, {
+      hour: 23,
+      minute: 59,
+      second: 60,
+      nanosecond: 0,
+    }),
+    "lt": LocalTime({ hour: 23, minute: 59, second: 60, nanosecond: 0, }),
+  })
+}
+
+///|
 test "quickcheck: roundtrips" {
   @quickcheck.check(
     (doc : Map[String, @toml.Toml]) => @toml.parse(@toml.print(doc)) == doc,

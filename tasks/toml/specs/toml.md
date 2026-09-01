@@ -82,7 +82,10 @@ Mapping rules:
   observable in the value.
 - **Fractional seconds** map to `Time::nanosecond` (`.6` is
   600_000_000). Digits beyond nanosecond precision are truncated, not
-  rounded.
+  rounded (`.1234567899` gives 123_456_789, never 123_456_790).
+- **Leap seconds**: `second` may be 60. RFC 3339's `time-second` is
+  `2DIGIT ; 00-58, 00-59, 00-60 based on leap second rules`, so
+  `1990-12-31T23:59:60Z` is valid; `:61` is not.
 - **Array** preserves element order. TOML v1.0.0 arrays may mix value
   types.
 

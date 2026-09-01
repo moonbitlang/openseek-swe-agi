@@ -12,6 +12,9 @@ pub(all) struct Date {
 /// `nanosecond` holds the fractional second as a number of nanoseconds
 /// (`07:32:00.5` has `nanosecond` 500_000_000). Fractional digits beyond
 /// nanosecond precision are truncated, not rounded.
+///
+/// `second` may be 60: RFC 3339's `time-second` is `00-58, 00-59, 00-60
+/// based on leap second rules`, so `23:59:60` is a valid time.
 pub(all) struct Time {
   hour : Int
   minute : Int
@@ -116,7 +119,8 @@ declare pub fn parse(input : StringView) -> Map[String, Toml] raise
 ///   string — including `""` — is a legal quoted key);
 /// - `Date`/`Time` components are within their TOML ranges: a real
 ///   calendar date with year 1..9999, hour <= 23, minute <= 59,
-///   second <= 59, nanosecond < 1_000_000_000, and an offset within
+///   second <= 60 (RFC 3339 permits 60 for leap seconds),
+///   nanosecond < 1_000_000_000, and an offset within
 ///   +/- (23 hours 59 minutes).
 ///
 /// Floats must round-trip exactly (shortest-representation printing is

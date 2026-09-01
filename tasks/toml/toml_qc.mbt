@@ -3,14 +3,23 @@
 /// round-trip property test. Everything generated stays printable on
 /// purpose: strings are built from Unicode scalar values (no unpaired
 /// surrogates), and date/time components stay within their TOML ranges
-/// (year 1..9999, real calendar dates, second <= 59, nanosecond below
-/// 1_000_000_000, |offset| <= 23:59). See `print` in `toml_spec.mbt` for
-/// the well-formedness contract.
+/// (year 1..9999, real calendar dates, second <= 60 for leap seconds,
+/// nanosecond below 1_000_000_000, |offset| <= 23:59). See `print` in
+/// `toml_spec.mbt` for the well-formedness contract.
+///
+/// Keys include the characters that force quoting *and* escaping — `"`,
+/// `\`, and control characters — so a printer that quotes a non-bare key
+/// without escaping its contents fails the round-trip.
 let qc_key_char : @quickcheck.Generator[Char] = @quickcheck.frequency([
   (5, @quickcheck.char_range('a', 'z')),
   (2, @quickcheck.char_range('0', '9')),
   (2, @quickcheck.elements(['_', '-'])),
-  (1, @quickcheck.elements([' ', '.', '"', '\'', '[', '=', '中', 'é', 'Ω'])),
+  (
+    1,
+    @quickcheck.elements([
+      ' ', '.', '"', '\'', '[', '=', '\\', '\n', '\t', '\u{7F}', '中', 'é', 'Ω',
+    ]),
+  ),
 ])
 
 ///|
@@ -119,9 +128,16 @@ let qc_nanosecond_gen : @quickcheck.Generator[Int] = @quickcheck.frequency([
 ])
 
 ///|
+let qc_second_gen : @quickcheck.Generator[Int] = @quickcheck.frequency([
+  (9, @quickcheck.int_range(0, 59)),
+  // RFC 3339 leap second
+  (1, @quickcheck.pure(60)),
+])
+
+///|
 let qc_time_gen : @quickcheck.Generator[Time] = @quickcheck.int_range(0, 23).flat_map(hour => {
     @quickcheck.int_range(0, 59).flat_map(minute => {
-      @quickcheck.int_range(0, 59).flat_map(second => {
+      qc_second_gen.flat_map(second => {
         qc_nanosecond_gen.map(nanosecond => {
           hour,
           minute,

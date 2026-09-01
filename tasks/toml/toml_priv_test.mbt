@@ -8337,3 +8337,45 @@ test "valid/table/array-within-dotted" {
     }),
   })
 }
+
+///|
+test "invalid/integer/int64-overflow-02" {
+  let toml_text =
+    #|# one below the signed 64-bit minimum
+    #|v = -9223372036854775809
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
+test "invalid/integer/int64-overflow-hex" {
+  let toml_text =
+    #|# 2^64 in hexadecimal
+    #|v = 0x10000000000000000
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
+test "valid/datetime/fraction-truncated" {
+  let toml_text =
+    #|# Digits beyond nanosecond precision are truncated, not rounded:
+    #|# rounding .1234567899 would give 123456790.
+    #|trunc = 1979-05-27T07:32:00.1234567899Z
+    #|trunc-max = 07:32:00.9999999999
+    #|
+  let toml = @toml.parse(toml_text)
+  assert_eq(toml, {
+    "trunc": Datetime(
+      { year: 1979, month: 5, day: 27, },
+      { hour: 7, minute: 32, second: 0, nanosecond: 123456789, },
+      offset=0,
+    ),
+    "trunc-max": LocalTime({
+      hour: 7,
+      minute: 32,
+      second: 0,
+      nanosecond: 999999999,
+    }),
+  })
+}

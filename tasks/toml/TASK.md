@@ -68,7 +68,8 @@ In scope (TOML v1.0.0, exactly):
   - floats: IEEE 754 binary64, exponent forms, `inf` and `nan`
   - booleans
   - datetimes: offset date-time, local date-time, local date, local time
-    (seconds required; fractional seconds truncated to nanoseconds)
+    (seconds required; leap second `:60` accepted; fractional seconds
+    truncated to nanoseconds)
   - arrays (multi-line, trailing comma allowed, heterogeneous element
     types allowed)
   - inline tables (single-line, no trailing comma)
@@ -122,6 +123,9 @@ types and check `parse(print(doc)) == doc`.
   and the space separator are accepted and not observable in the value.
 - Fractional seconds go to `Time::nanosecond`, truncated (not rounded)
   beyond nine digits.
+- `second` may be 60: RFC 3339's `time-second` is `00-58, 00-59, 00-60
+  based on leap second rules`, so `23:59:60` parses; only `:61` and above
+  are invalid.
 - Reject structural conflicts as required by the invalid tests (duplicate
   keys, redefining tables, extending closed inline tables, appending to
   static arrays, dotted-key/header conflicts, etc.).
@@ -148,10 +152,10 @@ moon test
 
 The model should keep running until all tests pass.
 
-- **Public tests** (`*_pub_test.mbt`): 75 cases (including two
+- **Public tests** (`*_pub_test.mbt`): 78 cases (including two
   property-based tests), visible in this repository for development and
   debugging
-- **Private tests** (`*_priv_test.mbt`): 651 additional cases, vendored
+- **Private tests** (`*_priv_test.mbt`): 654 additional cases, vendored
   as ordinary files in this local task and run by `moon test`
 
 **CRITICAL - Full Suite Evaluation**:
