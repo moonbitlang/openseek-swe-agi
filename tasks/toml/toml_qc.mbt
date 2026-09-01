@@ -3,13 +3,20 @@
 /// round-trip property test. Everything generated stays printable on
 /// purpose: strings are built from Unicode scalar values (no unpaired
 /// surrogates), and date/time components stay within their TOML ranges
-/// (year 1..9999, real calendar dates, second <= 60 for leap seconds,
+/// (year 0..9999, real calendar dates, second <= 60 for leap seconds,
 /// nanosecond below 1_000_000_000, |offset| <= 23:59). See `print` in
 /// `toml_spec.mbt` for the well-formedness contract.
 ///
-/// Keys include the characters that force quoting *and* escaping — `"`,
-/// `\`, and control characters — so a printer that quotes a non-bare key
-/// without escaping its contents fails the round-trip.
+/// Both generators reach the characters a printer must escape — `"`, `\`,
+/// and the control characters, DEL included — in key *and* value position,
+/// so a printer that quotes without escaping fails the round-trip. DEL
+/// matters on its own: U+007F sits above the C0 range, so a printer that
+/// tests `c < 0x20` leaves it raw and emits invalid TOML.
+let qc_control_char : Array[Char] = [
+  '\u{0}', '\u{1}', '\u{8}', '\n', '\u{B}', '\u{C}', '\r', '\u{1F}', '\u{7F}',
+]
+
+///|
 let qc_key_char : @quickcheck.Generator[Char] = @quickcheck.frequency([
   (5, @quickcheck.char_range('a', 'z')),
   (2, @quickcheck.char_range('0', '9')),
@@ -17,9 +24,10 @@ let qc_key_char : @quickcheck.Generator[Char] = @quickcheck.frequency([
   (
     1,
     @quickcheck.elements([
-      ' ', '.', '"', '\'', '[', '=', '\\', '\n', '\t', '\u{7F}', '中', 'é', 'Ω',
+      ' ', '.', '"', '\'', '[', '=', '\\', '\t', '中', 'é', 'Ω',
     ]),
   ),
+  (1, @quickcheck.elements(qc_control_char)),
 ])
 
 ///|
@@ -27,7 +35,8 @@ let qc_string_char : @quickcheck.Generator[Char] = @quickcheck.frequency([
   (5, @quickcheck.char_range('a', 'z')),
   (2, @quickcheck.char_range('0', '9')),
   (2, @quickcheck.elements([' ', ',', '=', '#', '"', '\'', '\\', '[', ']'])),
-  (1, @quickcheck.elements(['\n', '\t', '\u{1}', '你', '好', '😀', 'é'])),
+  (1, @quickcheck.elements(['\t', '你', '好', '😀', 'é'])),
+  (1, @quickcheck.elements(qc_control_char)),
 ])
 
 ///|
@@ -109,7 +118,9 @@ fn qc_days_in(year : Int, month : Int) -> Int {
 ///|
 let qc_date_gen : @quickcheck.Generator[Date] = @quickcheck.frequency([
   (4, @quickcheck.int_range(1900, 2100)),
-  (1, @quickcheck.elements([1, 9999, 2000, 2024])),
+  // 0 and 9999 are the ends of `date-fullyear = 4DIGIT`; 1900 and 2000 pin
+  // the two halves of the Gregorian century rule.
+  (1, @quickcheck.elements([0, 1, 9999, 1900, 2000, 2024])),
 ]).flat_map(year => {
   @quickcheck.int_range(1, 12).flat_map(month => {
     @quickcheck.int_range(1, qc_days_in(year, month)).map(day => {

@@ -118,10 +118,14 @@ declare pub fn parse(input : StringView) -> Map[String, Toml] raise
 ///   other string is representable via basic-string escapes, and every
 ///   string — including `""` — is a legal quoted key);
 /// - `Date`/`Time` components are within their TOML ranges: a real
-///   calendar date with year 1..9999, hour <= 23, minute <= 59,
-///   second <= 60 (RFC 3339 permits 60 for leap seconds),
-///   nanosecond < 1_000_000_000, and an offset within
-///   +/- (23 hours 59 minutes).
+///   calendar date with year 0..9999 (RFC 3339's `date-fullyear` is
+///   `4DIGIT`, so `0000` is in range and `10000-01-01` is rejected for
+///   its shape, not its year), hour <= 23, minute <= 59, second <= 60
+///   (RFC 3339 permits 60 for leap seconds), nanosecond < 1_000_000_000,
+///   and an offset within +/- (23 hours 59 minutes).
+///
+/// This range is exactly what `parse` can produce, so `print` accepts
+/// everything `parse` returns.
 ///
 /// Floats must round-trip exactly (shortest-representation printing is
 /// sufficient); `nan` prints as a NaN value, which the shipped `Eq` treats

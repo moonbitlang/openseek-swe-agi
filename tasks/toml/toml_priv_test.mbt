@@ -8410,3 +8410,76 @@ test "valid/datetime/offset-max" {
     ),
   })
 }
+
+///|
+test "invalid/integer/int64-overflow-oct-signed" {
+  let toml_text =
+    #|# the same boundary in octal
+    #|v = 0o1000000000000000000000
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
+test "invalid/integer/int64-overflow-bin-signed" {
+  let toml_text =
+    #|# the same boundary in binary
+    #|v = 0b1000000000000000000000000000000000000000000000000000000000000000
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
+test "invalid/integer/int64-overflow-hex-uint-max" {
+  let toml_text =
+    #|# 2^64 - 1: the largest value a UInt64 accumulator holds without
+    #|# overflowing, so it is the far end of the range wrapping admits.
+    #|v = 0xffffffffffffffff
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
+test "valid/integer/radix-signed-max" {
+  let toml_text =
+    #|# 2^63 - 1 in every radix: the largest integer TOML must accept.
+    #|h = 0x7fffffffffffffff
+    #|o = 0o777777777777777777777
+    #|b = 0b111111111111111111111111111111111111111111111111111111111111111
+    #|
+  let toml = @toml.parse(toml_text)
+  assert_eq(toml, {
+    "h": Integer(9223372036854775807),
+    "o": Integer(9223372036854775807),
+    "b": Integer(9223372036854775807),
+  })
+}
+
+///|
+test "print/escape-roundtrip" {
+  // TOML v1.0.0 basic strings must escape `"`, `\\`, and the control
+  // characters U+0000-U+0008, U+000A-U+001F and U+007F. Tab (U+0009) is the
+  // one control character allowed to stand for itself.
+  let specials = [
+    '\u{0}', '\u{1}', '\u{8}', '\t', '\n', '\u{B}', '\u{C}', '\r', '\u{1F}', '\u{7F}',
+    '"', '\\',
+  ]
+  for c in specials {
+    let s = String::from_array(['a', c, 'b'])
+    // the same character in key position and in value position
+    let doc : Map[String, @toml.Toml] = Map([(s, String(s))])
+    assert_eq(@toml.parse(@toml.print(doc)), doc)
+  }
+}
+
+///|
+test "print/escape-roundtrip-bare" {
+  // A lone control character, with no ordinary characters around it, and the
+  // empty key -- which must print as `""` rather than bare.
+  let doc : Map[String, @toml.Toml] = Map([
+    ("", String("\u{7F}")),
+    ("\u{7F}", String("")),
+    ("\r\n", String("\r\n")),
+  ])
+  assert_eq(@toml.parse(@toml.print(doc)), doc)
+}

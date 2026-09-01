@@ -830,6 +830,44 @@ test "invalid/datetime/offset-hour-24" {
 }
 
 ///|
+test "invalid/integer/int64-overflow-hex-signed" {
+  let toml_text =
+    #|# 2^63 in hexadecimal: one past the *signed* 64-bit maximum.
+    #|# A UInt64 accumulator that reinterprets its result reads this as
+    #|# -9223372036854775808 instead of rejecting it.
+    #|v = 0x8000000000000000
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
+test "valid/datetime/year-zero" {
+  let toml_text =
+    #|# RFC 3339 date-fullyear is 4DIGIT, so 0000 is in range. The y10k
+    #|# tests reject 10000-01-01 for its *shape* (five digits), not for a
+    #|# year bound -- there is no year bound.
+    #|d = 0000-01-01
+    #|dt = 0000-01-01T00:00:00
+    #|odt = 0000-01-01T00:00:00Z
+    #|
+  let toml = @toml.parse(toml_text)
+  assert_eq(toml, {
+    "d": LocalDate({ year: 0, month: 1, day: 1, }),
+    "dt": LocalDatetime({ year: 0, month: 1, day: 1, }, {
+      hour: 0,
+      minute: 0,
+      second: 0,
+      nanosecond: 0,
+    }),
+    "odt": Datetime(
+      { year: 0, month: 1, day: 1, },
+      { hour: 0, minute: 0, second: 0, nanosecond: 0, },
+      offset=0,
+    ),
+  })
+}
+
+///|
 test "quickcheck: roundtrips" {
   @quickcheck.check(
     (doc : Map[String, @toml.Toml]) => @toml.parse(@toml.print(doc)) == doc,

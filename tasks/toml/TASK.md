@@ -155,10 +155,10 @@ moon test
 
 The model should keep running until all tests pass.
 
-- **Public tests** (`*_pub_test.mbt`): 79 cases (including two
+- **Public tests** (`*_pub_test.mbt`): 81 cases (including two
   property-based tests), visible in this repository for development and
   debugging
-- **Private tests** (`*_priv_test.mbt`): 656 additional cases
+- **Private tests** (`*_priv_test.mbt`): 662 additional cases
   that decide the score. They are **withheld while you work** — expect
   them to be absent from this directory, and do not go looking for
   them. Your `moon test` therefore exercises the public tests only;
@@ -166,9 +166,10 @@ The model should keep running until all tests pass.
 
 **CRITICAL - Full Suite Evaluation**:
 
-Passing only the public tests is **INSUFFICIENT** and will result in task
-failure. The task is complete **only when both public and private test
-suites in this directory pass**.
+Passing only the public tests is **INSUFFICIENT**. A green `moon test`
+is necessary but not sufficient: it covers roughly 10% of the cases that
+decide the outcome. The task is complete only when the private suite
+passes too — and you cannot run it yourself.
 
 **Why Private Tests Matter**:
 - **Coverage**: Private tests represent ~90% of the total evaluation -
