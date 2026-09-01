@@ -2,7 +2,7 @@ name: bench
 
 on:
   schedule:
-    - cron: "0 6 * * *" # Runs everyday 14:00 UTC+8
+    - cron: "0 10 * * *" # Runs everyday 18:00 UTC+8
   workflow_dispatch:
 
 # One benchmark at a time: overlapping runs would race on the stats commit.
