@@ -1680,15 +1680,6 @@ test "invalid/datetime/no-date-time-sep" {
 }
 
 ///|
-test "invalid/datetime/no-leads-month" {
-  let toml_text =
-    #|# Month "7" instead of "07"; the leading zero is required.
-    #|no-leads = 1987-7-05T17:45:00Z
-    #|
-  @test.assert_raise(() => @toml.parse(toml_text))
-}
-
-///|
 test "invalid/datetime/no-leads-with-milli" {
   let toml_text =
     #|# Day "5" instead of "05"; the leading zero is required.
@@ -2279,15 +2270,6 @@ test "invalid/local-datetime/no-leads" {
   let toml_text =
     #|# Month "7" instead of "07"; the leading zero is required.
     #|no-leads = 1987-7-05T17:45:00
-    #|
-  @test.assert_raise(() => @toml.parse(toml_text))
-}
-
-///|
-test "invalid/local-datetime/time-no-leads" {
-  let toml_text =
-    #|# Leading 0 is always required.
-    #|d = 2023-10-01T1:32:00Z
     #|
   @test.assert_raise(() => @toml.parse(toml_text))
 }
@@ -3090,38 +3072,6 @@ test "invalid/datetime/hour-over" {
 }
 
 ///|
-test "invalid/datetime/offset-minus-minute-1digit" {
-  let toml_text =
-    #|foo = 1997-09-09T09:09:09.09+09:9
-    #|
-  @test.assert_raise(() => @toml.parse(toml_text))
-}
-
-///|
-test "invalid/datetime/offset-minus-no-hour-minute-sep" {
-  let toml_text =
-    #|foo = 1997-09-09T09:09:09.09+0909
-    #|
-  @test.assert_raise(() => @toml.parse(toml_text))
-}
-
-///|
-test "invalid/datetime/offset-minus-no-hour-minute" {
-  let toml_text =
-    #|foo = 1997-09-09T09:09:09.09+
-    #|
-  @test.assert_raise(() => @toml.parse(toml_text))
-}
-
-///|
-test "invalid/datetime/offset-minus-no-minute" {
-  let toml_text =
-    #|foo = 1997-09-09T09:09:09.09+09
-    #|
-  @test.assert_raise(() => @toml.parse(toml_text))
-}
-
-///|
 test "invalid/datetime/offset-overflow-hour" {
   let toml_text =
     #|# RFC 3339 time-numoffset uses time-hour, which is 00-23
@@ -3429,94 +3379,6 @@ test "invalid/spec-1.0.0/table-9-1" {
     #|
     #|[fruit.apple.texture]  # you can add sub-tables
     #|smooth = true
-    #|
-  @test.assert_raise(() => @toml.parse(toml_text))
-}
-
-///|
-test "invalid/spec-1.1.0/common-16-0" {
-  let toml_text =
-    #|str4 = """Here are two quotation marks: "". Simple enough."""
-    #|str5 = """Here are three quotation marks: """."""  # INVALID
-    #|str5 = """Here are three quotation marks: ""\"."""
-    #|str6 = """Here are fifteen quotation marks: ""\"""\"""\"""\"""\"."""
-    #|
-    #|# "This," she said, "is just a pointless statement."
-    #|str7 = """"This," she said, "is just a pointless statement.""""
-    #|
-  @test.assert_raise(() => @toml.parse(toml_text))
-}
-
-///|
-test "invalid/spec-1.1.0/common-19-0" {
-  let toml_text =
-    #|quot15 = '''Here are fifteen quotation marks: """""""""""""""'''
-    #|
-    #|apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID
-    #|apos15 = "Here are fifteen apostrophes: '''''''''''''''"
-    #|
-    #|# 'That,' she said, 'is still pointless.'
-    #|str = ''''That,' she said, 'is still pointless.''''
-    #|
-  @test.assert_raise(() => @toml.parse(toml_text))
-}
-
-///|
-test "invalid/spec-1.1.0/common-2" {
-  let toml_text =
-    #|key = # INVALID
-    #|
-  @test.assert_raise(() => @toml.parse(toml_text))
-}
-
-///|
-test "invalid/spec-1.1.0/common-46-0" {
-  let toml_text =
-    #|[fruit]
-    #|apple.color = "red"
-    #|apple.taste.sweet = true
-    #|
-    #|[fruit.apple]  # INVALID
-    #|# [fruit.apple.taste]  # INVALID
-    #|
-    #|[fruit.apple.texture]  # you can add sub-tables
-    #|smooth = true
-    #|
-  @test.assert_raise(() => @toml.parse(toml_text))
-}
-
-///|
-test "invalid/spec-1.1.0/common-46-1" {
-  let toml_text =
-    #|[fruit]
-    #|apple.color = "red"
-    #|apple.taste.sweet = true
-    #|
-    #|# [fruit.apple]  # INVALID
-    #|[fruit.apple.taste]  # INVALID
-    #|
-    #|[fruit.apple.texture]  # you can add sub-tables
-    #|smooth = true
-    #|
-  @test.assert_raise(() => @toml.parse(toml_text))
-}
-
-///|
-test "invalid/spec-1.1.0/common-49-0" {
-  let toml_text =
-    #|[product]
-    #|type = { name = "Nail" }
-    #|type.edible = false  # INVALID
-    #|
-  @test.assert_raise(() => @toml.parse(toml_text))
-}
-
-///|
-test "invalid/spec-1.1.0/common-50-0" {
-  let toml_text =
-    #|[product]
-    #|type.name = "Nail"
-    #|type = { edible = false }  # INVALID
     #|
   @test.assert_raise(() => @toml.parse(toml_text))
 }
@@ -4602,21 +4464,6 @@ test "valid/spec-1.1.0/common-27" {
 }
 
 ///|
-test "valid/spec-1.1.0/common-28" {
-  let toml_text =
-    #|odt4 = 1979-05-27 07:32:00Z
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "odt4": Datetime(
-      { year: 1979, month: 5, day: 27, },
-      { hour: 7, minute: 32, second: 0, nanosecond: 0, },
-      offset=0,
-    ),
-  })
-}
-
-///|
 test "valid/spec-1.1.0/common-30" {
   let toml_text =
     #|ldt1 = 1979-05-27T07:32:00
@@ -4647,15 +4494,6 @@ test "valid/spec-1.1.0/common-30" {
 }
 
 ///|
-test "valid/spec-1.1.0/common-32" {
-  let toml_text =
-    #|ld1 = 1979-05-27
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, { "ld1": LocalDate({ year: 1979, month: 5, day: 27, }) })
-}
-
-///|
 test "valid/spec-1.1.0/common-33" {
   let toml_text =
     #|lt1 = 07:32:00
@@ -4667,130 +4505,6 @@ test "valid/spec-1.1.0/common-33" {
     "lt1": LocalTime({ hour: 7, minute: 32, second: 0, nanosecond: 0, }),
     "lt2": LocalTime({ hour: 0, minute: 32, second: 0, nanosecond: 500000000, }),
     "lt3": LocalTime({ hour: 0, minute: 32, second: 0, nanosecond: 999000000, }),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-35" {
-  let toml_text =
-    #|integers = [ 1, 2, 3 ]
-    #|colors = [ "red", "yellow", "green" ]
-    #|nested_arrays_of_ints = [ [ 1, 2 ], [3, 4, 5] ]
-    #|nested_mixed_array = [ [ 1, 2 ], ["a", "b", "c"] ]
-    #|string_array = [ "all", 'strings', """are the same""", '''type''' ]
-    #|
-    #|# Mixed-type arrays are allowed
-    #|numbers = [ 0.1, 0.2, 0.5, 1, 2, 5 ]
-    #|contributors = [
-    #|  "Foo Bar <foo@example.com>",
-    #|  { name = "Baz Qux", email = "bazqux@example.com", url = "https://example.com/bazqux" }
-    #|]
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "colors": Array([String("red"), String("yellow"), String("green")]),
-    "contributors": Array([
-      String("Foo Bar <foo@example.com>"),
-      Table({
-        "email": String("bazqux@example.com"),
-        "name": String("Baz Qux"),
-        "url": String("https://example.com/bazqux"),
-      }),
-    ]),
-    "integers": Array([Integer(1), Integer(2), Integer(3)]),
-    "nested_arrays_of_ints": Array([
-      Array([Integer(1), Integer(2)]),
-      Array([Integer(3), Integer(4), Integer(5)]),
-    ]),
-    "nested_mixed_array": Array([
-      Array([Integer(1), Integer(2)]),
-      Array([String("a"), String("b"), String("c")]),
-    ]),
-    "numbers": Array([
-      Float(0.1),
-      Float(0.2),
-      Float(0.5),
-      Integer(1),
-      Integer(2),
-      Integer(5),
-    ]),
-    "string_array": Array([
-      String("all"),
-      String("strings"),
-      String("are the same"),
-      String("type"),
-    ]),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-36" {
-  let toml_text =
-    #|integers2 = [
-    #|  1, 2, 3
-    #|]
-    #|
-    #|integers3 = [
-    #|  1,
-    #|  2, # this is ok
-    #|]
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "integers2": Array([Integer(1), Integer(2), Integer(3)]),
-    "integers3": Array([Integer(1), Integer(2)]),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-3" {
-  let toml_text =
-    #|key = "value"
-    #|bare_key = "value"
-    #|bare-key = "value"
-    #|1234 = "value"
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "1234": String("value"),
-    "bare-key": String("value"),
-    "bare_key": String("value"),
-    "key": String("value"),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-4" {
-  let toml_text =
-    #|"127.0.0.1" = "value"
-    #|"character encoding" = "value"
-    #|"ʎǝʞ" = "value"
-    #|'key2' = "value"
-    #|'quoted "value"' = "value"
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "127.0.0.1": String("value"),
-    "character encoding": String("value"),
-    "key2": String("value"),
-    "quoted \"value\"": String("value"),
-    "ʎǝʞ": String("value"),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-6" {
-  let toml_text =
-    #|name = "Orange"
-    #|physical.color = "orange"
-    #|physical.shape = "round"
-    #|site."google.com" = true
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "name": String("Orange"),
-    "physical": Table({ "color": String("orange"), "shape": String("round") }),
-    "site": Table({ "google.com": Bool(true) }),
   })
 }
 
@@ -4825,35 +4539,6 @@ test "valid/spec-1.1.0/common-8" {
     "fruit": Table({
       "apple": Table({ "smooth": Bool(true) }),
       "orange": Integer(2),
-    }),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-9" {
-  let toml_text =
-    #|# VALID BUT DISCOURAGED
-    #|
-    #|apple.type = "fruit"
-    #|orange.type = "fruit"
-    #|
-    #|apple.skin = "thin"
-    #|orange.skin = "thick"
-    #|
-    #|apple.color = "red"
-    #|orange.color = "orange"
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "apple": Table({
-      "color": String("red"),
-      "skin": String("thin"),
-      "type": String("fruit"),
-    }),
-    "orange": Table({
-      "color": String("orange"),
-      "skin": String("thick"),
-      "type": String("fruit"),
     }),
   })
 }
@@ -6381,180 +6066,6 @@ test "valid/spec-1.0.0/table-9" {
 }
 
 ///|
-test "valid/spec-1.1.0/common-37" {
-  let toml_text =
-    #|[table]
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, { "table": Table(Map([])) })
-}
-
-///|
-test "valid/spec-1.1.0/common-38" {
-  let toml_text =
-    #|[table-1]
-    #|key1 = "some string"
-    #|key2 = 123
-    #|
-    #|[table-2]
-    #|key1 = "another string"
-    #|key2 = 456
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "table-1": Table({ "key1": String("some string"), "key2": Integer(123) }),
-    "table-2": Table({ "key1": String("another string"), "key2": Integer(456) }),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-39" {
-  let toml_text =
-    #|[dog."tater.man"]
-    #|type.name = "pug"
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "dog": Table({
-      "tater.man": Table({ "type": Table({ "name": String("pug") }) }),
-    }),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-40" {
-  let toml_text =
-    #|[a.b.c]            # this is best practice
-    #|[ d.e.f ]          # same as [d.e.f]
-    #|[ g .  h  . i ]    # same as [g.h.i]
-    #|[ j . "ʞ" . 'l' ]  # same as [j."ʞ".'l']
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "a": Table({ "b": Table({ "c": Table(Map([])) }) }),
-    "d": Table({ "e": Table({ "f": Table(Map([])) }) }),
-    "g": Table({ "h": Table({ "i": Table(Map([])) }) }),
-    "j": Table({ "ʞ": Table({ "l": Table(Map([])) }) }),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-41" {
-  let toml_text =
-    #|# [x] you
-    #|# [x.y] don't
-    #|# [x.y.z] need these
-    #|[x.y.z.w] # for this to work
-    #|
-    #|[x] # defining a super-table afterward is ok
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "x": Table({ "y": Table({ "z": Table({ "w": Table(Map([])) }) }) }),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-42" {
-  let toml_text =
-    #|# VALID BUT DISCOURAGED
-    #|[fruit.apple]
-    #|[animal]
-    #|[fruit.orange]
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "animal": Table(Map([])),
-    "fruit": Table({ "apple": Table(Map([])), "orange": Table(Map([])) }),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-43" {
-  let toml_text =
-    #|# RECOMMENDED
-    #|[fruit.apple]
-    #|[fruit.orange]
-    #|[animal]
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "animal": Table(Map([])),
-    "fruit": Table({ "apple": Table(Map([])), "orange": Table(Map([])) }),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-44" {
-  let toml_text =
-    #|# Top-level table begins.
-    #|name = "Fido"
-    #|breed = "pug"
-    #|
-    #|# Top-level table ends.
-    #|[owner]
-    #|name = "Regina Dogman"
-    #|member_since = 1999-08-04
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "breed": String("pug"),
-    "name": String("Fido"),
-    "owner": Table({
-      "member_since": LocalDate({ year: 1999, month: 8, day: 4, }),
-      "name": String("Regina Dogman"),
-    }),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-45" {
-  let toml_text =
-    #|fruit.apple.color = "red"
-    #|# Defines a table named fruit
-    #|# Defines a table named fruit.apple
-    #|
-    #|fruit.apple.taste.sweet = true
-    #|# Defines a table named fruit.apple.taste
-    #|# fruit and fruit.apple were already created
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "fruit": Table({
-      "apple": Table({
-        "color": String("red"),
-        "taste": Table({ "sweet": Bool(true) }),
-      }),
-    }),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-46" {
-  let toml_text =
-    #|[fruit]
-    #|apple.color = "red"
-    #|apple.taste.sweet = true
-    #|
-    #|# [fruit.apple]  # INVALID
-    #|# [fruit.apple.taste]  # INVALID
-    #|
-    #|[fruit.apple.texture]  # you can add sub-tables
-    #|smooth = true
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "fruit": Table({
-      "apple": Table({
-        "color": String("red"),
-        "taste": Table({ "sweet": Bool(true) }),
-        "texture": Table({ "smooth": Bool(true) }),
-      }),
-    }),
-  })
-}
-
-///|
 test "valid/spec-1.1.0/common-48" {
   let toml_text =
     #|[name]
@@ -6595,32 +6106,6 @@ test "valid/spec-1.1.0/common-48" {
 }
 
 ///|
-test "valid/spec-1.1.0/common-49" {
-  let toml_text =
-    #|[product]
-    #|type = { name = "Nail" }
-    #|# type.edible = false  # INVALID
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "product": Table({ "type": Table({ "name": String("Nail") }) }),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-50" {
-  let toml_text =
-    #|[product]
-    #|type.name = "Nail"
-    #|# type = { edible = false }  # INVALID
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "product": Table({ "type": Table({ "name": String("Nail") }) }),
-  })
-}
-
-///|
 test "valid/spec-1.1.0/common-51" {
   let toml_text =
     #|[[product]]
@@ -6645,65 +6130,6 @@ test "valid/spec-1.1.0/common-51" {
         "name": String("Nail"),
         "sku": Integer(284758393),
       }),
-    ]),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-52" {
-  let toml_text =
-    #|[[fruits]]
-    #|name = "apple"
-    #|
-    #|[fruits.physical]  # subtable
-    #|color = "red"
-    #|shape = "round"
-    #|
-    #|[[fruits.varieties]]  # nested array of tables
-    #|name = "red delicious"
-    #|
-    #|[[fruits.varieties]]
-    #|name = "granny smith"
-    #|
-    #|
-    #|[[fruits]]
-    #|name = "banana"
-    #|
-    #|[[fruits.varieties]]
-    #|name = "plantain"
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "fruits": Array([
-      Table({
-        "name": String("apple"),
-        "physical": Table({ "color": String("red"), "shape": String("round") }),
-        "varieties": Array([
-          Table({ "name": String("red delicious") }),
-          Table({ "name": String("granny smith") }),
-        ]),
-      }),
-      Table({
-        "name": String("banana"),
-        "varieties": Array([Table({ "name": String("plantain") })]),
-      }),
-    ]),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-53" {
-  let toml_text =
-    #|points = [ { x = 1, y = 2, z = 3 },
-    #|           { x = 7, y = 8, z = 9 },
-    #|           { x = 2, y = 4, z = 8 } ]
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "points": Array([
-      Table({ "x": Integer(1), "y": Integer(2), "z": Integer(3) }),
-      Table({ "x": Integer(7), "y": Integer(8), "z": Integer(9) }),
-      Table({ "x": Integer(2), "y": Integer(4), "z": Integer(8) }),
     ]),
   })
 }
@@ -7851,151 +7277,6 @@ test "valid/spec-1.0.0/inline-table-3" {
 }
 
 ///|
-test "valid/spec-1.1.0/common-0" {
-  let toml_text =
-    #|# This is a full-line comment
-    #|key = "value"  # This is a comment at the end of a line
-    #|another = "# This is not a comment"
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "another": String("# This is not a comment"),
-    "key": String("value"),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-10" {
-  let toml_text =
-    #|# RECOMMENDED
-    #|
-    #|apple.type = "fruit"
-    #|apple.skin = "thin"
-    #|apple.color = "red"
-    #|
-    #|orange.type = "fruit"
-    #|orange.skin = "thick"
-    #|orange.color = "orange"
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "apple": Table({
-      "color": String("red"),
-      "skin": String("thin"),
-      "type": String("fruit"),
-    }),
-    "orange": Table({
-      "color": String("orange"),
-      "skin": String("thick"),
-      "type": String("fruit"),
-    }),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-11" {
-  let toml_text =
-    #|3.14159 = "pi"
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, { "3": Table({ "14159": String("pi") }) })
-}
-
-///|
-test "valid/spec-1.1.0/common-13" {
-  let toml_text =
-    #|str1 = """
-    #|Roses are red
-    #|Violets are blue"""
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, { "str1": String("Roses are red\nViolets are blue") })
-}
-
-///|
-test "valid/spec-1.1.0/common-14" {
-  let toml_text =
-    #|# On a Unix system, the above multi-line string will most likely be the same as:
-    #|str2 = "Roses are red\nViolets are blue"
-    #|
-    #|# On a Windows system, it will most likely be equivalent to:
-    #|str3 = "Roses are red\r\nViolets are blue"
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "str2": String("Roses are red\nViolets are blue"),
-    "str3": String("Roses are red\r\nViolets are blue"),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-15" {
-  let toml_text =
-    #|# The following strings are byte-for-byte equivalent:
-    #|str1 = "The quick brown fox jumps over the lazy dog."
-    #|
-    #|str2 = """
-    #|The quick brown \
-    #|
-    #|
-    #|  fox jumps over \
-    #|    the lazy dog."""
-    #|
-    #|str3 = """\
-    #|       The quick brown \
-    #|       fox jumps over \
-    #|       the lazy dog.\
-    #|       """
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "str1": String("The quick brown fox jumps over the lazy dog."),
-    "str2": String("The quick brown fox jumps over the lazy dog."),
-    "str3": String("The quick brown fox jumps over the lazy dog."),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-16" {
-  let toml_text =
-    #|str4 = """Here are two quotation marks: "". Simple enough."""
-    #|# str5 = """Here are three quotation marks: """."""  # INVALID
-    #|str5 = """Here are three quotation marks: ""\"."""
-    #|str6 = """Here are fifteen quotation marks: ""\"""\"""\"""\"""\"."""
-    #|
-    #|# "This," she said, "is just a pointless statement."
-    #|str7 = """"This," she said, "is just a pointless statement.""""
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "str4": String("Here are two quotation marks: \"\". Simple enough."),
-    "str5": String("Here are three quotation marks: \"\"\"."),
-    "str6": String(
-      "Here are fifteen quotation marks: \"\"\"\"\"\"\"\"\"\"\"\"\"\"\".",
-    ),
-    "str7": String("\"This,\" she said, \"is just a pointless statement.\""),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-17" {
-  let toml_text =
-    #|# What you see is what you get.
-    #|winpath  = 'C:\Users\nodejs\templates'
-    #|winpath2 = '\\ServerX\admin$\system32\'
-    #|quoted   = 'Tom "Dubs" Preston-Werner'
-    #|regex    = '<\i\c*\s*>'
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "quoted": String("Tom \"Dubs\" Preston-Werner"),
-    "regex": String("<\\i\\c*\\s*>"),
-    "winpath": String("C:\\Users\\nodejs\\templates"),
-    "winpath2": String("\\\\ServerX\\admin$\\system32\\"),
-  })
-}
-
-///|
 test "valid/spec-1.1.0/common-18" {
   let toml_text =
     #|regex2 = '''I [dw]on't need \d{2} apples'''
@@ -8013,167 +7294,6 @@ test "valid/spec-1.1.0/common-18" {
     ),
     "regex2": String("I [dw]on't need \\d{2} apples"),
   })
-}
-
-///|
-test "valid/spec-1.1.0/common-19" {
-  let toml_text =
-    #|quot15 = '''Here are fifteen quotation marks: """""""""""""""'''
-    #|
-    #|# apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID
-    #|apos15 = "Here are fifteen apostrophes: '''''''''''''''"
-    #|
-    #|# 'That,' she said, 'is still pointless.'
-    #|str = ''''That,' she said, 'is still pointless.''''
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "apos15": String("Here are fifteen apostrophes: '''''''''''''''"),
-    "quot15": String(
-      "Here are fifteen quotation marks: \"\"\"\"\"\"\"\"\"\"\"\"\"\"\"",
-    ),
-    "str": String("'That,' she said, 'is still pointless.'"),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-1" {
-  let toml_text =
-    #|key = "value"
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, { "key": String("value") })
-}
-
-///|
-test "valid/spec-1.1.0/common-20" {
-  let toml_text =
-    #|int1 = +99
-    #|int2 = 42
-    #|int3 = 0
-    #|int4 = -17
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "int1": Integer(99),
-    "int2": Integer(42),
-    "int3": Integer(0),
-    "int4": Integer(-17),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-21" {
-  let toml_text =
-    #|int5 = 1_000
-    #|int6 = 5_349_221
-    #|int7 = 53_49_221  # Indian number system grouping
-    #|int8 = 1_2_3_4_5  # VALID but discouraged
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "int5": Integer(1000),
-    "int6": Integer(5349221),
-    "int7": Integer(5349221),
-    "int8": Integer(12345),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-22" {
-  let toml_text =
-    #|# hexadecimal with prefix `0x`
-    #|hex1 = 0xDEADBEEF
-    #|hex2 = 0xdeadbeef
-    #|hex3 = 0xdead_beef
-    #|
-    #|# octal with prefix `0o`
-    #|oct1 = 0o01234567
-    #|oct2 = 0o755 # useful for Unix file permissions
-    #|
-    #|# binary with prefix `0b`
-    #|bin1 = 0b11010110
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "bin1": Integer(214),
-    "hex1": Integer(3735928559),
-    "hex2": Integer(3735928559),
-    "hex3": Integer(3735928559),
-    "oct1": Integer(342391),
-    "oct2": Integer(493),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-23" {
-  let toml_text =
-    #|# fractional
-    #|flt1 = +1.0
-    #|flt2 = 3.1415
-    #|flt3 = -0.01
-    #|
-    #|# exponent
-    #|flt4 = 5e+22
-    #|flt5 = 1e06
-    #|flt6 = -2E-2
-    #|
-    #|# both
-    #|flt7 = 6.626e-34
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "flt1": Float(1.0),
-    "flt2": Float(3.1415),
-    "flt3": Float(-0.01),
-    "flt4": Float(5.0e22),
-    "flt5": Float(1.0e6),
-    "flt6": Float(-0.02),
-    "flt7": Float(6.626e-34),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-24" {
-  let toml_text =
-    #|flt8 = 224_617.445_991_228
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, { "flt8": Float(224617.445991228) })
-}
-
-///|
-test "valid/spec-1.1.0/common-25" {
-  let toml_text =
-    #|# infinity
-    #|sf1 = inf  # positive infinity
-    #|sf2 = +inf # positive infinity
-    #|sf3 = -inf # negative infinity
-    #|
-    #|# not a number
-    #|sf4 = nan  # actual sNaN/qNaN encoding is implementation-specific
-    #|sf5 = +nan # same as `nan`
-    #|sf6 = -nan # valid, actual encoding is implementation-specific
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, {
-    "sf1": Float(@double.infinity),
-    "sf2": Float(@double.infinity),
-    "sf3": Float(@double.neg_infinity),
-    "sf4": Float(@double.not_a_number),
-    "sf5": Float(@double.not_a_number),
-    "sf6": Float(@double.not_a_number),
-  })
-}
-
-///|
-test "valid/spec-1.1.0/common-26" {
-  let toml_text =
-    #|bool1 = true
-    #|bool2 = false
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, { "bool1": Bool(true), "bool2": Bool(false) })
 }
 
 ///|
@@ -8453,6 +7573,72 @@ test "valid/integer/radix-signed-max" {
     "o": Integer(9223372036854775807),
     "b": Integer(9223372036854775807),
   })
+}
+
+///|
+test "invalid/datetime/offset-minus-minute-1digit" {
+  let toml_text =
+    #|foo = 1997-09-09T09:09:09.09-09:9
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
+test "invalid/datetime/offset-minus-no-hour-minute-sep" {
+  let toml_text =
+    #|foo = 1997-09-09T09:09:09.09-0909
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
+test "invalid/datetime/offset-minus-no-hour-minute" {
+  let toml_text =
+    #|foo = 1997-09-09T09:09:09.09-
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
+test "invalid/local-datetime/time-no-leads" {
+  let toml_text =
+    #|# Leading 0 is always required, in the local branch too.
+    #|d = 2023-10-01T1:32:00
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
+test "invalid/datetime/no-leads-minute" {
+  let toml_text =
+    #|# Minute "5" instead of "05"; the leading zero is required.
+    #|d = 1987-07-05T17:5:00Z
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
+test "invalid/datetime/no-leads-second" {
+  let toml_text =
+    #|# Second "0" instead of "00"; the leading zero is required.
+    #|d = 1987-07-05T17:45:0Z
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
+test "invalid/datetime/separator-double-space" {
+  let toml_text =
+    #|# One space is allowed, two are not.
+    #|d = 1987-07-05  17:45:00Z
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
+test "invalid/local-datetime/separator-tab" {
+  let toml_text = "d = 1987-07-05\t17:45:00\n"
+  @test.assert_raise(() => @toml.parse(toml_text))
 }
 
 ///|

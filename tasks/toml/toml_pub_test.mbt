@@ -467,16 +467,6 @@ test "valid/comment/after-literal-no-ws" {
 }
 
 ///|
-test "valid/comment/at-eof2" {
-  let toml_text =
-    #|# This is a full-line comment
-    #|key = "value" # This is a comment at the end of a line
-    #|
-  let toml = @toml.parse(toml_text)
-  assert_eq(toml, { "key": String("value") })
-}
-
-///|
 test "valid/comment/at-eof" {
   let toml_text =
     #|# This is a full-line comment
@@ -865,6 +855,52 @@ test "valid/datetime/year-zero" {
       offset=0,
     ),
   })
+}
+
+///|
+test "invalid/datetime/offset-minus-no-minute" {
+  let toml_text =
+    #|# The minus side of the offset is validated too.
+    #|foo = 1997-09-09T09:09:09.09-09
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
+test "valid/datetime/leap-second-offset" {
+  let toml_text =
+    #|# 1990-12-31T23:59:60Z seen from -05:00 and +09:00.
+    #|west = 1990-12-31T18:59:60-05:00
+    #|east = 1991-01-01T08:59:60+09:00
+    #|
+  let toml = @toml.parse(toml_text)
+  assert_eq(toml, {
+    "west": Datetime(
+      { year: 1990, month: 12, day: 31, },
+      { hour: 18, minute: 59, second: 60, nanosecond: 0, },
+      offset=-300,
+    ),
+    "east": Datetime(
+      { year: 1991, month: 1, day: 1, },
+      { hour: 8, minute: 59, second: 60, nanosecond: 0, },
+      offset=540,
+    ),
+  })
+}
+
+///|
+test "invalid/datetime/separator-tab" {
+  let toml_text = "# A tab is not a date/time separator; TOML allows T, t or one space.\nd = 1987-07-05\t17:45:00Z\n"
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
+test "valid/comment/at-eof2" {
+  let toml_text =
+    #|# This is a full-line comment
+    #|key = "value" # This is a comment at the end of a line
+  let toml = @toml.parse(toml_text)
+  assert_eq(toml, { "key": String("value") })
 }
 
 ///|
