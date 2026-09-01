@@ -30,11 +30,18 @@ pub(all) struct Doc {
 ///
 /// - `=` and `:` both separate keys from values
 /// - Whitespace around keys, separators, and unquoted values is trimmed
-/// - Quoted values (`"..."` or `'...'`) keep their inner text verbatim
-///   (including whitespace and `;`/`#`), with the surrounding quotes removed
+/// - Quoted values keep whitespace and `;`/`#` verbatim and lose the
+///   surrounding quotes. `'...'` is raw; `"..."` applies the escapes
+///   `\"`, `\\`, `\n`, `\r` and `\t`, and is therefore the only carrier
+///   for a value holding both a line break and a separator
 /// - `;` and `#` start comments (full-line, or inline after whitespace in an
 ///   unquoted value)
-/// - A trailing `\` continues an unquoted value onto the next line
+/// - An unquoted value applies the same escapes
+/// - A trailing `\` continues an unquoted value onto the next line, joining
+///   the lines directly. Continuation is decided on the raw line before
+///   escapes are applied: an odd-length run of trailing backslashes ends in
+///   a marker, an even-length run is escaped literals. A marker with no
+///   following line is an error. See `specs/ini.md`
 ///
 /// Examples:
 ///
@@ -67,7 +74,11 @@ declare pub fn parse(input : StringView) -> Doc raise
 ///
 /// The exact text is unspecified, but it must parse back to an equal
 /// document: `parse(print(doc)) == doc` for any well-formed document
-/// (non-empty keys, section names valid per the dialect, and values free of
-/// `\r` and `\\`). Values that carry whitespace, comment characters,
-/// separators, or line breaks need quoting to survive the round-trip.
+/// (non-empty keys and section names valid per the dialect; values are
+/// unrestricted).
+///
+/// Double quotes carry every value, since they keep whitespace, comment
+/// characters and separators verbatim and escape the rest. The unquoted
+/// form is trimmed at both ends and gives `;`/`#` and a trailing `\` their
+/// special meanings, so it fits only a value that has none of them.
 declare pub fn print(doc : Doc) -> String

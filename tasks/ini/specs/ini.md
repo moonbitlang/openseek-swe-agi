@@ -219,17 +219,39 @@ Quoted values disable inline comment parsing entirely.
 
 ## Multiline continuation: concatenation details
 
-The suite defines backslash continuation. Make explicit:
+A logical value continued over several lines is stored as a single string.
+The lines are joined **directly**, with no separator: the trailing backslash
+is removed and the next line is appended where it left off. `a\` + `b` is
+`ab`, and the space in `a \` + `b` comes from the value, not the join — the
+whitespace before a continuation marker is kept, so that line yields `a b`.
 
-- If the logical value is continued, the resulting stored value is a single
-  string.
-- Whether to keep or remove the newline between lines is determined by tests.
-  Many INI dialects either:
-  - remove the trailing backslash and join lines directly, or
-  - remove the backslash and join with `\n`.
+Continuation is decided on the raw line, **before** escape processing:
 
-Treat the expected documents in `ini_priv_test.mbt` as authoritative for the
-join rule.
+- Count the backslashes at the end of the line. An **odd**-length run ends in
+  a continuation marker; an **even**-length run is escaped literals and the
+  value ends there.
+- So `path=C:\Program Files\` continues onto the next line — the marker does
+  not care what the value holds or what the next line looks like — while
+  `path=C:\Program Files\\` is the value `C:\Program Files\` and ends.
+- A marker with no line after it has nothing to join to and is an error.
+
+Writing `k=a` with N trailing backslashes, followed by a line `b=1`:
+
+| N | line          | result                                    |
+|---|---------------|-------------------------------------------|
+| 1 | `k=a\`        | `k` = `ab=1` — joined, the line break gone |
+| 2 | `k=a\\`       | `k` = `a\`, `b` = `1`                      |
+| 3 | `k=a\\\`      | `k` = `a\b=1` — one literal, then joined   |
+| 4 | `k=a\\\\`     | `k` = `a\\`, `b` = `1`                     |
+
+A line break that ends a continued line is consumed. A line break *in* the
+value is a different thing and is written with the `\n` escape: `k=a\\\n` is
+`a\` followed by a newline, because its last character is `n`, leaving no
+trailing backslash to act as a marker.
+
+Order matters here. Deciding continuation *after* escapes have collapsed
+`\\` into `\` makes an escaped trailing backslash indistinguishable from a
+marker, and no rule recovers the difference.
 
 ## Keys and sections: validation details
 

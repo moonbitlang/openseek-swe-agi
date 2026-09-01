@@ -1,8 +1,13 @@
 ///|
 /// Generators for well-formed documents, used by the round-trip property
-/// test. They stay inside the dialect on purpose: non-empty keys and section
-/// names without separators, comment markers, quotes, or brackets, and
-/// values without `\r` or `\\` (whose semantics are position-dependent).
+/// test. Keys and section names stay inside the dialect on purpose:
+/// non-empty, and without separators, comment markers, quotes, or brackets.
+///
+/// Values are unrestricted, so the generator reaches the characters that
+/// carry a meaning somewhere in the grammar — the separators `=` and `:`,
+/// the comment markers `;` and `#`, both quotes, `\` and `\r`, and a line
+/// break. Each of those forces a choice of carrier, and `\` and `\r` also
+/// have to survive whichever one is chosen.
 let name_char : @quickcheck.Generator[Char] = @quickcheck.frequency() <| [
   (5, @quickcheck.char_range('a', 'z')),
   (2, @quickcheck.char_range('0', '9')),
@@ -15,7 +20,8 @@ let value_char : @quickcheck.Generator[Char] = @quickcheck.frequency() <| [
   (5, @quickcheck.char_range('a', 'z')),
   (2, @quickcheck.char_range('0', '9')),
   (2, @quickcheck.elements([' ', ',', '=', ':', ';', '#', '"', '\''])),
-  (1, @quickcheck.elements(['\n', '你', '好', '😀', 'é'])),
+  (1, @quickcheck.elements(['\\', '\n', '\r', '\t'])),
+  (1, @quickcheck.elements(['你', '好', '😀', 'é'])),
 ]
 
 ///|
