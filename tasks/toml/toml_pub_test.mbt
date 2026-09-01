@@ -904,6 +904,14 @@ test "valid/comment/at-eof2" {
 }
 
 ///|
+test "invalid/encoding/bom-leading" {
+  let toml_text =
+    #|﻿key = 1
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
 test "quickcheck: roundtrips" {
   @quickcheck.check(
     (doc : Map[String, @toml.Toml]) => @toml.parse(@toml.print(doc)) == doc,

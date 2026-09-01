@@ -7642,6 +7642,15 @@ test "invalid/local-datetime/separator-tab" {
 }
 
 ///|
+test "invalid/encoding/bom-line-start" {
+  let toml_text =
+    #|key = 1
+    #|﻿other = 2
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
 test "print/escape-roundtrip" {
   // TOML v1.0.0 basic strings must escape `"`, `\\`, and the control
   // characters U+0000-U+0008, U+000A-U+001F and U+007F. Tab (U+0009) is the
