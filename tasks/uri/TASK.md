@@ -74,6 +74,7 @@ Implementation notes:
   the parsing strategy, and any internal data structures.
 - Do **not** modify the following files:
   - `rfc3986_spec.mbt` - API specification
+  - `uri_qc.mbt` - Property-test generators
   - `specs/` folder - Reference documents
   - `*_pub_test.mbt` - Public test files (`uri_pub_test.mbt`)
   - `*_priv_test.mbt` - Private test files (`uri_priv_test.mbt`)
@@ -88,17 +89,20 @@ Required entry points:
 - `Uri::parse(input : String) -> Uri raise`
 - `Uri::resolve(base : Uri, reference : String) -> Uri raise`
 - `Uri::to_string(self : Uri) -> String`
-- Component getters: `scheme`, `userinfo`, `host`, `port`, `path`, `query`,
-  `fragment`
+
+The parse result type is fixed by the spec: `Uri` is a `pub(all)` struct
+whose fields (`scheme`, `userinfo`, `host`, `port`, `path`, `query`,
+`fragment`) are read directly by the tests and constructed directly by the
+property-test generators in `uri_qc.mbt`.
 
 ## Behavioral rules
 
-- Components are returned as parsed, still percent-encoded; `None` means the
+- Components are stored as parsed, still percent-encoded; `None` means the
   component is absent, `Some("")` means it is present but empty.
-- `host()` returns IPv6/IPvFuture literals **including** the surrounding
+- `host` holds IPv6/IPvFuture literals **including** the surrounding
   brackets (e.g. `Some("[::1]")`).
 - Schemes may be normalized to lowercase; nothing else is normalized.
-- A reference without a scheme parses with `scheme() == ""`.
+- A reference without a scheme parses with `scheme == ""`.
 - Reject invalid inputs as the invalid tests require: forbidden raw characters
   (spaces, `<>`, `\`, `^`, backtick, `{}`, `|`, control characters),
   malformed percent-encodings, non-numeric ports, malformed IPv6/IPvFuture
@@ -107,7 +111,9 @@ Required entry points:
   stays `http:g`); ad-hoc path joining will fail the abnormal examples.
 - `Uri::to_string` reproduces exactly the components present, with `?`, `#`,
   `//`, `@`, and `:` delimiters emitted precisely when the corresponding
-  component is present (even when empty).
+  component is present (even when empty). `Uri::parse(uri.to_string()) == uri`
+  must hold for every well-formed `Uri`; the round-trip is checked by a
+  property-based test.
 
 ## Test execution
 
@@ -124,8 +130,8 @@ moon test
 
 The model should keep running until all tests pass.
 
-- **Public tests** (`*_pub_test.mbt`): 14 cases, visible in this repository for development and debugging
-- **Private tests** (`*_priv_test.mbt`): 124 additional cases, vendored as ordinary files in this local task and run by `moon test`
+- **Public tests** (`*_pub_test.mbt`): 16 cases (including two property-based tests), visible in this repository for development and debugging
+- **Private tests** (`*_priv_test.mbt`): 125 additional cases, vendored as ordinary files in this local task and run by `moon test`
 
 **CRITICAL - Full Suite Evaluation**:
 

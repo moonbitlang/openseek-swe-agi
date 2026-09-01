@@ -1,224 +1,234 @@
 ///|
 test "component/host/domain" {
   let uri = Uri::parse("http://example.com/")
-  assert_eq(uri.host(), Some("example.com"))
+  assert_eq(uri.host, Some("example.com"))
 }
 
 ///|
 test "component/host/subdomain" {
   let uri = Uri::parse("http://www.example.com/")
-  assert_eq(uri.host(), Some("www.example.com"))
+  assert_eq(uri.host, Some("www.example.com"))
 }
 
 ///|
 test "component/host/ipv4" {
   let uri = Uri::parse("http://192.168.1.1/")
-  assert_eq(uri.host(), Some("192.168.1.1"))
+  assert_eq(uri.host, Some("192.168.1.1"))
 }
 
 ///|
 test "component/host/ipv6-loopback" {
   let uri = Uri::parse("http://[::1]/")
-  assert_eq(uri.host(), Some("[::1]"))
+  assert_eq(uri.host, Some("[::1]"))
 }
 
 ///|
 test "component/host/ipv6-full" {
   let uri = Uri::parse("http://[2001:db8:85a3::8a2e:370:7334]/")
-  assert_eq(uri.host(), Some("[2001:db8:85a3::8a2e:370:7334]"))
+  assert_eq(uri.host, Some("[2001:db8:85a3::8a2e:370:7334]"))
 }
 
 ///|
 test "component/host/ipv6-with-port" {
   let uri = Uri::parse("http://[::1]:8080/")
-  assert_eq(uri.host(), Some("[::1]"))
-  assert_eq(uri.port(), Some("8080"))
+  assert_eq(uri.host, Some("[::1]"))
+  assert_eq(uri.port, Some("8080"))
 }
 
 ///|
 test "component/host/localhost" {
   let uri = Uri::parse("http://localhost/")
-  assert_eq(uri.host(), Some("localhost"))
+  assert_eq(uri.host, Some("localhost"))
 }
 
 ///|
 test "component/host/empty" {
   let uri = Uri::parse("file:///path/to/file")
-  assert_eq(uri.host(), Some(""))
+  assert_eq(uri.host, Some(""))
+}
+
+///|
+test "component/host/empty-with-userinfo" {
+  // authority = [ userinfo "@" ] host [ ":" port ] — the reg-name host may
+  // be zero-length even when userinfo is present (RFC 3986 Section 3.2.2)
+  let uri = Uri::parse("http://user@/path")
+  assert_eq(uri.userinfo, Some("user"))
+  assert_eq(uri.host, Some(""))
+  assert_eq(uri.path, "/path")
 }
 
 ///|
 test "component/host/none-for-opaque" {
   let uri = Uri::parse("mailto:user@example.com")
-  assert_eq(uri.host(), None)
+  assert_eq(uri.host, None)
 }
 
 ///|
 test "component/port/standard-http" {
   let uri = Uri::parse("http://example.com:80/")
-  assert_eq(uri.port(), Some("80"))
+  assert_eq(uri.port, Some("80"))
 }
 
 ///|
 test "component/port/standard-https" {
   let uri = Uri::parse("https://example.com:443/")
-  assert_eq(uri.port(), Some("443"))
+  assert_eq(uri.port, Some("443"))
 }
 
 ///|
 test "component/port/high-port" {
   let uri = Uri::parse("http://example.com:65535/")
-  assert_eq(uri.port(), Some("65535"))
+  assert_eq(uri.port, Some("65535"))
 }
 
 ///|
 test "component/port/empty" {
   let uri = Uri::parse("http://example.com:/")
-  assert_eq(uri.port(), Some(""))
+  assert_eq(uri.port, Some(""))
 }
 
 ///|
 test "component/port/none" {
   let uri = Uri::parse("http://example.com/")
-  assert_eq(uri.port(), None)
+  assert_eq(uri.port, None)
 }
 
 ///|
 test "component/port/zero" {
   let uri = Uri::parse("http://example.com:0/")
-  assert_eq(uri.port(), Some("0"))
+  assert_eq(uri.port, Some("0"))
 }
 
 ///|
 test "component/path/empty" {
   let uri = Uri::parse("http://example.com")
-  assert_eq(uri.path(), "")
+  assert_eq(uri.path, "")
 }
 
 ///|
 test "component/path/root" {
   let uri = Uri::parse("http://example.com/")
-  assert_eq(uri.path(), "/")
+  assert_eq(uri.path, "/")
 }
 
 ///|
 test "component/path/simple" {
   let uri = Uri::parse("http://example.com/path")
-  assert_eq(uri.path(), "/path")
+  assert_eq(uri.path, "/path")
 }
 
 ///|
 test "component/path/nested" {
   let uri = Uri::parse("http://example.com/path/to/resource")
-  assert_eq(uri.path(), "/path/to/resource")
+  assert_eq(uri.path, "/path/to/resource")
 }
 
 ///|
 test "component/path/with-extension" {
   let uri = Uri::parse("http://example.com/file.html")
-  assert_eq(uri.path(), "/file.html")
+  assert_eq(uri.path, "/file.html")
 }
 
 ///|
 test "component/path/percent-encoded" {
   let uri = Uri::parse("http://example.com/path%20with%20spaces")
-  assert_eq(uri.path(), "/path%20with%20spaces")
+  assert_eq(uri.path, "/path%20with%20spaces")
 }
 
 ///|
 test "component/path/special-chars" {
   let uri = Uri::parse("http://example.com/path;params")
-  assert_eq(uri.path(), "/path;params")
+  assert_eq(uri.path, "/path;params")
 }
 
 ///|
 test "component/path/dot-segments" {
   let uri = Uri::parse("http://example.com/a/b/../c")
-  assert_eq(uri.path(), "/a/b/../c")
+  assert_eq(uri.path, "/a/b/../c")
 }
 
 ///|
 test "component/path/opaque" {
   let uri = Uri::parse("mailto:user@example.com")
-  assert_eq(uri.path(), "user@example.com")
+  assert_eq(uri.path, "user@example.com")
 }
 
 ///|
 test "component/query/simple" {
   let uri = Uri::parse("http://example.com/?q=test")
-  assert_eq(uri.query(), Some("q=test"))
+  assert_eq(uri.query, Some("q=test"))
 }
 
 ///|
 test "component/query/multiple-params" {
   let uri = Uri::parse("http://example.com/?a=1&b=2&c=3")
-  assert_eq(uri.query(), Some("a=1&b=2&c=3"))
+  assert_eq(uri.query, Some("a=1&b=2&c=3"))
 }
 
 ///|
 test "component/query/empty" {
   let uri = Uri::parse("http://example.com/?")
-  assert_eq(uri.query(), Some(""))
+  assert_eq(uri.query, Some(""))
 }
 
 ///|
 test "component/query/none" {
   let uri = Uri::parse("http://example.com/")
-  assert_eq(uri.query(), None)
+  assert_eq(uri.query, None)
 }
 
 ///|
 test "component/query/with-fragment" {
   let uri = Uri::parse("http://example.com/?q=test#section")
-  assert_eq(uri.query(), Some("q=test"))
+  assert_eq(uri.query, Some("q=test"))
 }
 
 ///|
 test "component/query/special-chars" {
   let uri = Uri::parse("http://example.com/?q=a+b&x=1%262")
-  assert_eq(uri.query(), Some("q=a+b&x=1%262"))
+  assert_eq(uri.query, Some("q=a+b&x=1%262"))
 }
 
 ///|
 test "component/query/unicode-encoded" {
   let uri = Uri::parse("http://example.com/?q=%E4%B8%AD%E6%96%87")
-  assert_eq(uri.query(), Some("q=%E4%B8%AD%E6%96%87"))
+  assert_eq(uri.query, Some("q=%E4%B8%AD%E6%96%87"))
 }
 
 ///|
 test "component/fragment/simple" {
   let uri = Uri::parse("http://example.com/#section")
-  assert_eq(uri.fragment(), Some("section"))
+  assert_eq(uri.fragment, Some("section"))
 }
 
 ///|
 test "component/fragment/with-query" {
   let uri = Uri::parse("http://example.com/?q=test#section")
-  assert_eq(uri.fragment(), Some("section"))
+  assert_eq(uri.fragment, Some("section"))
 }
 
 ///|
 test "component/fragment/empty" {
   let uri = Uri::parse("http://example.com/#")
-  assert_eq(uri.fragment(), Some(""))
+  assert_eq(uri.fragment, Some(""))
 }
 
 ///|
 test "component/fragment/none" {
   let uri = Uri::parse("http://example.com/")
-  assert_eq(uri.fragment(), None)
+  assert_eq(uri.fragment, None)
 }
 
 ///|
 test "component/fragment/with-special-chars" {
   let uri = Uri::parse("http://example.com/#section/subsection")
-  assert_eq(uri.fragment(), Some("section/subsection"))
+  assert_eq(uri.fragment, Some("section/subsection"))
 }
 
 ///|
 test "component/fragment/percent-encoded" {
   let uri = Uri::parse("http://example.com/#%E4%B8%AD%E6%96%87")
-  assert_eq(uri.fragment(), Some("%E4%B8%AD%E6%96%87"))
+  assert_eq(uri.fragment, Some("%E4%B8%AD%E6%96%87"))
 }
 
 ///|
@@ -552,49 +562,49 @@ test "resolve/abnormal/g-fragment-s-slash-dot-dot-x" {
 ///|
 test "rfc3986 example http rfc3986" {
   let uri = Uri::parse("http://www.ietf.org/rfc/rfc3986.txt")
-  assert_eq(uri.scheme(), "http")
-  assert_eq(uri.userinfo(), None)
-  assert_eq(uri.host(), Some("www.ietf.org"))
-  assert_eq(uri.port(), None)
-  assert_eq(uri.path(), "/rfc/rfc3986.txt")
-  assert_eq(uri.query(), None)
-  assert_eq(uri.fragment(), None)
+  assert_eq(uri.scheme, "http")
+  assert_eq(uri.userinfo, None)
+  assert_eq(uri.host, Some("www.ietf.org"))
+  assert_eq(uri.port, None)
+  assert_eq(uri.path, "/rfc/rfc3986.txt")
+  assert_eq(uri.query, None)
+  assert_eq(uri.fragment, None)
 }
 
 ///|
 test "rfc3986 example ftp rfc1808" {
   let uri = Uri::parse("ftp://ftp.is.co.za/rfc/rfc1808.txt")
-  assert_eq(uri.scheme(), "ftp")
-  assert_eq(uri.userinfo(), None)
-  assert_eq(uri.host(), Some("ftp.is.co.za"))
-  assert_eq(uri.port(), None)
-  assert_eq(uri.path(), "/rfc/rfc1808.txt")
-  assert_eq(uri.query(), None)
-  assert_eq(uri.fragment(), None)
+  assert_eq(uri.scheme, "ftp")
+  assert_eq(uri.userinfo, None)
+  assert_eq(uri.host, Some("ftp.is.co.za"))
+  assert_eq(uri.port, None)
+  assert_eq(uri.path, "/rfc/rfc1808.txt")
+  assert_eq(uri.query, None)
+  assert_eq(uri.fragment, None)
 }
 
 ///|
 test "rfc3986 example mailto" {
   let uri = Uri::parse("mailto:John.Doe@example.com")
-  assert_eq(uri.scheme(), "mailto")
-  assert_eq(uri.userinfo(), None)
-  assert_eq(uri.host(), None)
-  assert_eq(uri.port(), None)
-  assert_eq(uri.path(), "John.Doe@example.com")
-  assert_eq(uri.query(), None)
-  assert_eq(uri.fragment(), None)
+  assert_eq(uri.scheme, "mailto")
+  assert_eq(uri.userinfo, None)
+  assert_eq(uri.host, None)
+  assert_eq(uri.port, None)
+  assert_eq(uri.path, "John.Doe@example.com")
+  assert_eq(uri.query, None)
+  assert_eq(uri.fragment, None)
 }
 
 ///|
 test "rfc3986 example news" {
   let uri = Uri::parse("news:comp.infosystems.www.servers.unix")
-  assert_eq(uri.scheme(), "news")
-  assert_eq(uri.userinfo(), None)
-  assert_eq(uri.host(), None)
-  assert_eq(uri.port(), None)
-  assert_eq(uri.path(), "comp.infosystems.www.servers.unix")
-  assert_eq(uri.query(), None)
-  assert_eq(uri.fragment(), None)
+  assert_eq(uri.scheme, "news")
+  assert_eq(uri.userinfo, None)
+  assert_eq(uri.host, None)
+  assert_eq(uri.port, None)
+  assert_eq(uri.path, "comp.infosystems.www.servers.unix")
+  assert_eq(uri.query, None)
+  assert_eq(uri.fragment, None)
 }
 
 ///|
@@ -731,10 +741,6 @@ test "rfc3986 invalid authority parsing" {
     _ => Err(())
   }
   assert_true(result1 is Err(_))
-
-  // Unencoded @ in host (not in userinfo position)
-  let result2 = Ok(Uri::parse("http://host@/path")) catch { _ => Err(()) }
-  assert_true(result2 is Err(_))
 
   // Invalid character in host
   let result3 = Ok(Uri::parse("http://exam ple.com/")) catch { _ => Err(()) }
@@ -879,49 +885,49 @@ test "rfc3986 invalid query and fragment" {
 ///|
 test "rfc3986 example tel" {
   let uri = Uri::parse("tel:+1-816-555-1212")
-  assert_eq(uri.scheme(), "tel")
-  assert_eq(uri.userinfo(), None)
-  assert_eq(uri.host(), None)
-  assert_eq(uri.port(), None)
-  assert_eq(uri.path(), "+1-816-555-1212")
-  assert_eq(uri.query(), None)
-  assert_eq(uri.fragment(), None)
+  assert_eq(uri.scheme, "tel")
+  assert_eq(uri.userinfo, None)
+  assert_eq(uri.host, None)
+  assert_eq(uri.port, None)
+  assert_eq(uri.path, "+1-816-555-1212")
+  assert_eq(uri.query, None)
+  assert_eq(uri.fragment, None)
 }
 
 ///|
 test "rfc3986 example telnet" {
   let uri = Uri::parse("telnet://192.0.2.16:80/")
-  assert_eq(uri.scheme(), "telnet")
-  assert_eq(uri.userinfo(), None)
-  assert_eq(uri.host(), Some("192.0.2.16"))
-  assert_eq(uri.port(), Some("80"))
-  assert_eq(uri.path(), "/")
-  assert_eq(uri.query(), None)
-  assert_eq(uri.fragment(), None)
+  assert_eq(uri.scheme, "telnet")
+  assert_eq(uri.userinfo, None)
+  assert_eq(uri.host, Some("192.0.2.16"))
+  assert_eq(uri.port, Some("80"))
+  assert_eq(uri.path, "/")
+  assert_eq(uri.query, None)
+  assert_eq(uri.fragment, None)
 }
 
 ///|
 test "rfc3986 example urn" {
   let uri = Uri::parse("urn:oasis:names:specification:docbo:dtd:xml:4.1.2")
-  assert_eq(uri.scheme(), "urn")
-  assert_eq(uri.userinfo(), None)
-  assert_eq(uri.host(), None)
-  assert_eq(uri.port(), None)
-  assert_eq(uri.path(), "oasis:names:specification:docbo:dtd:xml:4.1.2")
-  assert_eq(uri.query(), None)
-  assert_eq(uri.fragment(), None)
+  assert_eq(uri.scheme, "urn")
+  assert_eq(uri.userinfo, None)
+  assert_eq(uri.host, None)
+  assert_eq(uri.port, None)
+  assert_eq(uri.path, "oasis:names:specification:docbo:dtd:xml:4.1.2")
+  assert_eq(uri.query, None)
+  assert_eq(uri.fragment, None)
 }
 
 ///|
 test "rfc3986 query fragment" {
   let uri = Uri::parse("http://example.com/path?query#frag")
-  assert_eq(uri.scheme(), "http")
-  assert_eq(uri.userinfo(), None)
-  assert_eq(uri.host(), Some("example.com"))
-  assert_eq(uri.port(), None)
-  assert_eq(uri.path(), "/path")
-  assert_eq(uri.query(), Some("query"))
-  assert_eq(uri.fragment(), Some("frag"))
+  assert_eq(uri.scheme, "http")
+  assert_eq(uri.userinfo, None)
+  assert_eq(uri.host, Some("example.com"))
+  assert_eq(uri.port, None)
+  assert_eq(uri.path, "/path")
+  assert_eq(uri.query, Some("query"))
+  assert_eq(uri.fragment, Some("frag"))
 }
 
 ///|
@@ -1064,116 +1070,116 @@ test "rfc3986 section 5.4.2 abnormal examples" {
 test "rfc3986 ipv6 address parsing" {
   // IPv6 loopback
   let uri1 = Uri::parse("http://[::1]:8080/path")
-  assert_eq(uri1.scheme(), "http")
-  assert_eq(uri1.host(), Some("[::1]"))
-  assert_eq(uri1.port(), Some("8080"))
-  assert_eq(uri1.path(), "/path")
+  assert_eq(uri1.scheme, "http")
+  assert_eq(uri1.host, Some("[::1]"))
+  assert_eq(uri1.port, Some("8080"))
+  assert_eq(uri1.path, "/path")
 
   // IPv6 full address
   let uri2 = Uri::parse("http://[2001:db8::1]/path")
-  assert_eq(uri2.scheme(), "http")
-  assert_eq(uri2.host(), Some("[2001:db8::1]"))
-  assert_eq(uri2.port(), None)
-  assert_eq(uri2.path(), "/path")
+  assert_eq(uri2.scheme, "http")
+  assert_eq(uri2.host, Some("[2001:db8::1]"))
+  assert_eq(uri2.port, None)
+  assert_eq(uri2.path, "/path")
 
   // IPv6 with userinfo
   let uri3 = Uri::parse("http://user:pass@[::1]:8080/")
-  assert_eq(uri3.scheme(), "http")
-  assert_eq(uri3.userinfo(), Some("user:pass"))
-  assert_eq(uri3.host(), Some("[::1]"))
-  assert_eq(uri3.port(), Some("8080"))
-  assert_eq(uri3.path(), "/")
+  assert_eq(uri3.scheme, "http")
+  assert_eq(uri3.userinfo, Some("user:pass"))
+  assert_eq(uri3.host, Some("[::1]"))
+  assert_eq(uri3.port, Some("8080"))
+  assert_eq(uri3.path, "/")
 
   // IPv6 full form
   let uri4 = Uri::parse("http://[2001:0db8:0000:0000:0000:0000:0000:0001]/")
-  assert_eq(uri4.scheme(), "http")
-  assert_eq(uri4.host(), Some("[2001:0db8:0000:0000:0000:0000:0000:0001]"))
-  assert_eq(uri4.path(), "/")
+  assert_eq(uri4.scheme, "http")
+  assert_eq(uri4.host, Some("[2001:0db8:0000:0000:0000:0000:0000:0001]"))
+  assert_eq(uri4.path, "/")
 
   // IPv6 with query and fragment
   let uri5 = Uri::parse("http://[::1]/path?query=value#fragment")
-  assert_eq(uri5.scheme(), "http")
-  assert_eq(uri5.host(), Some("[::1]"))
-  assert_eq(uri5.path(), "/path")
-  assert_eq(uri5.query(), Some("query=value"))
-  assert_eq(uri5.fragment(), Some("fragment"))
+  assert_eq(uri5.scheme, "http")
+  assert_eq(uri5.host, Some("[::1]"))
+  assert_eq(uri5.path, "/path")
+  assert_eq(uri5.query, Some("query=value"))
+  assert_eq(uri5.fragment, Some("fragment"))
 
   // IPv6 zone ID (RFC 6874)
   let uri6 = Uri::parse("http://[fe80::1%25eth0]/")
-  assert_eq(uri6.scheme(), "http")
-  assert_eq(uri6.host(), Some("[fe80::1%25eth0]"))
-  assert_eq(uri6.path(), "/")
+  assert_eq(uri6.scheme, "http")
+  assert_eq(uri6.host, Some("[fe80::1%25eth0]"))
+  assert_eq(uri6.path, "/")
 }
 
 ///|
 test "rfc3986 ipvfuture" {
   // IPvFuture format: [v<version>.<address>]
   let uri = Uri::parse("http://[v1.test]/path")
-  assert_eq(uri.scheme(), "http")
-  assert_eq(uri.host(), Some("[v1.test]"))
-  assert_eq(uri.path(), "/path")
+  assert_eq(uri.scheme, "http")
+  assert_eq(uri.host, Some("[v1.test]"))
+  assert_eq(uri.path, "/path")
 }
 
 ///|
 test "rfc3986 percent-encoding in path" {
   // Space encoded as %20
   let uri1 = Uri::parse("http://example.com/hello%20world")
-  assert_eq(uri1.path(), "/hello%20world")
+  assert_eq(uri1.path, "/hello%20world")
 
   // Various special characters encoded
   let uri2 = Uri::parse("http://example.com/path%2Fwith%2Fslashes")
-  assert_eq(uri2.path(), "/path%2Fwith%2Fslashes")
+  assert_eq(uri2.path, "/path%2Fwith%2Fslashes")
 
   // UTF-8 encoded characters (e.g., é = %C3%A9)
   let uri3 = Uri::parse("http://example.com/caf%C3%A9")
-  assert_eq(uri3.path(), "/caf%C3%A9")
+  assert_eq(uri3.path, "/caf%C3%A9")
 
   // Mixed encoded and unencoded
   let uri4 = Uri::parse("http://example.com/a%20b/c%2Fd")
-  assert_eq(uri4.path(), "/a%20b/c%2Fd")
+  assert_eq(uri4.path, "/a%20b/c%2Fd")
 
   // Uppercase hex digits (RFC 3986 recommends uppercase)
   let uri5 = Uri::parse("http://example.com/%7Euser")
-  assert_eq(uri5.path(), "/%7Euser")
+  assert_eq(uri5.path, "/%7Euser")
 
   // Lowercase hex digits (also valid)
   let uri6 = Uri::parse("http://example.com/%7euser")
-  assert_eq(uri6.path(), "/%7euser")
+  assert_eq(uri6.path, "/%7euser")
 }
 
 ///|
 test "rfc3986 percent-encoding in query" {
   // Encoded equals and ampersand
   let uri1 = Uri::parse("http://example.com/?key%3Dvalue%26other")
-  assert_eq(uri1.query(), Some("key%3Dvalue%26other"))
+  assert_eq(uri1.query, Some("key%3Dvalue%26other"))
 
   // Space in query
   let uri2 = Uri::parse("http://example.com/?search=hello%20world")
-  assert_eq(uri2.query(), Some("search=hello%20world"))
+  assert_eq(uri2.query, Some("search=hello%20world"))
 
   // Plus sign (not special in RFC 3986, but often used for space)
   let uri3 = Uri::parse("http://example.com/?q=hello+world")
-  assert_eq(uri3.query(), Some("q=hello+world"))
+  assert_eq(uri3.query, Some("q=hello+world"))
 }
 
 ///|
 test "rfc3986 percent-encoding in fragment" {
   let uri1 = Uri::parse("http://example.com/#section%201")
-  assert_eq(uri1.fragment(), Some("section%201"))
+  assert_eq(uri1.fragment, Some("section%201"))
   let uri2 = Uri::parse("http://example.com/#%C3%A9l%C3%A8ve")
-  assert_eq(uri2.fragment(), Some("%C3%A9l%C3%A8ve"))
+  assert_eq(uri2.fragment, Some("%C3%A9l%C3%A8ve"))
 }
 
 ///|
 test "rfc3986 percent-encoding in userinfo" {
   // Encoded @ in username
   let uri1 = Uri::parse("http://user%40domain:pass@example.com/")
-  assert_eq(uri1.userinfo(), Some("user%40domain:pass"))
-  assert_eq(uri1.host(), Some("example.com"))
+  assert_eq(uri1.userinfo, Some("user%40domain:pass"))
+  assert_eq(uri1.host, Some("example.com"))
 
   // Encoded colon in password
   let uri2 = Uri::parse("http://user:pass%3Aword@example.com/")
-  assert_eq(uri2.userinfo(), Some("user:pass%3Aword"))
+  assert_eq(uri2.userinfo, Some("user:pass%3Aword"))
 }
 
 ///|
@@ -1183,150 +1189,150 @@ test "rfc3986 reserved characters" {
 
   // Sub-delims in path (allowed unencoded)
   let uri1 = Uri::parse("http://example.com/path!$&'()*+,;=")
-  assert_eq(uri1.path(), "/path!$&'()*+,;=")
+  assert_eq(uri1.path, "/path!$&'()*+,;=")
 
   // Unreserved characters (allowed unencoded): ALPHA DIGIT - . _ ~
   let uri2 = Uri::parse("http://example.com/path-._~test")
-  assert_eq(uri2.path(), "/path-._~test")
+  assert_eq(uri2.path, "/path-._~test")
 }
 
 ///|
 test "rfc3986 empty components" {
   // Empty path
   let uri1 = Uri::parse("http://example.com")
-  assert_eq(uri1.host(), Some("example.com"))
-  assert_eq(uri1.path(), "")
+  assert_eq(uri1.host, Some("example.com"))
+  assert_eq(uri1.path, "")
 
   // Empty query
   let uri2 = Uri::parse("http://example.com?")
-  assert_eq(uri2.query(), Some(""))
+  assert_eq(uri2.query, Some(""))
 
   // Empty fragment
   let uri3 = Uri::parse("http://example.com#")
-  assert_eq(uri3.fragment(), Some(""))
+  assert_eq(uri3.fragment, Some(""))
 
   // Empty userinfo
   let uri4 = Uri::parse("http://@example.com/")
-  assert_eq(uri4.userinfo(), Some(""))
-  assert_eq(uri4.host(), Some("example.com"))
+  assert_eq(uri4.userinfo, Some(""))
+  assert_eq(uri4.host, Some("example.com"))
 
   // Empty port
   let uri5 = Uri::parse("http://example.com:/path")
-  assert_eq(uri5.host(), Some("example.com"))
-  assert_eq(uri5.port(), Some(""))
-  assert_eq(uri5.path(), "/path")
+  assert_eq(uri5.host, Some("example.com"))
+  assert_eq(uri5.port, Some(""))
+  assert_eq(uri5.path, "/path")
 
   // All empty optional components
   let uri6 = Uri::parse("http://@:/")
-  assert_eq(uri6.scheme(), "http")
-  assert_eq(uri6.userinfo(), Some(""))
-  assert_eq(uri6.host(), Some(""))
-  assert_eq(uri6.port(), Some(""))
-  assert_eq(uri6.path(), "/")
+  assert_eq(uri6.scheme, "http")
+  assert_eq(uri6.userinfo, Some(""))
+  assert_eq(uri6.host, Some(""))
+  assert_eq(uri6.port, Some(""))
+  assert_eq(uri6.path, "/")
 }
 
 ///|
 test "rfc3986 scheme-only uri" {
   // Scheme with path only
   let uri1 = Uri::parse("file:///etc/passwd")
-  assert_eq(uri1.scheme(), "file")
-  assert_eq(uri1.host(), Some(""))
-  assert_eq(uri1.path(), "/etc/passwd")
+  assert_eq(uri1.scheme, "file")
+  assert_eq(uri1.host, Some(""))
+  assert_eq(uri1.path, "/etc/passwd")
 
   // Scheme with empty authority
   let uri2 = Uri::parse("file://")
-  assert_eq(uri2.scheme(), "file")
-  assert_eq(uri2.host(), Some(""))
-  assert_eq(uri2.path(), "")
+  assert_eq(uri2.scheme, "file")
+  assert_eq(uri2.host, Some(""))
+  assert_eq(uri2.path, "")
 }
 
 ///|
 test "rfc3986 path-only references" {
   // Absolute path reference
   let uri1 = Uri::parse("/path/to/resource")
-  assert_eq(uri1.scheme(), "")
-  assert_eq(uri1.host(), None)
-  assert_eq(uri1.path(), "/path/to/resource")
+  assert_eq(uri1.scheme, "")
+  assert_eq(uri1.host, None)
+  assert_eq(uri1.path, "/path/to/resource")
 
   // Relative path reference
   let uri2 = Uri::parse("path/to/resource")
-  assert_eq(uri2.scheme(), "")
-  assert_eq(uri2.host(), None)
-  assert_eq(uri2.path(), "path/to/resource")
+  assert_eq(uri2.scheme, "")
+  assert_eq(uri2.host, None)
+  assert_eq(uri2.path, "path/to/resource")
 
   // Query-only reference
   let uri3 = Uri::parse("?query=value")
-  assert_eq(uri3.scheme(), "")
-  assert_eq(uri3.path(), "")
-  assert_eq(uri3.query(), Some("query=value"))
+  assert_eq(uri3.scheme, "")
+  assert_eq(uri3.path, "")
+  assert_eq(uri3.query, Some("query=value"))
 
   // Fragment-only reference
   let uri4 = Uri::parse("#fragment")
-  assert_eq(uri4.scheme(), "")
-  assert_eq(uri4.path(), "")
-  assert_eq(uri4.fragment(), Some("fragment"))
+  assert_eq(uri4.scheme, "")
+  assert_eq(uri4.path, "")
+  assert_eq(uri4.fragment, Some("fragment"))
 
   // Empty reference
   let uri5 = Uri::parse("")
-  assert_eq(uri5.scheme(), "")
-  assert_eq(uri5.path(), "")
+  assert_eq(uri5.scheme, "")
+  assert_eq(uri5.path, "")
 }
 
 ///|
 test "rfc3986 unusual but valid uris" {
   // Numeric host
   let uri1 = Uri::parse("http://127.0.0.1/")
-  assert_eq(uri1.host(), Some("127.0.0.1"))
+  assert_eq(uri1.host, Some("127.0.0.1"))
 
   // Very long path segments
   let uri2 = Uri::parse(
     "http://example.com/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   )
-  assert_eq(uri2.path(), "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+  assert_eq(uri2.path, "/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 
   // Multiple query parameters
   let uri3 = Uri::parse("http://example.com/?a=1&b=2&c=3")
-  assert_eq(uri3.query(), Some("a=1&b=2&c=3"))
+  assert_eq(uri3.query, Some("a=1&b=2&c=3"))
 
   // Path with multiple consecutive slashes
   let uri4 = Uri::parse("http://example.com//path//to//resource")
-  assert_eq(uri4.path(), "//path//to//resource")
+  assert_eq(uri4.path, "//path//to//resource")
 
   // Scheme with numbers and plus/minus/dot
   let uri5 = Uri::parse("custom+scheme.1-2://host/path")
-  assert_eq(uri5.scheme(), "custom+scheme.1-2")
-  assert_eq(uri5.host(), Some("host"))
+  assert_eq(uri5.scheme, "custom+scheme.1-2")
+  assert_eq(uri5.host, Some("host"))
 
   // Data URI scheme
   let uri6 = Uri::parse("data:text/plain;base64,SGVsbG8=")
-  assert_eq(uri6.scheme(), "data")
-  assert_eq(uri6.path(), "text/plain;base64,SGVsbG8=")
+  assert_eq(uri6.scheme, "data")
+  assert_eq(uri6.path, "text/plain;base64,SGVsbG8=")
 
   // Localhost variations
   let uri7 = Uri::parse("http://localhost:3000/api")
-  assert_eq(uri7.host(), Some("localhost"))
-  assert_eq(uri7.port(), Some("3000"))
-  assert_eq(uri7.path(), "/api")
+  assert_eq(uri7.host, Some("localhost"))
+  assert_eq(uri7.port, Some("3000"))
+  assert_eq(uri7.path, "/api")
 }
 
 ///|
 test "rfc3986 authority edge cases" {
   // Host only (no path)
   let uri1 = Uri::parse("//example.com")
-  assert_eq(uri1.scheme(), "")
-  assert_eq(uri1.host(), Some("example.com"))
-  assert_eq(uri1.path(), "")
+  assert_eq(uri1.scheme, "")
+  assert_eq(uri1.host, Some("example.com"))
+  assert_eq(uri1.path, "")
 
   // Authority with all components
   let uri2 = Uri::parse("http://user:pass@host.com:8080/path")
-  assert_eq(uri2.userinfo(), Some("user:pass"))
-  assert_eq(uri2.host(), Some("host.com"))
-  assert_eq(uri2.port(), Some("8080"))
-  assert_eq(uri2.path(), "/path")
+  assert_eq(uri2.userinfo, Some("user:pass"))
+  assert_eq(uri2.host, Some("host.com"))
+  assert_eq(uri2.port, Some("8080"))
+  assert_eq(uri2.path, "/path")
 
   // Userinfo with special characters
   let uri3 = Uri::parse("http://us-er_name.test:pa-ss_word.test@example.com/")
-  assert_eq(uri3.userinfo(), Some("us-er_name.test:pa-ss_word.test"))
+  assert_eq(uri3.userinfo, Some("us-er_name.test:pa-ss_word.test"))
 }
 
 ///|
@@ -1334,36 +1340,36 @@ test "rfc3986 section 6.2.2 case normalization" {
   // Scheme is case-insensitive (should be normalized to lowercase)
   let uri1 = Uri::parse("HTTP://example.com/")
   // Note: The parser may or may not normalize the scheme; testing parse behavior
-  assert_eq(uri1.host(), Some("example.com"))
+  assert_eq(uri1.host, Some("example.com"))
 
   // Host is case-insensitive for reg-name
   let uri2 = Uri::parse("http://EXAMPLE.COM/path")
   // Testing that the URI is parsed correctly regardless of case
-  assert_eq(uri2.path(), "/path")
+  assert_eq(uri2.path, "/path")
 
   // Mixed case scheme
   let uri3 = Uri::parse("HtTp://Example.Com/Path")
-  assert_eq(uri3.path(), "/Path")
+  assert_eq(uri3.path, "/Path")
 }
 
 ///|
 test "rfc3986 section 6.2.2 percent-encoding normalization" {
   // Uppercase hex digits in percent-encoding
   let uri1 = Uri::parse("http://example.com/%7E")
-  assert_eq(uri1.path(), "/%7E")
+  assert_eq(uri1.path, "/%7E")
 
   // Lowercase hex digits (equivalent)
   let uri2 = Uri::parse("http://example.com/%7e")
-  assert_eq(uri2.path(), "/%7e")
+  assert_eq(uri2.path, "/%7e")
 
   // These are equivalent but stored as-is
   let uri3 = Uri::parse("http://example.com/~")
-  assert_eq(uri3.path(), "/~")
+  assert_eq(uri3.path, "/~")
 
   // Unreserved chars that could be encoded but don't need to be
   let uri4 = Uri::parse("http://example.com/%41%42%43")
   // %41%42%43 = ABC (but parser preserves encoding)
-  assert_eq(uri4.path(), "/%41%42%43")
+  assert_eq(uri4.path, "/%41%42%43")
 }
 
 ///|
@@ -1398,22 +1404,22 @@ test "rfc3986 section 6.2.3 scheme-based normalization" {
   // HTTP default port is 80, HTTPS is 443
   // Explicit default ports may be normalized away
   let uri1 = Uri::parse("http://example.com:80/path")
-  assert_eq(uri1.host(), Some("example.com"))
-  assert_eq(uri1.port(), Some("80"))
-  assert_eq(uri1.path(), "/path")
+  assert_eq(uri1.host, Some("example.com"))
+  assert_eq(uri1.port, Some("80"))
+  assert_eq(uri1.path, "/path")
 
   // Non-default port
   let uri2 = Uri::parse("http://example.com:8080/path")
-  assert_eq(uri2.port(), Some("8080"))
+  assert_eq(uri2.port, Some("8080"))
 
   // HTTPS default port
   let uri3 = Uri::parse("https://example.com:443/path")
-  assert_eq(uri3.port(), Some("443"))
+  assert_eq(uri3.port, Some("443"))
 
   // Empty path normalization for http(s) - path should be "/" per RFC
   let uri4 = Uri::parse("http://example.com")
   // An empty path is equivalent to "/"
-  assert_eq(uri4.path(), "")
+  assert_eq(uri4.path, "")
 }
 
 ///|
