@@ -820,6 +820,16 @@ test "valid/datetime/leap-second" {
 }
 
 ///|
+test "invalid/datetime/offset-hour-24" {
+  let toml_text =
+    #|# RFC 3339 time-numoffset uses time-hour, which is 00-23,
+    #|# so +24:00 is out of range even though 24 hours is a real span.
+    #|d = 1985-06-18 17:04:07+24:00
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
 test "quickcheck: roundtrips" {
   @quickcheck.check(
     (doc : Map[String, @toml.Toml]) => @toml.parse(@toml.print(doc)) == doc,

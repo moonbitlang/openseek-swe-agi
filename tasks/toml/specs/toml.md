@@ -150,7 +150,9 @@ The vendored spec is authoritative; highlights the tests lean on:
 - **Booleans**: `true` / `false` (lowercase only).
 - **Datetimes**: RFC 3339 forms with real calendar validation (month
   1–12, day valid for the month/leap year, hour ≤ 23, minute ≤ 59,
-  second ≤ 60, offset hour ≤ 23 and minute ≤ 59). Seconds are required.
+  second ≤ 60, offset hour ≤ 23 and minute ≤ 59 — `time-numoffset` reuses
+  the `time-hour` production, so `+24:00` is invalid). Seconds are
+  required.
   Year is exactly four digits.
 - **Arrays**: `[ ... ]` — may span lines, allow comments between
   elements and a trailing comma.

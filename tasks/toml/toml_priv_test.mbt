@@ -3124,7 +3124,7 @@ test "invalid/datetime/offset-minus-no-minute" {
 ///|
 test "invalid/datetime/offset-overflow-hour" {
   let toml_text =
-    #|# Hour must be 00-24
+    #|# RFC 3339 time-numoffset uses time-hour, which is 00-23
     #|d = 1985-06-18 17:04:07+25:00
     #|
   @test.assert_raise(() => @toml.parse(toml_text))
@@ -8377,5 +8377,36 @@ test "valid/datetime/fraction-truncated" {
       second: 0,
       nanosecond: 999999999,
     }),
+  })
+}
+
+///|
+test "invalid/datetime/offset-hour-24-negative" {
+  let toml_text =
+    #|# same boundary on the western side
+    #|d = 1985-06-18 17:04:07-24:00
+    #|
+  @test.assert_raise(() => @toml.parse(toml_text))
+}
+
+///|
+test "valid/datetime/offset-max" {
+  let toml_text =
+    #|# The largest offsets RFC 3339 allows, in both directions.
+    #|east = 1985-06-18T17:04:07+23:59
+    #|west = 1985-06-18T17:04:07-23:59
+    #|
+  let toml = @toml.parse(toml_text)
+  assert_eq(toml, {
+    "east": Datetime(
+      { year: 1985, month: 6, day: 18, },
+      { hour: 17, minute: 4, second: 7, nanosecond: 0, },
+      offset=1439,
+    ),
+    "west": Datetime(
+      { year: 1985, month: 6, day: 18, },
+      { hour: 17, minute: 4, second: 7, nanosecond: 0, },
+      offset=-1439,
+    ),
   })
 }

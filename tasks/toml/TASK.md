@@ -126,6 +126,9 @@ types and check `parse(print(doc)) == doc`.
 - `second` may be 60: RFC 3339's `time-second` is `00-58, 00-59, 00-60
   based on leap second rules`, so `23:59:60` parses; only `:61` and above
   are invalid.
+- Offsets run to `+23:59` / `-23:59`: RFC 3339's `time-numoffset` is
+  `("+" / "-") time-hour ":" time-minute`, and `time-hour` is `00-23`, so
+  `+24:00` is out of range.
 - Reject structural conflicts as required by the invalid tests (duplicate
   keys, redefining tables, extending closed inline tables, appending to
   static arrays, dotted-key/header conflicts, etc.).
@@ -152,10 +155,10 @@ moon test
 
 The model should keep running until all tests pass.
 
-- **Public tests** (`*_pub_test.mbt`): 78 cases (including two
+- **Public tests** (`*_pub_test.mbt`): 79 cases (including two
   property-based tests), visible in this repository for development and
   debugging
-- **Private tests** (`*_priv_test.mbt`): 654 additional cases, vendored
+- **Private tests** (`*_priv_test.mbt`): 656 additional cases, vendored
   as ordinary files in this local task and run by `moon test`
 
 **CRITICAL - Full Suite Evaluation**:
