@@ -131,18 +131,15 @@ Rules required by invalid tests:
 
 ### Multiline values (backslash continuation)
 
-The suite defines a continuation convention:
-
-- If a line’s value ends with a backslash `\\` and is immediately followed by a
-  newline, the next line continues the same value (tests: `valid/multiline-value-with-backslash`,
-  `valid/complex-multiline`, `valid/long-multiline-value`).
-- A backslash at end-of-input without a following newline is invalid
+- A line whose value ends in an **odd**-length run of trailing backslashes
+  ends in a continuation marker: the marker is removed and the next line is
+  joined on directly. An **even**-length run is escaped literals and the
+  value ends there. "Multiline continuation: concatenation details" below
+  gives the run-length table.
+- A marker with no line after it is invalid
   (`invalid/backslash-continuation-no-newline`).
-- A newline that appears in the middle of a value without a trailing `\\` on the
-  previous line is invalid (`invalid/multiline-without-backslash`).
-
-The precise concatenation rule (whether newlines are preserved or stripped) is
-defined by the expected documents in the tests.
+- A line that is not a continuation and carries no separator is invalid
+  (`invalid/multiline-without-backslash`).
 
 ## Error conditions (must reject)
 
@@ -195,14 +192,16 @@ Newline:
 
 ## Whitespace trimming vs preservation
 
-The tests imply the following policy (treat the expected documents as canonical):
+The policy is:
 
 - Around separators (`=`/`:`): surrounding whitespace is ignored for parsing.
 - In unquoted values:
   - trailing inline comments are stripped
   - internal whitespace is preserved
-  - leading/trailing whitespace is preserved in some “edge” tests; prefer to
-    preserve it unless the test suite expects trimming in a particular case.
+  - leading and trailing whitespace is trimmed (`key=value  ` is `value`);
+    quote the value to keep it. The one exception is a line ending in a
+    continuation marker, where the whitespace before the marker belongs to
+    the joined value — that is where the space in `a \` + `b` comes from.
 - In quoted values:
   - preserve all characters inside quotes (including leading/trailing spaces)
   - comment markers `;` and `#` are literal characters
