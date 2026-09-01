@@ -1,0 +1,6 @@
+import {
+  "moonbitlang/core/test",
+  "moonbitlang/core/double",
+}
+
+warnings = "+unnecessary_annotation"

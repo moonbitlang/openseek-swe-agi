@@ -1,0 +1,43 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "toml"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn parse(StringView) -> Map[String, Toml] raise
+
+// Errors
+
+// Types and methods
+pub(all) struct Date {
+  year : Int
+  month : Int
+  day : Int
+} derive(Eq, @debug.Debug)
+
+pub(all) struct Time {
+  hour : Int
+  minute : Int
+  second : Int
+  nanosecond : Int
+} derive(Eq, @debug.Debug)
+
+pub(all) enum Toml {
+  String(String)
+  Integer(Int64)
+  Float(Double)
+  Bool(Bool)
+  Datetime(Date, Time, offset~ : Int)
+  LocalDatetime(Date, Time)
+  LocalDate(Date)
+  LocalTime(Time)
+  Array(Array[Toml])
+  Table(Map[String, Toml])
+} derive(@debug.Debug)
+pub impl Eq for Toml
+
+// Type aliases
+
+// Traits
