@@ -1280,6 +1280,39 @@ test "print/roundtrip-awkward-values" {
 }
 
 ///|
+test "valid/single-quoted-escaped-quote" {
+  // `\'` is the one escape single quotes decode -- and the only way to put
+  // an apostrophe between them.
+  let ini_text =
+    #|v='it\'s'
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, { global: { "v": "it's" }, sections: Map([]), })
+}
+
+///|
+test "valid/unknown-escapes-keep-backslash" {
+  // Anything that is not a recognised escape is left exactly as written, in
+  // every carrier. This is what lets a Windows path be written plainly.
+  let ini_text =
+    #|bare=C:\Program Files\x
+    #|dq="C:\Program Files\x"
+    #|sq='C:\Program Files\x'
+    #|odd=a\qb
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, {
+    global: {
+      "bare": "C:\\Program Files\\x",
+      "dq": "C:\\Program Files\\x",
+      "sq": "C:\\Program Files\\x",
+      "odd": "a\\qb",
+    },
+    sections: Map([]),
+  })
+}
+
+///|
 test "valid/single-quoted-verbatim" {
   // Single quotes are raw, so the same text keeps its backslashes. (Whether
   // `\'` escapes the closing quote is left open -- no fixture pins it.)

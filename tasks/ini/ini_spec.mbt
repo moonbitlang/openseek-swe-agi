@@ -31,17 +31,24 @@ pub(all) struct Doc {
 /// - `=` and `:` both separate keys from values
 /// - Whitespace around keys, separators, and unquoted values is trimmed
 /// - Quoted values keep whitespace and `;`/`#` verbatim and lose the
-///   surrounding quotes. `'...'` is raw; `"..."` applies the escapes
-///   `\"`, `\\`, `\n`, `\r` and `\t`, and is therefore the only carrier
-///   for a value holding both a line break and a separator
+///   surrounding quotes
+/// - `"..."` decodes `\"`, `\\`, `\n`, `\r` and `\t`, and is therefore the
+///   only carrier for a value holding both a line break and a separator
+/// - `'...'` is raw except for `\'`, which yields an apostrophe and is the
+///   only way to put one inside single quotes
+/// - An unquoted value decodes the same escapes as `"..."`
+/// - Any other escape is left alone, backslash included: `C:\Program` is
+///   itself, because `\P` decodes to nothing else
 /// - `;` and `#` start comments (full-line, or inline after whitespace in an
 ///   unquoted value)
-/// - An unquoted value applies the same escapes
 /// - A trailing `\` continues an unquoted value onto the next line, joining
 ///   the lines directly. Continuation is decided on the raw line before
 ///   escapes are applied: an odd-length run of trailing backslashes ends in
 ///   a marker, an even-length run is escaped literals. A marker with no
 ///   following line is an error. See `specs/ini.md`
+/// - A continuation line contributes text, not syntax. Its `=`, `:`, quotes
+///   and comment markers are ordinary characters of the joined value, so
+///   the rejection of `key=value=extra` does not reach them
 ///
 /// Examples:
 ///

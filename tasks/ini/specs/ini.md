@@ -123,6 +123,11 @@ Rules required by invalid tests:
 - Multiple separators like `key=value=extra` are invalid unless the extra `=`
   appears inside quotes (tests include “value with equals” and “multiple equals
   without quotes”).
+- This rule applies to the line as it is read, before any continuation is
+  joined. A continuation line contributes text, not syntax: its `=`, `:`,
+  quotes and comment markers are ordinary characters of the joined value.
+  `path=C:\Program Files\` followed by `nextkey=value` is one entry whose
+  value is `C:\Program Filesnextkey=value`, not a rejected double separator.
 
 ### Multiline values (backslash continuation)
 
@@ -203,8 +208,21 @@ The tests imply the following policy (treat the expected documents as canonical)
   - comment markers `;` and `#` are literal characters
 
 If you need an explicit rule: preserve value bytes exactly, except for (1)
-removing the surrounding quotes in quoted values, and (2) stripping inline
-comments in unquoted values.
+removing the surrounding quotes in quoted values, (2) stripping inline
+comments in unquoted values, (3) decoding escapes, and (4) removing a
+continuation marker and joining the next line.
+
+### Escape decoding
+
+`"..."` and unquoted values decode `\"`, `\\`, `\n`, `\r` and `\t`. `'...'`
+decodes only `\'`, which is the one way to put an apostrophe inside single
+quotes; everything else between single quotes is raw.
+
+Any sequence that is not one of those is left exactly as written, backslash
+and all — `path=C:\Program Files` is itself, because `\P` decodes to nothing
+else. This is what lets Windows paths be written plainly, and it is why the
+trailing-backslash rule above has to count the run rather than ask whether a
+backslash is "an escape".
 
 ## Inline comment stripping rules
 
