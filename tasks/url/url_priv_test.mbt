@@ -7443,3 +7443,15 @@ test "WPT setters hash #21" {
   assert_eq(url.href(), "http://example.net/#%00")
   assert_eq(url.hash(), "#%00")
 }
+
+///|
+/// The non-default port stays in a tuple origin, and blob: of a non-special
+/// inner URL is still opaque.
+test "origin keeps explicit ports and rejects non-special blob inners" {
+  let ftp = @url.Url::parse("ftp://example.com:2121/dir")
+  assert_eq(ftp.origin(), "ftp://example.com:2121")
+  let ws = @url.Url::parse("ws://example.com:8080/socket")
+  assert_eq(ws.origin(), "ws://example.com:8080")
+  let blob_file = @url.Url::parse("blob:file:///tmp/x")
+  assert_eq(blob_file.origin(), "null")
+}

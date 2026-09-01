@@ -926,3 +926,32 @@ test "quickcheck: parse should never panic" {
     }
   })
 }
+
+///|
+/// specs/url.bs, href setter step 2: an unparsable value throws a
+/// TypeError. It is the only setter that reports failure, and it throws
+/// before writing anything, so the URL keeps its previous value.
+test "setters href rejects an unparsable value" {
+  let url = @url.Url::parse("http://example.net:8080/path")
+  @test.assert_raise(() => url.set_href("http://[:::1]"))
+  assert_eq(url.href(), "http://example.net:8080/path")
+  @test.assert_raise(() => url.set_href("not a url"))
+  assert_eq(url.href(), "http://example.net:8080/path")
+}
+
+///|
+/// The origin serialization for every scheme group the spec promises:
+/// the special schemes carry a tuple origin, blob: inherits the origin of
+/// the URL in its path, and everything else is opaque ("null").
+test "origin covers ftp, ws, wss and blob" {
+  let ftp = @url.Url::parse("ftp://example.com/dir")
+  assert_eq(ftp.origin(), "ftp://example.com")
+  let ws = @url.Url::parse("ws://example.com/socket")
+  assert_eq(ws.origin(), "ws://example.com")
+  let wss = @url.Url::parse("wss://example.com:8443/socket")
+  assert_eq(wss.origin(), "wss://example.com:8443")
+  let blob = @url.Url::parse("blob:https://example.com:443/uuid")
+  assert_eq(blob.origin(), "https://example.com")
+  let blob_opaque = @url.Url::parse("blob:not-a-url")
+  assert_eq(blob_opaque.origin(), "null")
+}

@@ -21,7 +21,7 @@ pub fn Url::search(Self) -> String
 pub fn Url::set_hash(Self, String) -> Unit
 pub fn Url::set_host(Self, String) -> Unit
 pub fn Url::set_hostname(Self, String) -> Unit
-pub fn Url::set_href(Self, String) -> Unit
+pub fn Url::set_href(Self, String) -> Unit raise
 pub fn Url::set_password(Self, String) -> Unit
 pub fn Url::set_pathname(Self, String) -> Unit
 pub fn Url::set_port(Self, String) -> Unit

@@ -183,9 +183,14 @@ Serialization is canonical and deterministic:
   store; no-ops when the URL has no host or is `file:`… i.e. "cannot
   have username/password/port".
 - `set_host(s)` — parse in host state: updates host, and port when
-  `:port` follows; a bare trailing `:` rejects. No-op for opaque paths.
-- `set_hostname(s)` — parse in hostname state: `:` terminates, port
-  untouched.
+  `:port` follows. A bare trailing `:` does **not** reject: host state
+  hands `:` to port state, the empty port leaves the stored port alone,
+  so `set_host("example.com:")` on `http://example.net:8080` yields
+  `http://example.com:8080/`. No-op for opaque paths.
+- `set_hostname(s)` — parse in hostname state, where `:` is a forbidden
+  host code point under state override. So a value containing `:` is
+  **rejected outright** rather than truncated: `set_hostname("example.com:")`
+  leaves the whole URL unchanged. The port is never touched.
 - `set_port(s)` — `""` clears; digits parse (leading digits only —
   `"8080stuff"` takes 8080; non-digit start rejects); > 65535 rejects;
   default port stores as null. No-op when the URL cannot have a port.

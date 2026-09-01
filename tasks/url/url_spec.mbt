@@ -103,10 +103,14 @@ declare pub fn Url::origin(self : Url) -> String
 
 ///|
 /// The `href` setter: reparse `href` from scratch as an absolute URL and
-/// replace every component. Setters never raise: like the standard's
-/// setter steps, an invalid value leaves the URL unchanged (`set_href`
-/// included — tests never set an unparsable href).
-declare pub fn Url::set_href(self : Url, href : String) -> Unit
+/// replace every component.
+///
+/// This is the one setter that reports failure. Per the standard's href
+/// setter steps, an unparsable value throws a `TypeError` — here, raises
+/// — before anything is written, so the URL is left unchanged. Every
+/// other setter below is infallible: an invalid value is silently
+/// ignored and the URL keeps its previous state.
+declare pub fn Url::set_href(self : Url, href : String) -> Unit raise
 
 ///|
 /// The `protocol` setter: parse `protocol` (an optional trailing `:` is
