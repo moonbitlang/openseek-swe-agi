@@ -102,6 +102,8 @@
   .dot { stroke: var(--card); stroke-width: 2; transition: opacity 0.1s; }
   .faded { opacity: 0.12; }
   .crosshair { stroke: var(--border); stroke-width: 1; visibility: hidden; }
+  .selection { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 4 3; visibility: hidden; }
+  svg.pickable { cursor: pointer; }
 
   .tooltip {
     position: absolute;
@@ -220,7 +222,9 @@ function toPoint(rec) {
 // (only when few enough series to stay legible — beyond 4 the legend rules).
 // A series is {get(p), color, label, id?}; a null value breaks the line, so a
 // tool that made no calls that day leaves a gap instead of a fake zero.
-function chart(points, series, { height, ymax, ticks, fmt, tooltipRows }) {
+// With onPick, clicking selects the nearest day (dashed marker, shown via
+// setSelected); returns {node, setSelected}.
+function chart(points, series, { height, ymax, ticks, fmt, tooltipRows, onPick }) {
   const W = 880, H = height, PAD = { l: 40, r: 100, t: 12, b: 26 };
   const iw = W - PAD.l - PAD.r, ih = H - PAD.t - PAD.b;
   const x = i => points.length === 1
@@ -244,8 +248,9 @@ function chart(points, series, { height, ymax, ticks, fmt, tooltipRows }) {
     svg.append(label);
   });
 
+  const selection = svgEl("line", { y1: PAD.t, y2: PAD.t + ih, class: "selection" });
   const crosshair = svgEl("line", { y1: PAD.t, y2: PAD.t + ih, class: "crosshair" });
-  svg.append(crosshair);
+  svg.append(selection, crosshair);
 
   // Direct labels at the line ends, pushed apart when lines converge.
   const lastVal = s => {
@@ -300,11 +305,16 @@ function chart(points, series, { height, ymax, ticks, fmt, tooltipRows }) {
   const tooltip = el("div", "tooltip");
   wrap.append(svg, tooltip);
 
-  svg.addEventListener("mousemove", event => {
+  const nearestIndex = event => {
     const rect = svg.getBoundingClientRect();
     const mx = ((event.clientX - rect.left) / rect.width) * W;
     let best = 0;
     points.forEach((_, i) => { if (Math.abs(x(i) - mx) < Math.abs(x(best) - mx)) best = i; });
+    return best;
+  };
+  svg.addEventListener("mousemove", event => {
+    const rect = svg.getBoundingClientRect();
+    const best = nearestIndex(event);
     const p = points[best];
     crosshair.setAttribute("x1", x(best));
     crosshair.setAttribute("x2", x(best));
@@ -319,7 +329,16 @@ function chart(points, series, { height, ymax, ticks, fmt, tooltipRows }) {
     crosshair.style.visibility = "hidden";
     tooltip.style.visibility = "hidden";
   });
-  return wrap;
+  if (onPick) {
+    svg.classList.add("pickable");
+    svg.addEventListener("click", event => onPick(nearestIndex(event)));
+  }
+  const setSelected = i => {
+    selection.setAttribute("x1", x(i));
+    selection.setAttribute("x2", x(i));
+    selection.style.visibility = "visible";
+  };
+  return { node: wrap, setSelected };
 }
 
 function ttRow(color, text) {
@@ -336,12 +355,13 @@ const RATE_SERIES = [
   { get: p => p.toolRate, color: "var(--series-tools)", label: "tools" },
 ];
 
-function ratesChart(points) {
+function ratesChart(points, onPick) {
   return chart(points, RATE_SERIES, {
     height: 220,
     ymax: 1,
     ticks: [0, 0.5, 1],
     fmt: pct,
+    onPick,
     tooltipRows: p => [
       ttRow("var(--series-pass)", `pass@${p.k}: ${p.passed}/${p.k}`),
       ttRow("var(--series-tests)", `tests: ${pct(p.testRatio)}`),
@@ -351,7 +371,7 @@ function ratesChart(points) {
   });
 }
 
-function stepsChart(points) {
+function stepsChart(points, onPick) {
   const max = Math.max(20, ...points.map(p => p.avgSteps));
   const ymax = Math.ceil(max / 20) * 20;
   return chart(points, [{ get: p => p.avgSteps, color: "var(--series-steps)", label: "avg steps" }], {
@@ -359,6 +379,7 @@ function stepsChart(points) {
     ymax,
     ticks: [0, ymax / 2, ymax],
     fmt: v => String(Math.round(v)),
+    onPick,
     tooltipRows: p => [
       ttRow("var(--series-steps)", `avg steps: ${Math.round(p.avgSteps)}`),
       el("div", "tt-row", `runs: ${p.runs.map(run => run.steps).join(" / ")}`),
@@ -386,7 +407,7 @@ function rail(run) {
   return strip;
 }
 
-// Per-run detail for the most recent day: the accessible table view.
+// Per-run detail for the selected day: the accessible table view.
 function runTable(runs, date, task) {
   const table = el("table");
   const head = el("tr");
@@ -474,8 +495,8 @@ function highlightTool(card, tool) {
 }
 
 // Per-tool pass-rate trend: one line per tool, plus a hoverable legend row
-// carrying the latest day's rate and call volume.
-function toolTrend(points, card) {
+// carrying the selected day's rate and call volume.
+function toolTrend(points, card, onPick) {
   for (const p of points) p.toolsByDay = toolAgg(p);
   const totals = new Map();
   for (const p of points) {
@@ -499,34 +520,45 @@ function toolTrend(points, card) {
   }));
 
   const legend = el("div", "tool-legend");
-  const latest = points[points.length - 1];
+  const valueEls = new Map();
   shown.forEach((tool, i) => {
     const row = el("div", "tool-row");
     const swatch = el("span", "swatch");
     swatch.style.background = TOOL_COLORS[i];
-    const s = latest.toolsByDay.get(tool);
-    const value = s && s.calls > 0
-      ? `${pct(s.ok / s.calls)} · ${s.calls} calls`
-      : "no calls";
-    row.append(swatch, el("span", "mono", tool), el("span", "tool-value", value));
+    const value = el("span", "tool-value");
+    valueEls.set(tool, value);
+    row.append(swatch, el("span", "mono", tool), value);
     row.addEventListener("mouseenter", () => highlightTool(card, tool));
     row.addEventListener("mouseleave", () => highlightTool(card, null));
     legend.append(row);
   });
 
-  const wrap = el("div");
-  wrap.append(legend, chart(points, series, {
+  const panel = chart(points, series, {
     height: 200,
     ymax: 1,
     ticks: [0, 0.5, 1],
     fmt: pct,
+    onPick,
     tooltipRows: p => shown.flatMap((tool, i) => {
       const s = p.toolsByDay.get(tool);
       if (!s || s.calls === 0) return [];
       return [ttRow(TOOL_COLORS[i], `${tool}: ${pct(s.ok / s.calls)} (${s.calls})`)];
     }),
-  }));
-  return wrap;
+  });
+
+  const wrap = el("div");
+  wrap.append(legend, panel.node);
+  const setSelected = i => {
+    panel.setSelected(i);
+    const day = points[i].toolsByDay;
+    for (const [tool, value] of valueEls) {
+      const s = day.get(tool);
+      value.textContent = s && s.calls > 0
+        ? `${pct(s.ok / s.calls)} · ${s.calls} calls`
+        : "no calls";
+    }
+  };
+  return { node: wrap, setSelected };
 }
 
 function titled(title, node) {
@@ -544,14 +576,28 @@ function taskCard(task, records) {
   head.append(el("span", "task-name", task));
   head.append(el("span", "task-latest",
     `${latest.date}: ${latest.passed}/${latest.k} passed · tests ${pct(latest.testRatio)}`));
-  if (viewerExists(latest.date, task)) {
-    const viewer = el("a", "run-link", "sessions ↗");
-    viewer.href = viewerHref(latest.date, task);
-    viewer.target = "_blank";
-    viewer.rel = "noopener";
-    head.append(viewer);
-  }
+  const viewer = el("a", "run-link", "sessions ↗");
+  viewer.target = "_blank";
+  viewer.rel = "noopener";
+  head.append(viewer);
   card.append(head);
+
+  // Every chart picks the day whose runs the detail table shows; the dashed
+  // marker on each panel tracks the selection (latest by default).
+  const runsTitle = el("div", "table-title");
+  const runsBody = el("div");
+  const runsSection = el("div");
+  runsSection.append(runsTitle, runsBody);
+  const panels = [];
+  const selectDay = i => {
+    const p = points[i];
+    runsTitle.textContent = `runs · ${p.date}` +
+      (points.length > 1 ? " — click a day in the charts to switch" : "");
+    runsBody.replaceChildren(runTable(p.runs, p.date, task));
+    for (const panel of panels) panel.setSelected(i);
+    viewer.hidden = !viewerExists(p.date, task);
+    if (!viewer.hidden) viewer.href = viewerHref(p.date, task);
+  };
 
   const legend = el("div", "legend");
   legend.append(
@@ -559,13 +605,18 @@ function taskCard(task, records) {
     ttRow("var(--series-tests)", "avg tests passed"),
     ttRow("var(--series-tools)", "tool-call pass rate"),
   );
+  const rates = ratesChart(points, selectDay);
+  const steps = stepsChart(points, selectDay);
+  const tools = toolTrend(points, card, selectDay);
+  panels.push(rates, steps, tools);
   card.append(
     legend,
-    ratesChart(points),
-    stepsChart(points),
-    titled(`runs · ${latest.date}`, runTable(latest.runs, latest.date, task)),
-    titled("tool calls · pass rate", toolTrend(points, card)),
+    rates.node,
+    steps.node,
+    runsSection,
+    titled("tool calls · pass rate", tools.node),
   );
+  selectDay(points.length - 1);
   return card;
 }
 
