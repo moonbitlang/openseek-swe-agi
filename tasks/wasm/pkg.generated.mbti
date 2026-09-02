@@ -1,0 +1,17 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "wasm"
+
+// Values
+pub fn decode_module(Bytes) -> Module raise
+
+pub fn validate_module(Module) -> Unit raise
+
+// Errors
+
+// Types and methods
+pub type Module
+pub fn Module::print(Self) -> String
+
+// Type aliases
+
+// Traits
