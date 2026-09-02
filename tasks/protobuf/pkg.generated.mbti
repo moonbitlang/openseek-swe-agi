@@ -1,0 +1,112 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "protobuf"
+
+import {
+  "moonbitlang/core/buffer",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn[T : Reader] read_bool(T) -> Bool raise
+
+pub fn[T : Reader] read_bytes(T) -> Bytes raise
+
+pub fn[T : Reader] read_double(T) -> Double raise
+
+pub fn[T : Reader] read_enum(T) -> Enum raise
+
+pub fn[T : Reader] read_fixed32(T) -> UInt raise
+
+pub fn[T : Reader] read_fixed64(T) -> UInt64 raise
+
+pub fn[T : Reader] read_float(T) -> Float raise
+
+pub fn[T : Reader] read_int32(T) -> Int raise
+
+pub fn[T : Reader] read_int64(T) -> Int64 raise
+
+pub fn[M, R : Reader] read_packed(R, (LimitedReader[R]) -> M raise) -> Array[M] raise
+
+pub fn[T : Reader] read_sfixed32(T) -> Int raise
+
+pub fn[T : Reader] read_sfixed64(T) -> Int64 raise
+
+pub fn[T : Reader] read_sint32(T) -> SInt raise
+
+pub fn[T : Reader] read_sint64(T) -> SInt64 raise
+
+pub fn[T : Reader] read_string(T) -> String raise
+
+pub fn[T : Reader] read_tag(T) -> (UInt, UInt) raise
+
+pub fn[T : Reader] read_uint32(T) -> UInt raise
+
+pub fn[T : Reader] read_uint64(T) -> UInt64 raise
+
+pub fn[T : Reader] read_unknown(T, (UInt, UInt)) -> Unit raise
+
+pub fn[T : Reader] read_varint32(T) -> UInt raise
+
+pub fn[T : Writer] write_bool(T, Bool) -> Unit raise
+
+pub fn[T : Writer] write_bytes(T, Bytes) -> Unit raise
+
+pub fn[T : Writer] write_double(T, Double) -> Unit raise
+
+pub fn[T : Writer] write_enum(T, Enum) -> Unit raise
+
+pub fn[T : Writer] write_fixed32(T, UInt) -> Unit raise
+
+pub fn[T : Writer] write_fixed64(T, UInt64) -> Unit raise
+
+pub fn[T : Writer] write_float(T, Float) -> Unit raise
+
+pub fn[T : Writer] write_int32(T, Int) -> Unit raise
+
+pub fn[T : Writer] write_int64(T, Int64) -> Unit raise
+
+pub fn[T : Writer] write_sfixed32(T, Int) -> Unit raise
+
+pub fn[T : Writer] write_sfixed64(T, Int64) -> Unit raise
+
+pub fn[T : Writer] write_sint32(T, Int) -> Unit raise
+
+pub fn[T : Writer] write_sint64(T, Int64) -> Unit raise
+
+pub fn[T : Writer] write_string(T, String) -> Unit raise
+
+pub fn[T : Writer] write_tag(T, (UInt, UInt)) -> Unit raise
+
+pub fn[T : Writer] write_uint32(T, UInt) -> Unit raise
+
+pub fn[T : Writer] write_uint64(T, UInt64) -> Unit raise
+
+pub fn[T : Writer] write_varint(T, UInt64) -> Unit raise
+
+// Errors
+
+// Types and methods
+pub type BytesReader
+pub fn BytesReader::from_bytes(Bytes) -> Self
+pub impl Reader for BytesReader
+
+pub(all) struct Enum(UInt) derive(Eq, @debug.Debug)
+
+pub type LimitedReader[T]
+pub impl[T : Reader] Reader for LimitedReader[T]
+
+pub(all) struct SInt(Int) derive(Eq, @debug.Debug)
+
+pub(all) struct SInt64(Int64) derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits
+pub(open) trait Reader {
+  fn read(Self, FixedArray[Byte], offset? : Int, max_length? : Int) -> Int? raise
+}
+
+pub(open) trait Writer {
+  fn write(Self, BytesView) -> Unit raise
+}
+pub impl Writer for @buffer.Buffer
