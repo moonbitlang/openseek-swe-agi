@@ -1,0 +1,45 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "hpack"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/quickcheck",
+  "moonbitlang/core/quickcheck/shrink",
+  "moonbitlang/core/quickcheck/splitmix",
+}
+
+// Values
+
+// Errors
+pub(all) suberror HpackError {
+  InvalidIndex(Int)
+  IntegerOverflow
+  UnexpectedEof
+  InvalidHuffman
+  TableSizeExceeded(size~ : Int, max~ : Int)
+  InvalidTableSizeUpdate
+} derive(Eq, @debug.Debug)
+
+// Types and methods
+pub type Decoder
+pub fn Decoder::decode(Self, BytesView) -> Array[HeaderField] raise HpackError
+pub fn Decoder::new(max_table_size? : Int) -> Self
+
+pub type Encoder
+pub fn Encoder::encode(Self, Array[HeaderField]) -> Bytes
+pub fn Encoder::encode_never_indexed(Self, HeaderField) -> Bytes
+pub fn Encoder::encode_without_indexing(Self, HeaderField) -> Bytes
+pub fn Encoder::new(max_table_size? : Int, use_huffman? : Bool) -> Self
+pub fn Encoder::set_max_size(Self, Int) -> Unit
+
+pub(all) struct HeaderField {
+  name : Bytes
+  value : Bytes
+} derive(Eq, @debug.Debug)
+pub fn HeaderField::size(Self) -> Int
+pub impl @quickcheck.Arbitrary for HeaderField
+pub impl @shrink.Shrink for HeaderField
+
+// Type aliases
+
+// Traits
