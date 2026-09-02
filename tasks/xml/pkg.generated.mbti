@@ -1,0 +1,29 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "xml"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn parse(StringView) -> Array[Event] raise
+
+pub fn print(Array[Event]) -> String
+
+// Errors
+
+// Types and methods
+pub(all) enum Event {
+  Decl(version~ : String, encoding~ : String?, standalone~ : Bool?)
+  DocType(String)
+  Start(name~ : String, attributes~ : Map[String, String])
+  End(String)
+  Text(String)
+  Comment(String)
+  PI(target~ : String, data~ : String)
+  EntityRef(String)
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits
