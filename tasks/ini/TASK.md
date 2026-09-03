@@ -32,11 +32,12 @@ a lookup table.
 Build incrementally:
 
 1. **Line handling**: LF/CRLF line breaks, blank lines, full-line comments.
-2. **Sections**: `[name]` headers, the "" global section, last-wins
-   redefinition.
-3. **Entries**: `=` and `:` separators, whitespace trimming, duplicate keys.
-4. **Values**: quoted values (escapes, embedded newlines), inline comments,
-   backslash continuations, escape sequences in unquoted values.
+2. **Sections**: `[name]` headers, the "" global section, re-opening on a
+   repeated header.
+3. **Entries**: the first `=` or `:` as the separator, whitespace trimming,
+   duplicate keys.
+4. **Values**: quoted values (escapes, `\n` for a line break), inline
+   comments, backslash continuations, escape sequences in unquoted values.
 5. **Error detection**: reject the malformed inputs required by invalid tests.
 
 Run tests frequently while adding features.
@@ -48,16 +49,17 @@ Important: The core logic must be implemented in MoonBit.
 In scope for this parser implementation:
 
 - Sections with the global "" section, including:
-  - names with spaces, unicode, and punctuation
+  - names with spaces, unicode, punctuation and embedded quotes
   - fully-quoted names (`["name"]`, `['name']`) with the quotes stripped
-  - last-wins semantics for repeated sections and duplicate keys
-- Key/value entries with `=` and `:` separators
+  - re-opening on a repeated header, with last-wins for duplicate keys
+- Key/value entries split at the first `=` or `:`; later ones are value text
 - Comments: `;` and `#`, full-line and inline (after whitespace, outside
   quotes)
-- Quoted values (double and single), preserving inner whitespace and comment
-  markers. Each carrier decodes its own escapes — unquoted `\\ \n \r \t`,
-  `"..."` those plus `\"`, `'...'` only `\\` and `\'` — and anything else
-  keeps its backslash. See the table in `specs/ini.md`
+- Quoted values (double and single), closing on the same line and
+  preserving inner whitespace and comment markers. Each carrier decodes its
+  own escapes — unquoted `\\ \n \r \t`, `"..."` those plus `\"`, `'...'`
+  only `\\` and `\'` — and anything else keeps its backslash. See the table
+  in `specs/ini.md`
 - Backslash line continuations, and the trailing-backslash runs that are
   escaped literals instead (see `specs/ini.md`)
 - Line endings: LF and CRLF
@@ -94,17 +96,17 @@ Required entry points:
 
 ## Behavioral rules
 
-- The document is global entries plus a map of sections: duplicate keys
-  and repeated section headers collapse via last-wins (see `ini_spec.mbt`).
+- The document is global entries plus a map of sections: a duplicate key
+  takes its last value and a repeated section header re-opens the section
+  (see `ini_spec.mbt`).
 - Whitespace around keys, separators, and unquoted values is trimmed; quoted
   values keep theirs.
 - Reject malformed inputs as the invalid tests require:
-  - malformed section headers (unclosed, empty, nested brackets, stray
-    quotes)
+  - malformed section headers (unclosed, empty, nested brackets)
   - lines without a separator; empty or whitespace-only keys; control
     characters in keys
-  - unterminated or mismatched quotes
-  - multiple unquoted separators (`key=value=extra`)
+  - unterminated or mismatched quotes, a quote left open at the end of its
+    line, text after a closing quote
   - invalid continuations (trailing `\` at end of input, continuation
     without a trailing `\`)
 - `print` must satisfy `parse(print(doc)) == doc` for well-formed documents
@@ -126,7 +128,7 @@ moon test
 The model should keep running until all tests pass.
 
 - **Public tests** (`*_pub_test.mbt`): 12 cases (including two property-based tests), visible in this repository for development and debugging
-- **Private tests** (`*_priv_test.mbt`): 100 additional cases that decide the score. They are **withheld while you work** — expect them to be absent from this directory, and do not go looking for them. Your `moon test` therefore exercises the public tests only; the private suite is run against your implementation afterwards.
+- **Private tests** (`*_priv_test.mbt`): 108 additional cases that decide the score. They are **withheld while you work** — expect them to be absent from this directory, and do not go looking for them. Your `moon test` therefore exercises the public tests only; the private suite is run against your implementation afterwards.
 
 **CRITICAL - Full Suite Evaluation**:
 

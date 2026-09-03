@@ -23,21 +23,23 @@ pub(all) struct Doc {
 /// Returns the parsed document (see `Doc`).
 ///
 /// Raises a parse error on malformed input (malformed section headers, lines
-/// without a separator, empty keys, unterminated or mismatched quotes,
-/// multiple unquoted separators, invalid continuations).
+/// without a separator, empty keys or keys holding a control character,
+/// unterminated or mismatched quotes, invalid continuations).
 ///
 /// Entry semantics:
 ///
-/// - `=` and `:` both separate keys from values
+/// - `=` and `:` both separate keys from values. The first one on the line
+///   is the separator; every later `=` or `:` is value text, so
+///   `url=http://host:8080/p?a=b` is one entry holding the whole URL
 /// - Whitespace around keys, separators, and unquoted values is trimmed
 /// - Quoted values keep whitespace and `;`/`#` verbatim and lose the
-///   surrounding quotes
+///   surrounding quotes. The closing quote is on the same line as the
+///   opening one, followed only by whitespace or an inline comment
 /// - Each carrier decodes its own set and leaves every other sequence
 ///   exactly as written, backslash included — `C:\Program` is itself,
 ///   because `\P` decodes to nothing else:
 ///   - unquoted: `\\`, `\n`, `\r`, `\t`
-///   - `"..."`: those, and `\"`. This is the only carrier for a value
-///     holding both a line break and a separator
+///   - `"..."`: those, and `\"`
 ///   - `'...'`: `\\` and `\'` only, so `'a\nb'` keeps its backslash and
 ///     `\'` is the one way to hold an apostrophe between single quotes
 /// - `;` and `#` start comments (full-line, or inline after whitespace in an
@@ -48,8 +50,7 @@ pub(all) struct Doc {
 ///   a marker, an even-length run is escaped literals. A marker with no
 ///   following line is an error. See `specs/ini.md`
 /// - A continuation line contributes text, not syntax. Its `=`, `:`, quotes
-///   and comment markers are ordinary characters of the joined value, so
-///   the rejection of `key=value=extra` does not reach them
+///   and comment markers are ordinary characters of the joined value
 ///
 /// Examples:
 ///

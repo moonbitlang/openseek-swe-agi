@@ -81,17 +81,25 @@ Section headers have the form:
 
 Rules required by the tests:
 
-- Section names may include spaces and many punctuation characters.
-- Empty section name `[]` is invalid.
+- The name is the text between `[` and `]` with surrounding whitespace
+  trimmed. Names may include spaces and many punctuation characters.
+- Quotes are ordinary characters of a name — `[remote "origin"]` is the
+  section `remote "origin"` and `[section"name]` is `section"name` — except
+  that a name wrapped entirely in one pair of `"` or `'` loses that pair:
+  `["quoted section"]` is `quoted section` (`valid/git-config-style`,
+  `valid/quote-inside-section-name`, `edge/quoted-section-name`).
+- Empty or whitespace-only names are invalid (`[]`, `[   ]`).
 - Section syntax must be exact:
   - Missing `[` or `]` is invalid.
   - Nested/double brackets like `[[nested]]` are invalid.
   - Certain bracket/angle-bracket forms in invalid tests must be rejected.
 - A `[` appearing inside a value is not a section start; section recognition
-  is line-based and must not trigger inside a value (tests include `invalid/section-in-value`).
+  is line-based and never triggers inside a value: `key=value [section]` is
+  the value `value [section]` (`valid/section-in-value`).
 
-If the same section header appears multiple times, it **overwrites** the prior
-section map (“last one wins”) per `valid/section-overwrite`.
+A repeated section header **re-opens** the section: its entries are added to
+the existing map, and a key that appears again takes its last value
+(`valid/section-reopen`, `valid/section-reopen-last-wins`).
 
 ### Key/value entries
 
@@ -102,8 +110,18 @@ Key/value lines take one of these separator forms:
 
 Rules:
 
+- The **first** `=` or `:` on the line is the separator. Everything after it
+  is the value, so later `=` and `:` are ordinary value text:
+  `key=value=extra` is the value `value=extra`, `time: 12:30:45` is
+  `12:30:45`, and `url=http://host:8080/p?a=b` keeps the whole URL
+  (`valid/first-separator-wins`, `valid/first-separator-wins-colon`,
+  `edge/url-as-value`). A key therefore never contains `=` or `:`.
 - Keys must be non-empty and must not be only whitespace (tests: `invalid/empty-key`,
   `invalid/key-only-spaces`).
+- Keys are taken verbatim after trimming; escapes are decoded in values only,
+  so `key\nname=value` — a backslash and an `n` — is the key `key\nname`
+  (`valid/backslash-in-key`). A key holding a control character (U+0000–U+001F
+  or U+007F) is invalid (`invalid/control-characters-in-key`).
 - A line without a separator is invalid (`invalid/no-equals-sign`).
 - Values may be empty (`key=` is valid).
 - Keys are case-sensitive (tests: `edge/case-sensitivity`).
@@ -111,23 +129,29 @@ Rules:
 
 ### Quoted values
 
-Values may be quoted with either:
+A value whose first non-blank character is `"` or `'` is quoted:
 
-- Double quotes: `"..."` with escape support for embedded quotes as exercised by tests.
+- Double quotes: `"..."`, decoding the escapes in the table below.
 - Single quotes: `'...'` (tests include “complex quoted strings”).
 
-Rules required by invalid tests:
+Rules:
 
-- Unterminated quotes are invalid.
-- Mismatched quote pairs are invalid.
-- Multiple separators like `key=value=extra` are invalid unless the extra `=`
-  appears inside quotes (tests include “value with equals” and “multiple equals
-  without quotes”).
-- This rule applies to the line as it is read, before any continuation is
-  joined. A continuation line contributes text, not syntax: its `=`, `:`,
-  quotes and comment markers are ordinary characters of the joined value.
+- The closing quote is the next matching quote that is not escaped, and it
+  must be on the **same physical line** as the opening one. A quoted value
+  never spans lines; a line break inside the value is written with the `\n`
+  escape (`valid/quoted-with-newline`). A line whose quote is not closed is
+  invalid whatever follows the opening quote, and whether or not a later
+  line would close it (`invalid/unclosed-quote`,
+  `invalid/unterminated-quote-single-word`,
+  `invalid/double-quote-spans-lines`).
+- Mismatched quote pairs are invalid (`"...'`).
+- After the closing quote only whitespace and an optional inline comment
+  (`;` or `#`) may follow; any other text is invalid
+  (`valid/comment-after-closing-quote`, `invalid/text-after-closing-quote`).
+- A continuation line contributes text, not syntax: its `=`, `:`, quotes
+  and comment markers are ordinary characters of the joined value.
   `path=C:\Program Files\` followed by `nextkey=value` is one entry whose
-  value is `C:\Program Filesnextkey=value`, not a rejected double separator.
+  value is `C:\Program Filesnextkey=value`.
 
 ### Multiline values (backslash continuation)
 
@@ -145,14 +169,13 @@ Rules required by invalid tests:
 
 At minimum, the invalid test suite expects rejection for:
 
-- Malformed section headers (unclosed, empty, missing bracket, nested brackets,
-  quotes in section name, etc.).
+- Malformed section headers (unclosed, empty, missing bracket, nested
+  brackets).
 - Missing separator in a key/value line.
-- Empty or whitespace-only keys.
-- Unterminated or mismatched quoted values.
-- Multiple separators without quotes.
+- Empty or whitespace-only keys, and keys holding a control character.
+- Unterminated or mismatched quoted values, a quote left open at the end of
+  its line, and text after a closing quote.
 - Unpermitted multi-line forms (no trailing backslash continuation, dangling `\\`).
-- Control characters in keys (tests include `invalid/control-characters-in-key`).
 
 ## Conformance checklist (high value test coverage)
 
@@ -161,7 +184,7 @@ At minimum, the invalid test suite expects rejection for:
 - `;` and `#` comments (full-line and inline)
 - Quoted values and escaped quotes
 - Duplicate keys: last-wins
-- Section redefinition: last-wins
+- Section re-opening: entries accumulate, duplicate keys last-wins
 - Backslash-based multiline values
 - Unicode content in keys/values/sections
 - CRLF line endings
@@ -176,11 +199,11 @@ ini         := { line }*
 line        := ws* ( comment | section | kv | empty ) ws* newline?
 comment     := (';' | '#') { any }*
 section     := '[' section_name ']'  (no extra '[' or ']' nesting)
-kv          := key ws* sep ws* value
+kv          := key ws* sep ws* value   (sep is the FIRST '=' or ':' on the line)
 sep         := '=' | ':'
-key         := nonempty, not all-whitespace, no control chars
+key         := nonempty, not all-whitespace, no control chars, no sep chars
 value       := quoted | unquoted
-quoted      := dq | sq
+quoted      := (dq | sq) ws* comment?   (opened and closed on the same line)
 dq          := '\"' { dq_char } '\"'
 sq          := '\\'' { sq_char } '\\''
 unquoted    := { any }* (subject to inline comment stripping)
@@ -283,13 +306,16 @@ marker, and no rule recovers the difference.
 Keys:
 
 - Must not be empty after trimming outer whitespace.
-- Must not contain control characters (tests include a `\\n` case).
+- Must not contain control characters (U+0000–U+001F, U+007F). A backslash
+  is not one: `key\nname` is a valid key, taken verbatim.
 - Are case-sensitive.
 - May contain dots and dashes (tests cover both).
 
 Sections:
 
-- Section name is the substring inside `[...]` and may contain spaces/unicode.
+- Section name is the trimmed substring inside `[...]` and may contain
+  spaces, unicode and quotes; one pair of quotes wrapping the whole name is
+  stripped (`["name"]`, `['name']`).
 - Reject empty/whitespace-only section names (tests include `invalid/section-only-spaces`).
 - Reject nested brackets (`[[...]]`) and other malformed bracket patterns.
 

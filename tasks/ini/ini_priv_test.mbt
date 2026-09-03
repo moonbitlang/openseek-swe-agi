@@ -56,11 +56,26 @@ test "invalid/section-no-open-bracket" {
 }
 
 ///|
-test "invalid/multiple-equals-without-quotes" {
+test "valid/first-separator-wins" {
+  // The first `=` or `:` on the line separates; every later one is value text.
   let ini_text =
     #|key=value=extra
     #|
-  @test.assert_raise(() => @ini.parse(ini_text))
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, { global: { "key": "value=extra" }, sections: Map([]), })
+}
+
+///|
+test "valid/first-separator-wins-colon" {
+  let ini_text =
+    #|time: 12:30:45
+    #|assign: a=b
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, {
+    global: { "time": "12:30:45", "assign": "a=b" },
+    sections: Map([]),
+  })
 }
 
 ///|
@@ -73,12 +88,19 @@ test "invalid/nested-sections-brackets" {
 }
 
 ///|
-test "invalid/quote-in-section-name" {
+test "valid/quote-inside-section-name" {
+  // Quotes are ordinary characters of a section name unless one pair wraps
+  // the whole name; compare `edge/quoted-section-name` and
+  // `valid/git-config-style`.
   let ini_text =
     #|[section"name]
     #|key=value
     #|
-  @test.assert_raise(() => @ini.parse(ini_text))
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, {
+    global: Map([]),
+    sections: { "section\"name": { "key": "value" } },
+  })
 }
 
 ///|
@@ -92,18 +114,31 @@ test "invalid/multiline-without-backslash" {
 
 ///|
 test "invalid/control-characters-in-key" {
-  let ini_text =
-    #|key\nname=value
-    #|
+  // U+0001 inside the key. Escapes are decoded in values only, so this has
+  // to be a real control character; compare `valid/backslash-in-key`.
+  let ini_text = "key\u{01}name=value\n"
   @test.assert_raise(() => @ini.parse(ini_text))
 }
 
 ///|
-test "invalid/section-in-value" {
+test "valid/backslash-in-key" {
+  // A backslash and an `n`, not a line break: keys are taken verbatim, and
+  // escapes are decoded in values only.
+  let ini_text =
+    #|key\nname=value
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, { global: { "key\\nname": "value" }, sections: Map([]), })
+}
+
+///|
+test "valid/section-in-value" {
+  // Section recognition is line-based: a `[` inside a value is text.
   let ini_text =
     #|key=value [section]
     #|
-  @test.assert_raise(() => @ini.parse(ini_text))
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, { global: { "key": "value [section]" }, sections: Map([]), })
 }
 
 ///|
@@ -461,12 +496,50 @@ test "valid/quoted-with-hash" {
 
 ///|
 test "valid/quoted-with-newline" {
+  // A quoted value closes on its own line; a line break inside it is
+  // written with the `\n` escape.
+  let ini_text =
+    #|value="line1\nline2"
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, { global: { "value": "line1\nline2" }, sections: Map([]), })
+}
+
+///|
+test "invalid/double-quote-spans-lines" {
+  // The closing quote must be on the same physical line as the opening one.
   let ini_text =
     #|value="line1
     #|line2"
     #|
+  @test.assert_raise(() => @ini.parse(ini_text))
+}
+
+///|
+test "invalid/single-quote-spans-lines" {
+  let ini_text =
+    #|value='line1
+    #|line2'
+    #|
+  @test.assert_raise(() => @ini.parse(ini_text))
+}
+
+///|
+test "valid/comment-after-closing-quote" {
+  let ini_text =
+    #|dq="a" ; comment
+    #|sq='b' # comment
+    #|
   let ini = @ini.parse(ini_text)
-  assert_eq(ini, { global: { "value": "line1\nline2" }, sections: Map([]), })
+  assert_eq(ini, { global: { "dq": "a", "sq": "b" }, sections: Map([]), })
+}
+
+///|
+test "invalid/text-after-closing-quote" {
+  let ini_text =
+    #|key="a"b
+    #|
+  @test.assert_raise(() => @ini.parse(ini_text))
 }
 
 ///|
@@ -495,7 +568,8 @@ test "valid/array-like-syntax" {
 }
 
 ///|
-test "valid/section-overwrite" {
+test "valid/section-reopen" {
+  // A repeated header re-opens the section: entries accumulate.
   let ini_text =
     #|[section]
     #|key1=value1
@@ -507,6 +581,22 @@ test "valid/section-overwrite" {
   assert_eq(ini, {
     global: Map([]),
     sections: { "section": { "key1": "value1", "key2": "value2" } },
+  })
+}
+
+///|
+test "valid/section-reopen-last-wins" {
+  let ini_text =
+    #|[section]
+    #|key=first
+    #|other=kept
+    #|[section]
+    #|key=second
+    #|
+  let ini = @ini.parse(ini_text)
+  assert_eq(ini, {
+    global: Map([]),
+    sections: { "section": { "key": "second", "other": "kept" } },
   })
 }
 
@@ -779,12 +869,21 @@ test "edge/special-section-chars" {
 }
 
 ///|
-test "edge/value-starts-with-quote" {
+test "invalid/unterminated-quote-single-word" {
+  // An opening quote with no closing quote is an error even when the rest
+  // of the line is a single word; compare `invalid/unclosed-quote`.
   let ini_text =
     #|quote="value
     #|
-  let ini = @ini.parse(ini_text)
-  assert_eq(ini, { global: { "quote": "\"value" }, sections: Map([]), })
+  @test.assert_raise(() => @ini.parse(ini_text))
+}
+
+///|
+test "invalid/unterminated-single-quote" {
+  let ini_text =
+    #|quote='value
+    #|
+  @test.assert_raise(() => @ini.parse(ini_text))
 }
 
 ///|
