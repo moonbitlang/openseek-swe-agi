@@ -38,25 +38,20 @@ jobs:
         run: |
           url=https://github.com/moonbitlang/openseek.git
           ref="${OPENSEEK_REF:-}"
-          if [ -z "$ref" ]; then
-            adhoc=false
-            sha="$(git ls-remote "$url" HEAD | cut -f1)"
-          elif [[ "$ref" =~ ^[0-9a-f]{40}$ ]]; then
-            # GitHub serves arbitrary reachable SHAs, so the bench job's
-            # `fetch --depth 1 origin <sha>` below takes this as-is.
-            adhoc=true
-            sha="$ref"
-          else
-            adhoc=true
-            # A branch or tag name. An annotated tag lists both the tag object
-            # and the commit it peels to (`<ref>^{}`); we want the commit.
-            refs="$(git ls-remote "$url" "$ref")"
-            sha="$(awk '$2 ~ /\^\{\}$/ {print $1; exit}' <<<"$refs")"
-            [ -n "$sha" ] || sha="$(awk 'NR == 1 {print $1}' <<<"$refs")"
-          fi
-          test -n "$sha" || {
-            echo "::error::cannot resolve openseek ref '$ref' -- pass a full" \
+          if [ -n "$ref" ]; then adhoc=true; else adhoc=false; ref=HEAD; fi
+          # Resolve by fetching. It is the one form that accepts a branch, a
+          # tag and a raw SHA alike -- ls-remote would hand back an annotated
+          # tag's *tag object*, since its patterns match the ref tail and so
+          # never match the peeled `<ref>^{}` entry, and we would then publish
+          # a SHA that is not the commit the bench jobs check out. A blobless
+          # single-commit fetch also proves the ref exists before six matrix
+          # jobs try it.
+          git init --quiet -b main resolve
+          git -C resolve remote add origin "$url"
+          git -C resolve fetch --quiet --depth 1 --filter=blob:none origin "$ref" || {
+            echo "::error::cannot fetch openseek ref '$ref' -- pass a full" \
                  "40-hex SHA, or a branch/tag name"; exit 1; }
+          sha="$(git -C resolve rev-parse "FETCH_HEAD^{commit}")"
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
           echo "adhoc=$adhoc" >> "$GITHUB_OUTPUT"
           echo "benchmarking openseek $sha (ad-hoc: $adhoc)"
