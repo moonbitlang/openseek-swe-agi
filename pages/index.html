@@ -194,6 +194,7 @@ const svgEl = (tag, attrs) => {
 function toPoint(rec) {
   const k = rec.runs.length;
   const mean = f => (k === 0 ? 0 : rec.runs.reduce((acc, run) => acc + f(run), 0) / k);
+  const finished = rec.runs.filter(run => run.stop_reason && run.stop_reason.kind === "finished");
   let toolOk = 0, toolAll = 0;
   for (const run of rec.runs) {
     for (const s of Object.values(run.tool_call_stats)) {
@@ -212,7 +213,13 @@ function toPoint(rec) {
       return t.total > 0 ? t.passed / t.total : 0;
     }),
     toolRate: toolAll > 0 ? toolOk / toolAll : 0,
-    avgSteps: mean(run => run.steps),
+    // Steps only over runs that ran to completion: a run cut short by an
+    // infra error (or one that looped until aborted) measures when the
+    // harness stopped it, not how many steps the agent needed. No finished
+    // run that day leaves a gap rather than a fake number.
+    avgSteps: finished.length === 0
+      ? null
+      : finished.reduce((acc, run) => acc + run.steps, 0) / finished.length,
     warnings: rec.runs.reduce((acc, run) => acc + run.check_result.warnings, 0),
     runs: rec.runs,
   };
@@ -372,7 +379,7 @@ function ratesChart(points, onPick) {
 }
 
 function stepsChart(points, onPick) {
-  const max = Math.max(20, ...points.map(p => p.avgSteps));
+  const max = Math.max(20, ...points.map(p => p.avgSteps ?? 0));
   const ymax = Math.ceil(max / 20) * 20;
   return chart(points, [{ get: p => p.avgSteps, color: "var(--series-steps)", label: "avg steps" }], {
     height: 140,
@@ -381,8 +388,13 @@ function stepsChart(points, onPick) {
     fmt: v => String(Math.round(v)),
     onPick,
     tooltipRows: p => [
-      ttRow("var(--series-steps)", `avg steps: ${Math.round(p.avgSteps)}`),
-      el("div", "tt-row", `runs: ${p.runs.map(run => run.steps).join(" / ")}`),
+      ttRow("var(--series-steps)", p.avgSteps === null
+        ? "avg steps: no finished run"
+        : `avg steps (finished only): ${Math.round(p.avgSteps)}`),
+      el("div", "tt-row", `runs: ${p.runs.map(run => {
+        const kind = run.stop_reason ? run.stop_reason.kind : "missing";
+        return kind === "finished" ? String(run.steps) : `${run.steps} (${kind})`;
+      }).join(" / ")}`),
     ],
   });
 }
