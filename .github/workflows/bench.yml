@@ -131,9 +131,10 @@ jobs:
         run: |
           moon run tools/grade -- "$TASK" > grade.json
           jq --arg date "$(date -u +%F)" \
+             --arg run "$GITHUB_RUN_NUMBER" \
              --arg openseek_commit "$OPENSEEK_COMMIT" \
-             '{date: $date, openseek_commit: $openseek_commit} + .' grade.json \
-            | tee "stats-$TASK.json"
+             '{date: $date, run: $run, openseek_commit: $openseek_commit} + .' \
+             grade.json | tee "stats-$TASK.json"
 
       - name: Export HTML
         continue-on-error: true
@@ -268,17 +269,19 @@ jobs:
           gh release view viewers >/dev/null 2>&1 ||
             gh release create viewers --title "Session viewers" --latest=false \
               --notes "Standalone session-viewer archives, one asset per task-run."
-          # Keyed by date and commit so a day that gets benchmarked twice --
-          # the nightly plus an ad-hoc ref -- keeps both viewers. The dashboard
-          # rebuilds this name from each stats record's own openseek_commit,
-          # so the two must agree on the 9-character prefix. The date stays
-          # first: the GC step below reads it back by position.
-          sha="${OPENSEEK_COMMIT:0:9}"
+          # Keyed by run number, the same key that separates the day's stats
+          # files: a day can be benchmarked more than once -- the nightly plus
+          # an ad-hoc ref, or a re-dispatch of an unchanged HEAD -- and each
+          # measurement needs its own viewer. The commit does not separate that
+          # last case; the run number separates all of them. The dashboard
+          # rebuilds this name from each stats record's own `run`. The date
+          # stays first: the GC step below reads it back by position.
           for f in "${files[@]}"; do
             task="$(basename "$f" .html)"
             task="${task#bench-}"
-            cp "$f" "bench-${date}-${sha}-${task}.html"
-            gh release upload viewers "bench-${date}-${sha}-${task}.html" --clobber
+            name="bench-${date}-${GITHUB_RUN_NUMBER}-${task}.html"
+            cp "$f" "$name"
+            gh release upload viewers "$name" --clobber
           done
 
       # Retire viewer assets older than 90 days — the asset name carries its
