@@ -182,14 +182,6 @@ jobs:
     needs: [prepare, bench]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
-    # Benchmarks of different refs run in parallel (their concurrency groups
-    # differ), but they all commit stats to one branch and deploy one Pages
-    # site. Reporting therefore serializes across every ref: each report job
-    # checks out only after the previous one has pushed, so the site it builds
-    # includes that run's stats instead of racing it to the deploy.
-    concurrency:
-      group: bench-report
-      cancel-in-progress: false
     environment:
       name: github-pages
     permissions:
@@ -324,6 +316,20 @@ jobs:
         run: |
           mkdir -p _site/viewer
           cp pages/index.html _site/
+          # Benchmarks of different refs run in parallel and all commit to one
+          # branch, so another run's stats may have landed since the commit
+          # step pushed. Take stats/ from the branch as it stands now, not as
+          # this job checked it out, so the site is built from every result
+          # committed so far.
+          #
+          # Deliberately not a concurrency group on this job: a group keeps
+          # only one pending member, so a third report would cancel the second
+          # and lose a whole benchmark's stats. Committing must never be
+          # cancellable. The residue is that two runs deploying within seconds
+          # of each other can leave the later-published one off the site until
+          # the next run rebuilds it -- stale, never lost.
+          git fetch --quiet origin "$GITHUB_REF_NAME"
+          git checkout --quiet FETCH_HEAD -- stats
           jq -s 'flatten | sort_by(.date)' stats/*.json > _site/data.json
           gh release download viewers --dir _site/viewer \
             --pattern 'bench-*.html' || echo "no viewers published yet"
