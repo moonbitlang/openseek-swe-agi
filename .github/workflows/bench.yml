@@ -4,27 +4,62 @@ on:
   schedule:
     - cron: "0 10 * * *" # Runs everyday 18:00 UTC+8
   workflow_dispatch:
+    inputs:
+      openseek_ref:
+        description: >-
+          openseek commit to benchmark: a full 40-hex SHA, or a branch/tag
+          name. Empty means openseek's current HEAD, which is exactly what the
+          nightly schedule measures.
+        required: false
+        default: ""
 
-# One benchmark at a time: overlapping runs would race on the stats commit.
+# One benchmark per target at a time: overlapping HEAD runs would race on the
+# stats commit. An ad-hoc run of a named ref never commits, so it only has to
+# serialize against other runs of that same ref.
 concurrency:
-  group: bench
+  group: bench-${{ github.event.inputs.openseek_ref || 'head' }}
   cancel-in-progress: false
 
 jobs:
   # Resolve the openseek commit under test once, so every task in the matrix
-  # benchmarks the same agent even if openseek's HEAD moves mid-run.
+  # benchmarks the same agent even if openseek's HEAD moves mid-run. A dispatch
+  # may name that commit instead, which makes the run "ad-hoc": it reports
+  # without writing anything back to this repo (see the report job).
   prepare:
     runs-on: ubuntu-latest
     outputs:
       openseek_commit: ${{ steps.head.outputs.sha }}
+      adhoc: ${{ steps.head.outputs.adhoc }}
     steps:
-      - name: Resolve openseek HEAD
+      - name: Resolve the openseek commit under test
         id: head
+        env:
+          OPENSEEK_REF: ${{ github.event.inputs.openseek_ref }}
         run: |
-          sha="$(git ls-remote https://github.com/moonbitlang/openseek.git HEAD | cut -f1)"
-          test -n "$sha"
+          url=https://github.com/moonbitlang/openseek.git
+          ref="${OPENSEEK_REF:-}"
+          if [ -z "$ref" ]; then
+            adhoc=false
+            sha="$(git ls-remote "$url" HEAD | cut -f1)"
+          elif [[ "$ref" =~ ^[0-9a-f]{40}$ ]]; then
+            # GitHub serves arbitrary reachable SHAs, so the bench job's
+            # `fetch --depth 1 origin <sha>` below takes this as-is.
+            adhoc=true
+            sha="$ref"
+          else
+            adhoc=true
+            # A branch or tag name. An annotated tag lists both the tag object
+            # and the commit it peels to (`<ref>^{}`); we want the commit.
+            refs="$(git ls-remote "$url" "$ref")"
+            sha="$(awk '$2 ~ /\^\{\}$/ {print $1; exit}' <<<"$refs")"
+            [ -n "$sha" ] || sha="$(awk 'NR == 1 {print $1}' <<<"$refs")"
+          fi
+          test -n "$sha" || {
+            echo "::error::cannot resolve openseek ref '$ref' -- pass a full" \
+                 "40-hex SHA, or a branch/tag name"; exit 1; }
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
-          echo "benchmarking openseek $sha"
+          echo "adhoc=$adhoc" >> "$GITHUB_OUTPUT"
+          echo "benchmarking openseek $sha (ad-hoc: $adhoc)"
 
   bench:
     needs: prepare
@@ -58,7 +93,7 @@ jobs:
         with:
           submodules: true
 
-      - name: Pin openseek to the resolved HEAD
+      - name: Pin openseek to the commit under test
         run: |
           git -C openseek fetch --depth 1 origin "$OPENSEEK_COMMIT"
           git -C openseek checkout --quiet "$OPENSEEK_COMMIT"
@@ -143,12 +178,57 @@ jobs:
           echo "::error::openseek fleet exited nonzero; partial results were still graded and uploaded"
           exit 1
 
+  # Every run -- scheduled or ad-hoc -- gets its numbers rendered into the run
+  # summary and its per-task stats collected into one downloadable document.
+  # The artifact is deliberately not named stats-*: the report job downloads
+  # that pattern, and the two jobs run concurrently.
+  summarize:
+    needs: [prepare, bench]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    env:
+      OPENSEEK_COMMIT: ${{ needs.prepare.outputs.openseek_commit }}
+    steps:
+      - name: Download stats
+        uses: actions/download-artifact@v4
+        with:
+          pattern: stats-*
+          path: collected
+          merge-multiple: true
+
+      - name: Merge and render
+        run: |
+          shopt -s nullglob
+          files=(collected/*.json)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "::error::no stats artifacts were produced"; exit 1
+          fi
+          jq -s 'sort_by(.task)' "${files[@]}" > stats-all.json
+          {
+            echo "### openseek \`$OPENSEEK_COMMIT\`"
+            echo
+            echo "| task | runs passed | tests per run |"
+            echo "| --- | --- | --- |"
+            jq -r '.[] | "| \(.task) | \(.passed)/\(.runs | length) | " +
+                         "\([.runs[] | "\(.test_result.passed)/\(.test_result.total)"]
+                            | join(", ")) |"' stats-all.json
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload combined stats
+        uses: actions/upload-artifact@v4
+        with:
+          name: combined-stats
+          path: stats-all.json
+          retention-days: 14
+
   # Commits the day's stats plus the tested openseek submodule pin in one
   # commit, so every stats file is attributable to an exact agent version.
   # Runs even when a task failed: a red day still records what it measured.
+  # Skipped for ad-hoc runs: a named ref is not the timeline's HEAD, so
+  # committing it would rewind the submodule pin and forge a day's entry.
   report:
     needs: [prepare, bench]
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && needs.prepare.outputs.adhoc != 'true' }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
