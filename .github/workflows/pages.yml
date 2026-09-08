@@ -1,0 +1,106 @@
+name: pages
+
+# The dashboard is a pure function of what is already committed: stats/ plus
+# the renderer, with the session viewers pulled from the release. So it is
+# rebuilt whenever one of those changes, rather than at the end of a benchmark
+# -- committing a stats file by hand, or editing the renderer, now publishes
+# without burning a fleet run to reach the deploy step.
+#
+# bench.yml reaches this through workflow_dispatch, not through the push
+# below, and that is not a stylistic choice: a push authenticated with
+# GITHUB_TOKEN -- which is what actions/checkout leaves configured -- creates
+# no workflow runs at all. workflow_dispatch and repository_dispatch are the
+# only two events exempt from that rule, so bench.yml asks for a deploy
+# explicitly once its stats commit has landed.
+#
+# The push trigger is still worth having: it covers commits by people, which
+# do create runs. Merging a change to the renderer publishes it.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "stats/**"
+      - "pages/**"
+      - ".github/workflows/pages.yml"
+
+# Serialized, and deliberately not cancel-in-progress. Content-wise a
+# superseded deploy has nothing to lose -- every run rebuilds the whole site
+# from committed state -- but cancelling a run that has already handed a
+# deployment to actions/deploy-pages leaves that deployment stuck in progress
+# and blocks the next one. A queued run is superseded by a newer queued run
+# anyway, which is the behaviour we wanted, without touching a live deploy.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      # Pages is one production site, so what ships is always the default
+      # branch -- never the ref a dispatch happened to name. `--ref` selects
+      # which *version of this workflow* runs; left unpinned here, that ref's
+      # stats and renderer would go live too, rolling the dashboard back to
+      # whatever a feature branch holds. bench.yml gates the same hazard out
+      # before reporting; this one is closed by construction instead, so no
+      # way of triggering the workflow can deploy the wrong tree.
+      - name: Checkout the default branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      # Deploying is then not what the dispatcher asked for, so say so rather
+      # than leaving them to wonder where their branch went.
+      - name: Note a non-default dispatch
+        if: ${{ github.ref_name != github.event.repository.default_branch }}
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          echo "::warning::triggered from '$GITHUB_REF_NAME', but the dashboard" \
+               "is always built from '$DEFAULT_BRANCH' -- that is what was" \
+               "deployed. To preview a branch, serve pages/index.html locally" \
+               "against a data.json built from its stats/."
+
+      - name: Build site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p _site/viewer
+          cp pages/index.html _site/
+          # Sorted by run within a day, not by filename: the glob puts
+          # ...-100.json before ...-99.json, sort_by is stable, and the
+          # dashboard reads the last record of a day as the latest one.
+          # Records predating the run field sort as 0 and hold their relative
+          # order, which is the file order. That is only accidentally right --
+          # 2026-09-04 through -09-07 are double-digit runs with no field --
+          # but every day with more than one such file has single-digit runs,
+          # so nothing is currently misordered by it.
+          jq -s 'flatten | sort_by([.date, (.run // "0" | tonumber)])' \
+            stats/*.json > _site/data.json
+          # The manifest tells the dashboard which viewers survive the 90-day
+          # GC, so it can hide a dead link instead of rendering one.
+          gh release download viewers --dir _site/viewer \
+            --pattern 'bench-*.html' ||
+            echo "::warning::could not download the viewers release in full;" \
+                 "the manifest below may be short and some session links" \
+                 "hidden until the next deploy."
+          ls _site/viewer | jq -R . | jq -s . > _site/viewers.json
+          echo "built $(jq length _site/data.json) records," \
+               "$(jq length _site/viewers.json) viewers"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy Pages
+        id: deploy
+        uses: actions/deploy-pages@v4

@@ -13,9 +13,10 @@ on:
         required: false
         default: ""
 
-# One benchmark per target at a time: overlapping HEAD runs would race on the
-# stats commit. An ad-hoc run of a named ref never commits, so it only has to
-# serialize against other runs of that same ref.
+# One benchmark per target at a time. Runs of different refs may overlap: they
+# all commit to one branch, but the push loop below rebases, and each run then
+# dispatches pages.yml itself. Do not "simplify" that dispatch away on the
+# theory that the push triggers it -- a GITHUB_TOKEN push creates no runs.
 concurrency:
   group: bench-${{ github.event.inputs.openseek_ref || 'head' }}
   cancel-in-progress: false
@@ -99,6 +100,7 @@ jobs:
     env:
       TASK: ${{ matrix.task }}
       OPENSEEK_COMMIT: ${{ needs.prepare.outputs.openseek_commit }}
+      ADHOC: ${{ needs.prepare.outputs.adhoc }}
       # openseek is a workspace and `moon` runs the prebuild of every member,
       # including ./desktop, which imports moonbit-community/proton. proton's
       # build.mjs asks pkg-config for gtk+-3.0 and x11 on linux, so it fails
@@ -162,8 +164,10 @@ jobs:
           moon run tools/grade -- "$TASK" > grade.json
           jq --arg date "$(date -u +%F)" \
              --arg run "$GITHUB_RUN_NUMBER" \
+             --argjson adhoc "$ADHOC" \
              --arg openseek_commit "$OPENSEEK_COMMIT" \
-             '{date: $date, run: $run, openseek_commit: $openseek_commit} + .' \
+             '{date: $date, run: $run, adhoc: $adhoc,
+               openseek_commit: $openseek_commit} + .' \
              grade.json | tee "stats-$TASK.json"
 
       - name: Export HTML
@@ -204,20 +208,21 @@ jobs:
           echo "::error::openseek fleet exited nonzero; partial results were still graded and uploaded"
           exit 1
 
-  # Commits the day's stats and publishes the dashboard. Runs even when a task
-  # failed: a red day still records what it measured. Ad-hoc runs report here
-  # too -- their stats carry their own openseek_commit, so the dashboard can
-  # show a named ref beside the HEAD timeline.
+  # Publishes the run, ordered by what can afford to fail: the stats commit
+  # first, being the one result a finished benchmark cannot reproduce; then
+  # every change to the release -- uploading this run's viewers, retiring
+  # expired ones -- because the deploy downloads that release wholesale and
+  # would otherwise race the deletions; then the dispatch. Runs even when a
+  # task failed: a red day still records what it measured. Ad-hoc runs report
+  # here too; their stats carry their own openseek_commit, so the dashboard
+  # marks them and shows the ref they measured.
   report:
     needs: [prepare, bench]
     if: ${{ !cancelled() && needs.prepare.outputs.reporting == 'true' }}
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
     permissions:
       contents: write
-      pages: write
-      id-token: write
+      actions: write
     env:
       OPENSEEK_COMMIT: ${{ needs.prepare.outputs.openseek_commit }}
       ADHOC: ${{ needs.prepare.outputs.adhoc }}
@@ -276,6 +281,15 @@ jobs:
             git -C openseek checkout --quiet "$OPENSEEK_COMMIT"
             git add openseek
           fi
+          # Re-running report is the documented way to finish a run that
+          # committed and then failed at viewers or the deploy, and the run
+          # number is stable across attempts, so the file it would write is
+          # already there byte for byte. Nothing staged means the commit is
+          # done, not that something went wrong.
+          if git diff --cached --quiet; then
+            echo "stats for run ${GITHUB_RUN_NUMBER} are already committed"
+            exit 0
+          fi
           git commit -m "bench: ${date} (openseek ${OPENSEEK_COMMIT:0:9}${note})"
           # Every reporting run pushes to this one branch, and runs of
           # different refs report in parallel, so a rejection just means
@@ -295,7 +309,7 @@ jobs:
 
       # Viewer HTML is heavy and never enters git history: it lives as assets
       # on a single rolling "viewers" release (durable, no expiry), keyed
-      # bench-<date>-<task>.html — the name the dashboard links to.
+      # bench-<date>-<run>-<task>.html — the name the dashboard links to.
       - name: Publish session viewers
         env:
           GH_TOKEN: ${{ github.token }}
@@ -322,7 +336,12 @@ jobs:
           for f in "${files[@]}"; do
             task="$(basename "$f" .html)"
             task="${task#bench-}"
-            d="$(jq -r '.date' "collected/stats-${task}.json")"
+            d="$(jq -r '.date' "collected/stats-${task}.json" 2>/dev/null)" || d=""
+            if [ -z "$d" ] || [ "$d" = null ]; then
+              echo "::warning::no stats record for $task, so its viewer has" \
+                   "no date to file under -- skipping it."
+              continue
+            fi
             name="bench-${d}-${GITHUB_RUN_NUMBER}-${task}.html"
             cp "$f" "$name"
             gh release upload viewers "$name" --clobber
@@ -330,7 +349,7 @@ jobs:
 
       # Retire viewer assets older than 90 days — the asset name carries its
       # date, so age needs no API timestamps. The dashboard reads the manifest
-      # below and stops linking a day once its viewer is gone.
+      # and stops linking a day once its viewer is gone.
       - name: GC old session viewers
         env:
           GH_TOKEN: ${{ github.token }}
@@ -342,50 +361,20 @@ jobs:
             day="${day:0:10}"
             if [[ "$day" < "$cutoff" ]]; then
               echo "retiring $name (before $cutoff)"
-              gh release delete-asset viewers "$name" --yes
+              gh release delete-asset viewers "$name" --yes ||
+                echo "::warning::could not delete $name; another run may" \
+                     "have retired it already -- the next GC will retry."
             fi
           done
 
-      # Publish the dashboard: the static renderer plus every committed stats
-      # file (including today's) merged into one data.json, the surviving
-      # session-viewer archive pulled back from the release, and a manifest of
-      # which viewers exist. Requires Pages source set to "GitHub Actions".
-      - name: Build site
+      # The stats push above cannot trigger pages.yml on its own: it is
+      # authenticated with GITHUB_TOKEN, and pushes made with that token create
+      # no workflow runs. workflow_dispatch is one of the two events exempt
+      # from that rule, so this is the only thing that can put the committed
+      # stats on the dashboard before the next nightly -- which is why it runs
+      # even when publishing the viewers stumbled.
+      - name: Deploy the dashboard
+        if: ${{ !cancelled() }}
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          mkdir -p _site/viewer
-          cp pages/index.html _site/
-          # Benchmarks of different refs run in parallel and all commit to one
-          # branch, so another run's stats may have landed since the commit
-          # step pushed. Take stats/ from the branch as it stands now, not as
-          # this job checked it out, so the site is built from every result
-          # committed so far.
-          #
-          # Deliberately not a concurrency group on this job: a group keeps
-          # only one pending member, so a third report would cancel the second
-          # and lose a whole benchmark's stats. Committing must never be
-          # cancellable. The residue is that two runs deploying within seconds
-          # of each other can leave the later-published one off the site until
-          # the next run rebuilds it -- stale, never lost.
-          git fetch --quiet origin "$GITHUB_REF_NAME"
-          git checkout --quiet FETCH_HEAD -- stats
-          # Sorted by run within a day, not by filename: the glob puts
-          # ...-100.json before ...-99.json, sort_by is stable, and the
-          # dashboard reads the last record of a day as the latest one.
-          # Records predating the run field sort as 0 and keep their relative
-          # order, which for the single-digit runs they came from is the same
-          # thing.
-          jq -s 'flatten | sort_by([.date, (.run // "0" | tonumber)])' \
-            stats/*.json > _site/data.json
-          gh release download viewers --dir _site/viewer \
-            --pattern 'bench-*.html' || echo "no viewers published yet"
-          ls _site/viewer | jq -R . | jq -s . > _site/viewers.json
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-
-      - name: Deploy Pages
-        uses: actions/deploy-pages@v4
+        run: gh workflow run pages.yml --ref "$GITHUB_REF_NAME"

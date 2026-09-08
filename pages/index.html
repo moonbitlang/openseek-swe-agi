@@ -205,6 +205,11 @@ function toPoint(rec) {
   return {
     date: rec.date,
     run: rec.run ?? null,
+    // A benchmark of a named ref rather than of openseek HEAD. It is filed
+    // under the day it ran, so it sorts last and would otherwise be read as
+    // the timeline's newest state -- while the commit it measured is often
+    // an older one. Everywhere a point is called latest, say when it isn't.
+    adhoc: rec.adhoc === true,
     commit: (rec.openseek_commit || "").slice(0, 9),
     k,
     passed: rec.passed,
@@ -327,7 +332,9 @@ function chart(points, series, { height, ymax, ticks, fmt, tooltipRows, onPick }
     crosshair.setAttribute("x1", x(best));
     crosshair.setAttribute("x2", x(best));
     crosshair.style.visibility = "visible";
-    tooltip.replaceChildren(el("div", "tt-date", `${p.date} · ${p.commit}`), ...tooltipRows(p));
+    tooltip.replaceChildren(
+      el("div", "tt-date", `${p.date} · ${p.commit}${p.adhoc ? " · ad-hoc" : ""}`),
+      ...tooltipRows(p));
     tooltip.style.visibility = "visible";
     const left = (x(best) / W) * rect.width;
     tooltip.style.left = `${Math.min(left + 12, rect.width - tooltip.offsetWidth - 4)}px`;
@@ -598,7 +605,8 @@ function taskCard(task, records) {
   const head = el("div", "task-head");
   head.append(el("span", "task-name", task));
   head.append(el("span", "task-latest",
-    `${latest.date}: ${latest.passed}/${latest.k} passed · tests ${pct(latest.testRatio)}`));
+    `${latest.date}${latest.adhoc ? " (ad-hoc)" : ""}: ` +
+    `${latest.passed}/${latest.k} passed · tests ${pct(latest.testRatio)}`));
   const viewer = el("a", "run-link", "sessions ↗");
   viewer.target = "_blank";
   viewer.rel = "noopener";
@@ -669,6 +677,8 @@ async function boot() {
   subtitle.replaceChildren(
     document.createTextNode(`daily fleet benchmark · latest ${last.date} · openseek `),
     Object.assign(el("code"), { textContent: (last.openseek_commit || "").slice(0, 9) }),
+    document.createTextNode(last.adhoc === true
+      ? " (ad-hoc: a named ref, not necessarily HEAD)" : ""),
   );
   const tasksRoot = document.getElementById("tasks");
   for (const [task, recs] of [...byTask.entries()].sort()) {
