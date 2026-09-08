@@ -5,14 +5,24 @@ name: pages
 # rebuilt whenever one of those changes, rather than at the end of a benchmark
 # -- committing a stats file by hand, or editing the renderer, now publishes
 # without burning a fleet run to reach the deploy step.
+#
+# bench.yml reaches this through workflow_dispatch, not through the push
+# below, and that is not a stylistic choice: a push authenticated with
+# GITHUB_TOKEN -- which is what actions/checkout leaves configured -- creates
+# no workflow runs at all. workflow_dispatch and repository_dispatch are the
+# only two events exempt from that rule, so bench.yml asks for a deploy
+# explicitly once its stats commit has landed.
+#
+# The push trigger is still worth having: it covers commits by people, which
+# do create runs. Merging a change to the renderer publishes it.
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - "stats/**"
       - "pages/**"
       - ".github/workflows/pages.yml"
-  workflow_dispatch:
 
 # Only the newest deployment matters: every run rebuilds the whole site from
 # committed state, so a superseded one has nothing to lose by being cancelled.

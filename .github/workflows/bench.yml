@@ -216,6 +216,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write
     env:
       OPENSEEK_COMMIT: ${{ needs.prepare.outputs.openseek_commit }}
       ADHOC: ${{ needs.prepare.outputs.adhoc }}
@@ -239,6 +240,9 @@ jobs:
           path: collected-runs
           merge-multiple: true
 
+      # Viewer HTML is heavy and never enters git history: it lives as assets
+      # on a single rolling "viewers" release (durable, no expiry), keyed
+      # bench-<date>-<run>-<task>.html — the name the dashboard links to.
       - name: Publish session viewers
         env:
           GH_TOKEN: ${{ github.token }}
@@ -289,11 +293,6 @@ jobs:
               gh release delete-asset viewers "$name" --yes
             fi
           done
-
-      # Publish the dashboard: the static renderer plus every committed stats
-      # file (including today's) merged into one data.json, the surviving
-      # session-viewer archive pulled back from the release, and a manifest of
-      # which viewers exist. Requires Pages source set to "GitHub Actions".
 
       - name: Merge stats and commit
         run: |
@@ -347,6 +346,11 @@ jobs:
           echo "::error::could not push stats after ${attempts} attempts"
           exit 1
 
-      # Viewer HTML is heavy and never enters git history: it lives as assets
-      # on a single rolling "viewers" release (durable, no expiry), keyed
-      # bench-<date>-<task>.html — the name the dashboard links to.
+      # The stats push above cannot trigger pages.yml on its own: it is
+      # authenticated with GITHUB_TOKEN, and pushes made with that token
+      # create no workflow runs. Dispatching is the documented way through --
+      # workflow_dispatch is one of the two events exempt from the rule.
+      - name: Deploy the dashboard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref "$GITHUB_REF_NAME"
