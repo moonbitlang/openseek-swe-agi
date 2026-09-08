@@ -14,8 +14,9 @@ on:
         default: ""
 
 # One benchmark per target at a time. Runs of different refs may overlap: they
-# all commit to one branch, but the push loop below rebases, and the dashboard
-# is deployed by pages.yml off the resulting pushes rather than from here.
+# all commit to one branch, but the push loop below rebases, and each run then
+# dispatches pages.yml itself. Do not "simplify" that dispatch away on the
+# theory that the push triggers it -- a GITHUB_TOKEN push creates no runs.
 concurrency:
   group: bench-${{ github.event.inputs.openseek_ref || 'head' }}
   cancel-in-progress: false
@@ -99,6 +100,7 @@ jobs:
     env:
       TASK: ${{ matrix.task }}
       OPENSEEK_COMMIT: ${{ needs.prepare.outputs.openseek_commit }}
+      ADHOC: ${{ needs.prepare.outputs.adhoc }}
       # openseek is a workspace and `moon` runs the prebuild of every member,
       # including ./desktop, which imports moonbit-community/proton. proton's
       # build.mjs asks pkg-config for gtk+-3.0 and x11 on linux, so it fails
@@ -162,8 +164,10 @@ jobs:
           moon run tools/grade -- "$TASK" > grade.json
           jq --arg date "$(date -u +%F)" \
              --arg run "$GITHUB_RUN_NUMBER" \
+             --argjson adhoc "$ADHOC" \
              --arg openseek_commit "$OPENSEEK_COMMIT" \
-             '{date: $date, run: $run, openseek_commit: $openseek_commit} + .' \
+             '{date: $date, run: $run, adhoc: $adhoc,
+               openseek_commit: $openseek_commit} + .' \
              grade.json | tee "stats-$TASK.json"
 
       - name: Export HTML
@@ -277,6 +281,15 @@ jobs:
             git -C openseek checkout --quiet "$OPENSEEK_COMMIT"
             git add openseek
           fi
+          # Re-running report is the documented way to finish a run that
+          # committed and then failed at viewers or the deploy, and the run
+          # number is stable across attempts, so the file it would write is
+          # already there byte for byte. Nothing staged means the commit is
+          # done, not that something went wrong.
+          if git diff --cached --quiet; then
+            echo "stats for run ${GITHUB_RUN_NUMBER} are already committed"
+            exit 0
+          fi
           git commit -m "bench: ${date} (openseek ${OPENSEEK_COMMIT:0:9}${note})"
           # Every reporting run pushes to this one branch, and runs of
           # different refs report in parallel, so a rejection just means
@@ -323,25 +336,32 @@ jobs:
           for f in "${files[@]}"; do
             task="$(basename "$f" .html)"
             task="${task#bench-}"
-            d="$(jq -r '.date' "collected/stats-${task}.json")"
+            d="$(jq -r '.date' "collected/stats-${task}.json" 2>/dev/null)" || d=""
+            if [ -z "$d" ] || [ "$d" = null ]; then
+              echo "::warning::no stats record for $task, so its viewer has" \
+                   "no date to file under -- skipping it."
+              continue
+            fi
             name="bench-${d}-${GITHUB_RUN_NUMBER}-${task}.html"
             cp "$f" "$name"
             gh release upload viewers "$name" --clobber
           done
 
-      # Retire viewer assets older than 90 days — the asset name carries its
-      # date, so age needs no API timestamps. The dashboard reads the manifest
-      # below and stops linking a day once its viewer is gone.
-
       # The stats push above cannot trigger pages.yml on its own: it is
-      # authenticated with GITHUB_TOKEN, and pushes made with that token
-      # create no workflow runs. Dispatching is the documented way through --
-      # workflow_dispatch is one of the two events exempt from the rule.
+      # authenticated with GITHUB_TOKEN, and pushes made with that token create
+      # no workflow runs. workflow_dispatch is one of the two events exempt
+      # from that rule, so this is the only thing that can put the committed
+      # stats on the dashboard before the next nightly -- which is why it runs
+      # even when publishing the viewers stumbled.
       - name: Deploy the dashboard
+        if: ${{ !cancelled() }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run pages.yml --ref "$GITHUB_REF_NAME"
 
+      # Retire viewer assets older than 90 days — the asset name carries its
+      # date, so age needs no API timestamps. The dashboard reads the manifest
+      # and stops linking a day once its viewer is gone.
       - name: GC old session viewers
         env:
           GH_TOKEN: ${{ github.token }}

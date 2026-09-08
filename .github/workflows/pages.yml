@@ -24,12 +24,15 @@ on:
       - "pages/**"
       - ".github/workflows/pages.yml"
 
-# Only the newest deployment matters: every run rebuilds the whole site from
-# committed state, so a superseded one has nothing to lose by being cancelled.
-# This is the opposite of the stats commit in bench.yml, which must never be.
+# Serialized, and deliberately not cancel-in-progress. Content-wise a
+# superseded deploy has nothing to lose -- every run rebuilds the whole site
+# from committed state -- but cancelling a run that has already handed a
+# deployment to actions/deploy-pages leaves that deployment stuck in progress
+# and blocks the next one. A queued run is superseded by a newer queued run
+# anyway, which is the behaviour we wanted, without touching a live deploy.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -75,9 +78,11 @@ jobs:
           # Sorted by run within a day, not by filename: the glob puts
           # ...-100.json before ...-99.json, sort_by is stable, and the
           # dashboard reads the last record of a day as the latest one.
-          # Records predating the run field sort as 0 and keep their relative
-          # order, which for the single-digit runs they came from is the same
-          # thing.
+          # Records predating the run field sort as 0 and hold their relative
+          # order, which is the file order. That is only accidentally right --
+          # 2026-09-04 through -09-07 are double-digit runs with no field --
+          # but every day with more than one such file has single-digit runs,
+          # so nothing is currently misordered by it.
           jq -s 'flatten | sort_by([.date, (.run // "0" | tonumber)])' \
             stats/*.json > _site/data.json
           # The manifest tells the dashboard which viewers survive the 90-day

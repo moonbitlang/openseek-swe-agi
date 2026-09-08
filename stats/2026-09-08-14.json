@@ -2,6 +2,7 @@
   {
     "date": "2026-09-08",
     "run": "14",
+    "adhoc": true,
     "openseek_commit": "343c0701b94890255a2725523c41d8c4deb25bc7",
     "task": "csv",
     "passed": 3,
@@ -1090,6 +1091,7 @@
   {
     "date": "2026-09-08",
     "run": "14",
+    "adhoc": true,
     "openseek_commit": "343c0701b94890255a2725523c41d8c4deb25bc7",
     "task": "hpack",
     "passed": 3,
@@ -3622,6 +3624,7 @@
   {
     "date": "2026-09-08",
     "run": "14",
+    "adhoc": true,
     "openseek_commit": "343c0701b94890255a2725523c41d8c4deb25bc7",
     "task": "ini",
     "passed": 3,
@@ -4734,6 +4737,7 @@
   {
     "date": "2026-09-08",
     "run": "14",
+    "adhoc": true,
     "openseek_commit": "343c0701b94890255a2725523c41d8c4deb25bc7",
     "task": "protobuf",
     "passed": 3,
@@ -6374,6 +6378,7 @@
   {
     "date": "2026-09-08",
     "run": "14",
+    "adhoc": true,
     "openseek_commit": "343c0701b94890255a2725523c41d8c4deb25bc7",
     "task": "toml",
     "passed": 1,
@@ -9558,6 +9563,7 @@
   {
     "date": "2026-09-08",
     "run": "14",
+    "adhoc": true,
     "openseek_commit": "343c0701b94890255a2725523c41d8c4deb25bc7",
     "task": "uri",
     "passed": 3,
