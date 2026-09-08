@@ -15,10 +15,14 @@ other commit, dispatch the `bench` workflow manually and fill in
 gh workflow run bench.yml -f openseek_ref=<sha-or-branch>
 ```
 
-Such a run is *ad-hoc*: it grades every task as usual and leaves the results
-in the run summary plus the `combined-stats` / `runs-<task>` artifacts, but it
-does not commit stats, move the `openseek` submodule pin, or redeploy the
-dashboard — those record the HEAD timeline and a pinned ref is not part of it.
+Such a run is *ad-hoc*, but it reports like any other: its stats are committed
+under `stats/`, the session viewers are published, and the dashboard is
+redeployed with the new point on it. Each stats record carries the
+`openseek_commit` it measured, so the point stays attributable.
+
+The one thing an ad-hoc run does not do is move the `openseek` submodule pin.
+That pin records which HEAD the timeline has reached, and a named ref — often
+an older commit — would rewind it.
 
 Locally, the submodule is an ordinary checkout, so any commit works directly:
 

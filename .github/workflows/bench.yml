@@ -173,57 +173,13 @@ jobs:
           echo "::error::openseek fleet exited nonzero; partial results were still graded and uploaded"
           exit 1
 
-  # Every run -- scheduled or ad-hoc -- gets its numbers rendered into the run
-  # summary and its per-task stats collected into one downloadable document.
-  # The artifact is deliberately not named stats-*: the report job downloads
-  # that pattern, and the two jobs run concurrently.
-  summarize:
-    needs: [prepare, bench]
-    if: ${{ !cancelled() }}
-    runs-on: ubuntu-latest
-    env:
-      OPENSEEK_COMMIT: ${{ needs.prepare.outputs.openseek_commit }}
-    steps:
-      - name: Download stats
-        uses: actions/download-artifact@v4
-        with:
-          pattern: stats-*
-          path: collected
-          merge-multiple: true
-
-      - name: Merge and render
-        run: |
-          shopt -s nullglob
-          files=(collected/*.json)
-          if [ ${#files[@]} -eq 0 ]; then
-            echo "::error::no stats artifacts were produced"; exit 1
-          fi
-          jq -s 'sort_by(.task)' "${files[@]}" > stats-all.json
-          {
-            echo "### openseek \`$OPENSEEK_COMMIT\`"
-            echo
-            echo "| task | runs passed | tests per run |"
-            echo "| --- | --- | --- |"
-            jq -r '.[] | "| \(.task) | \(.passed)/\(.runs | length) | " +
-                         "\([.runs[] | "\(.test_result.passed)/\(.test_result.total)"]
-                            | join(", ")) |"' stats-all.json
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload combined stats
-        uses: actions/upload-artifact@v4
-        with:
-          name: combined-stats
-          path: stats-all.json
-          retention-days: 14
-
-  # Commits the day's stats plus the tested openseek submodule pin in one
-  # commit, so every stats file is attributable to an exact agent version.
-  # Runs even when a task failed: a red day still records what it measured.
-  # Skipped for ad-hoc runs: a named ref is not the timeline's HEAD, so
-  # committing it would rewind the submodule pin and forge a day's entry.
+  # Commits the day's stats and publishes the dashboard. Runs even when a task
+  # failed: a red day still records what it measured. Ad-hoc runs report here
+  # too -- their stats carry their own openseek_commit, so the dashboard can
+  # show a named ref beside the HEAD timeline.
   report:
     needs: [prepare, bench]
-    if: ${{ !cancelled() && needs.prepare.outputs.adhoc != 'true' }}
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -233,6 +189,7 @@ jobs:
       id-token: write
     env:
       OPENSEEK_COMMIT: ${{ needs.prepare.outputs.openseek_commit }}
+      ADHOC: ${{ needs.prepare.outputs.adhoc }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -265,13 +222,30 @@ jobs:
           mkdir -p stats
           jq -s 'sort_by(.task)' "${files[@]}" > "$out"
 
-          git -C openseek fetch --depth 1 origin "$OPENSEEK_COMMIT"
-          git -C openseek checkout --quiet "$OPENSEEK_COMMIT"
+          note=""
+          [ "$ADHOC" = true ] && note=", ad-hoc"
+          {
+            echo "### openseek \`$OPENSEEK_COMMIT\`${note:+ · ad-hoc}"
+            echo
+            echo "| task | runs passed | tests per run |"
+            echo "| --- | --- | --- |"
+            jq -r '.[] | "| \(.task) | \(.passed)/\(.runs | length) | " +
+                         "\([.runs[] | "\(.test_result.passed)/\(.test_result.total)"]
+                            | join(", ")) |"' "$out"
+          } >> "$GITHUB_STEP_SUMMARY"
 
           git config user.name 'github-actions[bot]'
           git config user.email '41898203+github-actions[bot]@users.noreply.github.com'
-          git add openseek "$out"
-          git commit -m "bench: ${date} (openseek ${OPENSEEK_COMMIT:0:9})"
+          git add "$out"
+          # The submodule pin records which HEAD was measured, so only a HEAD
+          # run may move it -- an ad-hoc run of an older ref would rewind it.
+          # Its stats still land; they carry their own openseek_commit.
+          if [ "$ADHOC" != true ]; then
+            git -C openseek fetch --depth 1 origin "$OPENSEEK_COMMIT"
+            git -C openseek checkout --quiet "$OPENSEEK_COMMIT"
+            git add openseek
+          fi
+          git commit -m "bench: ${date} (openseek ${OPENSEEK_COMMIT:0:9}${note})"
           for _ in 1 2 3; do
             git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
             git pull --rebase origin "${GITHUB_REF_NAME}"
