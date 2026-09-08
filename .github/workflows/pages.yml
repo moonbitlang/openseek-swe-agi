@@ -42,8 +42,29 @@ jobs:
       pages: write
       id-token: write
     steps:
-      - name: Checkout
+      # Pages is one production site, so what ships is always the default
+      # branch -- never the ref a dispatch happened to name. `--ref` selects
+      # which *version of this workflow* runs; left unpinned here, that ref's
+      # stats and renderer would go live too, rolling the dashboard back to
+      # whatever a feature branch holds. bench.yml gates the same hazard out
+      # before reporting; this one is closed by construction instead, so no
+      # way of triggering the workflow can deploy the wrong tree.
+      - name: Checkout the default branch
         uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      # Deploying is then not what the dispatcher asked for, so say so rather
+      # than leaving them to wonder where their branch went.
+      - name: Note a non-default dispatch
+        if: ${{ github.ref_name != github.event.repository.default_branch }}
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          echo "::warning::triggered from '$GITHUB_REF_NAME', but the dashboard" \
+               "is always built from '$DEFAULT_BRANCH' -- that is what was" \
+               "deployed. To preview a branch, serve pages/index.html locally" \
+               "against a data.json built from its stats/."
 
       - name: Build site
         env:
