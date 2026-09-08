@@ -204,12 +204,14 @@ jobs:
           echo "::error::openseek fleet exited nonzero; partial results were still graded and uploaded"
           exit 1
 
-  # Publishes the run: session viewers onto the release, then the day's stats
-  # into git. That order matters -- the stats push is what triggers pages.yml,
-  # and the dashboard it builds hides a link whose viewer is not on the
-  # release yet. Runs even when a task failed: a red day still records what it
-  # measured. Ad-hoc runs report here too; their stats carry their own
-  # openseek_commit, so the dashboard shows a named ref beside the timeline.
+  # Publishes the run, ordered by what can afford to fail: the stats commit
+  # first, being the one result a finished benchmark cannot reproduce; then
+  # the session viewers, which must reach the release before the dashboard is
+  # rebuilt or it will hide their links; then the deploy; then GC, which is
+  # cleanup and can wait for the next run. Runs even when a task failed: a red
+  # day still records what it measured. Ad-hoc runs report here too; their
+  # stats carry their own openseek_commit, so the dashboard shows a named ref
+  # beside the timeline.
   report:
     needs: [prepare, bench]
     if: ${{ !cancelled() && needs.prepare.outputs.reporting == 'true' }}
@@ -239,6 +241,18 @@ jobs:
           pattern: runs-*
           path: collected-runs
           merge-multiple: true
+
+      - name: Merge stats and commit
+        run: |
+          shopt -s nullglob
+          files=(collected/*.json)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "::error::no stats artifacts were produced"; exit 1
+          fi
+          date="$(date -u +%F)"
+          out="stats/${date}-${GITHUB_RUN_NUMBER}.json"
+          mkdir -p stats
+          jq -s 'sort_by(.task)' "${files[@]}" > "$out"
 
       # Viewer HTML is heavy and never enters git history: it lives as assets
       # on a single rolling "viewers" release (durable, no expiry), keyed
@@ -275,37 +289,6 @@ jobs:
             gh release upload viewers "$name" --clobber
           done
 
-      # Retire viewer assets older than 90 days — the asset name carries its
-      # date, so age needs no API timestamps. The dashboard reads the manifest
-      # below and stops linking a day once its viewer is gone.
-
-      - name: GC old session viewers
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          cutoff="$(date -u -d '90 days ago' +%F)"
-          gh release view viewers --json assets --jq '.assets[].name' 2>/dev/null |
-          while read -r name; do
-            day="${name#bench-}"
-            day="${day:0:10}"
-            if [[ "$day" < "$cutoff" ]]; then
-              echo "retiring $name (before $cutoff)"
-              gh release delete-asset viewers "$name" --yes
-            fi
-          done
-
-      - name: Merge stats and commit
-        run: |
-          shopt -s nullglob
-          files=(collected/*.json)
-          if [ ${#files[@]} -eq 0 ]; then
-            echo "::error::no stats artifacts were produced"; exit 1
-          fi
-          date="$(date -u +%F)"
-          out="stats/${date}-${GITHUB_RUN_NUMBER}.json"
-          mkdir -p stats
-          jq -s 'sort_by(.task)' "${files[@]}" > "$out"
-
           note=""
           [ "$ADHOC" = true ] && note=", ad-hoc"
           {
@@ -317,7 +300,6 @@ jobs:
                          "\([.runs[] | "\(.test_result.passed)/\(.test_result.total)"]
                             | join(", ")) |"' "$out"
           } >> "$GITHUB_STEP_SUMMARY"
-
           git config user.name 'github-actions[bot]'
           git config user.email '41898203+github-actions[bot]@users.noreply.github.com'
           git add "$out"
@@ -345,7 +327,6 @@ jobs:
           done
           echo "::error::could not push stats after ${attempts} attempts"
           exit 1
-
       # The stats push above cannot trigger pages.yml on its own: it is
       # authenticated with GITHUB_TOKEN, and pushes made with that token
       # create no workflow runs. Dispatching is the documented way through --
@@ -354,3 +335,23 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run pages.yml --ref "$GITHUB_REF_NAME"
+
+      # Retire viewer assets older than 90 days — the asset name carries its
+      # date, so age needs no API timestamps. The dashboard reads the manifest
+      # below and stops linking a day once its viewer is gone.
+      - name: GC old session viewers
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cutoff="$(date -u -d '90 days ago' +%F)"
+          gh release view viewers --json assets --jq '.assets[].name' 2>/dev/null |
+          while read -r name; do
+            day="${name#bench-}"
+            day="${day:0:10}"
+            if [[ "$day" < "$cutoff" ]]; then
+              echo "retiring $name (before $cutoff)"
+              gh release delete-asset viewers "$name" --yes ||
+                echo "::warning::could not delete $name; another run may" \
+                     "have retired it already -- the next GC will retry."
+            fi
+          done
