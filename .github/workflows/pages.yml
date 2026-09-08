@@ -88,7 +88,10 @@ jobs:
           # The manifest tells the dashboard which viewers survive the 90-day
           # GC, so it can hide a dead link instead of rendering one.
           gh release download viewers --dir _site/viewer \
-            --pattern 'bench-*.html' || echo "no viewers published yet"
+            --pattern 'bench-*.html' ||
+            echo "::warning::could not download the viewers release in full;" \
+                 "the manifest below may be short and some session links" \
+                 "hidden until the next deploy."
           ls _site/viewer | jq -R . | jq -s . > _site/viewers.json
           echo "built $(jq length _site/data.json) records," \
                "$(jq length _site/viewers.json) viewers"

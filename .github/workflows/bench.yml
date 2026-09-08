@@ -210,12 +210,12 @@ jobs:
 
   # Publishes the run, ordered by what can afford to fail: the stats commit
   # first, being the one result a finished benchmark cannot reproduce; then
-  # the session viewers, which must reach the release before the dashboard is
-  # rebuilt or it will hide their links; then the deploy; then GC, which is
-  # cleanup and can wait for the next run. Runs even when a task failed: a red
-  # day still records what it measured. Ad-hoc runs report here too; their
-  # stats carry their own openseek_commit, so the dashboard shows a named ref
-  # beside the timeline.
+  # every change to the release -- uploading this run's viewers, retiring
+  # expired ones -- because the deploy downloads that release wholesale and
+  # would otherwise race the deletions; then the dispatch. Runs even when a
+  # task failed: a red day still records what it measured. Ad-hoc runs report
+  # here too; their stats carry their own openseek_commit, so the dashboard
+  # marks them and shows the ref they measured.
   report:
     needs: [prepare, bench]
     if: ${{ !cancelled() && needs.prepare.outputs.reporting == 'true' }}
@@ -347,18 +347,6 @@ jobs:
             gh release upload viewers "$name" --clobber
           done
 
-      # The stats push above cannot trigger pages.yml on its own: it is
-      # authenticated with GITHUB_TOKEN, and pushes made with that token create
-      # no workflow runs. workflow_dispatch is one of the two events exempt
-      # from that rule, so this is the only thing that can put the committed
-      # stats on the dashboard before the next nightly -- which is why it runs
-      # even when publishing the viewers stumbled.
-      - name: Deploy the dashboard
-        if: ${{ !cancelled() }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run pages.yml --ref "$GITHUB_REF_NAME"
-
       # Retire viewer assets older than 90 days — the asset name carries its
       # date, so age needs no API timestamps. The dashboard reads the manifest
       # and stops linking a day once its viewer is gone.
@@ -378,3 +366,15 @@ jobs:
                      "have retired it already -- the next GC will retry."
             fi
           done
+
+      # The stats push above cannot trigger pages.yml on its own: it is
+      # authenticated with GITHUB_TOKEN, and pushes made with that token create
+      # no workflow runs. workflow_dispatch is one of the two events exempt
+      # from that rule, so this is the only thing that can put the committed
+      # stats on the dashboard before the next nightly -- which is why it runs
+      # even when publishing the viewers stumbled.
+      - name: Deploy the dashboard
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref "$GITHUB_REF_NAME"
