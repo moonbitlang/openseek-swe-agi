@@ -24,6 +24,12 @@ The one thing an ad-hoc run does not do is move the `openseek` submodule pin.
 That pin records which HEAD the timeline has reached, and a named ref — often
 an older commit — would rewind it.
 
+Dispatch from the default branch. Reporting commits to whichever ref the
+workflow ran from and republishes the one repository-wide Pages site, so a run
+launched from another branch or a tag benchmarks and uploads its artifacts but
+reports nothing. `openseek_ref` is how you choose the commit under test; the
+ref the workflow itself runs from is a separate thing.
+
 Locally, the submodule is an ordinary checkout, so any commit works directly:
 
 ```

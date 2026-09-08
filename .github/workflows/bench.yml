@@ -30,21 +30,36 @@ jobs:
     outputs:
       openseek_commit: ${{ steps.head.outputs.sha }}
       adhoc: ${{ steps.head.outputs.adhoc }}
+      reporting: ${{ steps.gate.outputs.reporting }}
     steps:
-      # The report job commits the day's stats back to the ref this workflow
-      # was dispatched from. Git refuses to update refs/tags/* without force,
-      # so a tag dispatch would benchmark for hours and then fail every push.
-      # (`gh release create viewers` means this repo does have a tag.) Say so
-      # in seconds instead. The commit under test goes in openseek_ref; it has
-      # nothing to do with which ref the workflow itself runs from.
-      - name: Require a branch dispatch
-        if: ${{ github.ref_type == 'tag' }}
+      # Reporting commits stats to the ref this workflow was dispatched from
+      # and deploys the one repository-wide Pages site, so it belongs to the
+      # default branch alone. A tag cannot be pushed to without force, and a
+      # feature branch would both gain a stats commit and republish the
+      # production dashboard from its own snapshot -- rolling it back to
+      # whatever that branch happens to hold. Off the default branch the
+      # benchmark still runs and still uploads its artifacts; only reporting
+      # is withheld. Which ref the workflow runs from is unrelated to the
+      # commit under test: that is what openseek_ref is for.
+      - name: Decide whether this run may report
+        id: gate
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
-          echo "::error::bench must be dispatched from a branch, not the tag" \
-               "'$GITHUB_REF_NAME' -- reporting commits stats to that ref and" \
-               "git will not update a tag. Name the commit under test with" \
-               "the openseek_ref input instead."
-          exit 1
+          if [ -z "${DEFAULT_BRANCH:-}" ]; then
+            echo "::error::cannot determine the repository's default branch"
+            exit 1
+          fi
+          if [ "$GITHUB_REF_TYPE" = branch ] &&
+             [ "$GITHUB_REF_NAME" = "$DEFAULT_BRANCH" ]; then
+            echo "reporting=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "reporting=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::dispatched from $GITHUB_REF_TYPE" \
+                 "'$GITHUB_REF_NAME', not the default branch" \
+                 "'$DEFAULT_BRANCH' -- results will stay in this run's" \
+                 "artifacts and no stats will be committed or deployed."
+          fi
 
       - name: Resolve the openseek commit under test
         id: head
@@ -195,7 +210,7 @@ jobs:
   # show a named ref beside the HEAD timeline.
   report:
     needs: [prepare, bench]
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && needs.prepare.outputs.reporting == 'true' }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -355,7 +370,14 @@ jobs:
           # the next run rebuilds it -- stale, never lost.
           git fetch --quiet origin "$GITHUB_REF_NAME"
           git checkout --quiet FETCH_HEAD -- stats
-          jq -s 'flatten | sort_by(.date)' stats/*.json > _site/data.json
+          # Sorted by run within a day, not by filename: the glob puts
+          # ...-100.json before ...-99.json, sort_by is stable, and the
+          # dashboard reads the last record of a day as the latest one.
+          # Records predating the run field sort as 0 and keep their relative
+          # order, which for the single-digit runs they came from is the same
+          # thing.
+          jq -s 'flatten | sort_by([.date, (.run // "0" | tonumber)])' \
+            stats/*.json > _site/data.json
           gh release download viewers --dir _site/viewer \
             --pattern 'bench-*.html' || echo "no viewers published yet"
           ls _site/viewer | jq -R . | jq -s . > _site/viewers.json
