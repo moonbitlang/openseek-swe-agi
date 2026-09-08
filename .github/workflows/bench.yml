@@ -182,6 +182,14 @@ jobs:
     needs: [prepare, bench]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
+    # Benchmarks of different refs run in parallel (their concurrency groups
+    # differ), but they all commit stats to one branch and deploy one Pages
+    # site. Reporting therefore serializes across every ref: each report job
+    # checks out only after the previous one has pushed, so the site it builds
+    # includes that run's stats instead of racing it to the deploy.
+    concurrency:
+      group: bench-report
+      cancel-in-progress: false
     environment:
       name: github-pages
     permissions:
@@ -265,7 +273,6 @@ jobs:
           if [ ${#files[@]} -eq 0 ]; then
             echo "no viewer HTML this run"; exit 0
           fi
-          date="$(date -u +%F)"
           gh release view viewers >/dev/null 2>&1 ||
             gh release create viewers --title "Session viewers" --latest=false \
               --notes "Standalone session-viewer archives, one asset per task-run."
@@ -273,13 +280,18 @@ jobs:
           # files: a day can be benchmarked more than once -- the nightly plus
           # an ad-hoc ref, or a re-dispatch of an unchanged HEAD -- and each
           # measurement needs its own viewer. The commit does not separate that
-          # last case; the run number separates all of them. The dashboard
-          # rebuilds this name from each stats record's own `run`. The date
-          # stays first: the GC step below reads it back by position.
+          # last case; the run number separates all of them.
+          #
+          # The date comes from the task's own stats record, never from the
+          # clock here: a matrix job that graded before UTC midnight stamped
+          # yesterday into its record, and the dashboard rebuilds this name
+          # from that record. Reading it back keeps the two in step, per task.
+          # The date stays first: the GC step below reads it by position.
           for f in "${files[@]}"; do
             task="$(basename "$f" .html)"
             task="${task#bench-}"
-            name="bench-${date}-${GITHUB_RUN_NUMBER}-${task}.html"
+            d="$(jq -r '.date' "collected/stats-${task}.json")"
+            name="bench-${d}-${GITHUB_RUN_NUMBER}-${task}.html"
             cp "$f" "$name"
             gh release upload viewers "$name" --clobber
           done

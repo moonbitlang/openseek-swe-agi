@@ -391,23 +391,20 @@ function stepsChart(points, onPick) {
 // Session-viewer archive published per task-run beside the dashboard. The
 // asset is keyed by the workflow run, so two runs landing on one day — the
 // nightly and an ad-hoc one, or a re-dispatch of an unchanged HEAD — cannot
-// overwrite each other. The manifest (viewers.json) lists which ones still
-// exist; old ones are GC'd from the release. Days published before the run
-// entered the key are still reachable under their original date-only name,
-// so the fallback below stays until those have aged out. With no manifest
-// (local preview) links stay on and the current name wins.
+// overwrite each other. Records written before that key existed carry no
+// `run` and keep the date-only name they were published under; that is the
+// only case the old name is used, because a record that *has* a run must not
+// silently borrow another run's archive when its own upload is missing — the
+// session ids would not be in it. The manifest (viewers.json) lists which
+// assets still exist, since old ones are GC'd from the release; with no
+// manifest (local preview) links stay on.
 let VIEWERS = null;
-const viewerNames = (p, task) => [
-  p.run ? `bench-${p.date}-${p.run}-${task}.html` : null,
-  `bench-${p.date}-${task}.html`,
-].filter(name => name !== null);
-const viewerName = (p, task) => {
-  const names = viewerNames(p, task);
-  if (VIEWERS === null) return names[0];
-  return names.find(name => VIEWERS.has(name)) ?? null;
-};
+const viewerName = (p, task) => p.run
+  ? `bench-${p.date}-${p.run}-${task}.html`
+  : `bench-${p.date}-${task}.html`;
 const viewerHref = (p, task) => `viewer/${viewerName(p, task)}`;
-const viewerExists = (p, task) => viewerName(p, task) !== null;
+const viewerExists = (p, task) =>
+  VIEWERS === null || VIEWERS.has(viewerName(p, task));
 
 // The per-run tool-call rail: one segment per call, in session order.
 function rail(run) {
