@@ -31,6 +31,21 @@ jobs:
       openseek_commit: ${{ steps.head.outputs.sha }}
       adhoc: ${{ steps.head.outputs.adhoc }}
     steps:
+      # The report job commits the day's stats back to the ref this workflow
+      # was dispatched from. Git refuses to update refs/tags/* without force,
+      # so a tag dispatch would benchmark for hours and then fail every push.
+      # (`gh release create viewers` means this repo does have a tag.) Say so
+      # in seconds instead. The commit under test goes in openseek_ref; it has
+      # nothing to do with which ref the workflow itself runs from.
+      - name: Require a branch dispatch
+        if: ${{ github.ref_type == 'tag' }}
+        run: |
+          echo "::error::bench must be dispatched from a branch, not the tag" \
+               "'$GITHUB_REF_NAME' -- reporting commits stats to that ref and" \
+               "git will not update a tag. Name the commit under test with" \
+               "the openseek_ref input instead."
+          exit 1
+
       - name: Resolve the openseek commit under test
         id: head
         env:
@@ -247,11 +262,21 @@ jobs:
             git add openseek
           fi
           git commit -m "bench: ${date} (openseek ${OPENSEEK_COMMIT:0:9}${note})"
-          for _ in 1 2 3; do
+          # Every reporting run pushes to this one branch, and runs of
+          # different refs report in parallel, so a rejection just means
+          # someone else got there first: rebase and go again. The old loop
+          # gave up after three pushes -- and rebased a fourth time on the way
+          # out, preparing a commit it then threw away. Back off between
+          # attempts so a pile-up spreads out instead of colliding again.
+          attempts=8
+          for attempt in $(seq 1 "$attempts"); do
             git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
+            [ "$attempt" -lt "$attempts" ] || break
+            sleep $(( attempt * 5 ))
             git pull --rebase origin "${GITHUB_REF_NAME}"
           done
-          echo "::error::could not push stats after 3 attempts"; exit 1
+          echo "::error::could not push stats after ${attempts} attempts"
+          exit 1
 
       # Viewer HTML is heavy and never enters git history: it lives as assets
       # on a single rolling "viewers" release (durable, no expiry), keyed
