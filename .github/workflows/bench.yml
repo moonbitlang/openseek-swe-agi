@@ -30,7 +30,37 @@ jobs:
     outputs:
       openseek_commit: ${{ steps.head.outputs.sha }}
       adhoc: ${{ steps.head.outputs.adhoc }}
+      reporting: ${{ steps.gate.outputs.reporting }}
     steps:
+      # Reporting commits stats to the ref this workflow was dispatched from
+      # and deploys the one repository-wide Pages site, so it belongs to the
+      # default branch alone. A tag cannot be pushed to without force, and a
+      # feature branch would both gain a stats commit and republish the
+      # production dashboard from its own snapshot -- rolling it back to
+      # whatever that branch happens to hold. Off the default branch the
+      # benchmark still runs and still uploads its artifacts; only reporting
+      # is withheld. Which ref the workflow runs from is unrelated to the
+      # commit under test: that is what openseek_ref is for.
+      - name: Decide whether this run may report
+        id: gate
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          if [ -z "${DEFAULT_BRANCH:-}" ]; then
+            echo "::error::cannot determine the repository's default branch"
+            exit 1
+          fi
+          if [ "$GITHUB_REF_TYPE" = branch ] &&
+             [ "$GITHUB_REF_NAME" = "$DEFAULT_BRANCH" ]; then
+            echo "reporting=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "reporting=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::dispatched from $GITHUB_REF_TYPE" \
+                 "'$GITHUB_REF_NAME', not the default branch" \
+                 "'$DEFAULT_BRANCH' -- results will stay in this run's" \
+                 "artifacts and no stats will be committed or deployed."
+          fi
+
       - name: Resolve the openseek commit under test
         id: head
         env:
@@ -131,9 +161,10 @@ jobs:
         run: |
           moon run tools/grade -- "$TASK" > grade.json
           jq --arg date "$(date -u +%F)" \
+             --arg run "$GITHUB_RUN_NUMBER" \
              --arg openseek_commit "$OPENSEEK_COMMIT" \
-             '{date: $date, openseek_commit: $openseek_commit} + .' grade.json \
-            | tee "stats-$TASK.json"
+             '{date: $date, run: $run, openseek_commit: $openseek_commit} + .' \
+             grade.json | tee "stats-$TASK.json"
 
       - name: Export HTML
         continue-on-error: true
@@ -173,57 +204,13 @@ jobs:
           echo "::error::openseek fleet exited nonzero; partial results were still graded and uploaded"
           exit 1
 
-  # Every run -- scheduled or ad-hoc -- gets its numbers rendered into the run
-  # summary and its per-task stats collected into one downloadable document.
-  # The artifact is deliberately not named stats-*: the report job downloads
-  # that pattern, and the two jobs run concurrently.
-  summarize:
-    needs: [prepare, bench]
-    if: ${{ !cancelled() }}
-    runs-on: ubuntu-latest
-    env:
-      OPENSEEK_COMMIT: ${{ needs.prepare.outputs.openseek_commit }}
-    steps:
-      - name: Download stats
-        uses: actions/download-artifact@v4
-        with:
-          pattern: stats-*
-          path: collected
-          merge-multiple: true
-
-      - name: Merge and render
-        run: |
-          shopt -s nullglob
-          files=(collected/*.json)
-          if [ ${#files[@]} -eq 0 ]; then
-            echo "::error::no stats artifacts were produced"; exit 1
-          fi
-          jq -s 'sort_by(.task)' "${files[@]}" > stats-all.json
-          {
-            echo "### openseek \`$OPENSEEK_COMMIT\`"
-            echo
-            echo "| task | runs passed | tests per run |"
-            echo "| --- | --- | --- |"
-            jq -r '.[] | "| \(.task) | \(.passed)/\(.runs | length) | " +
-                         "\([.runs[] | "\(.test_result.passed)/\(.test_result.total)"]
-                            | join(", ")) |"' stats-all.json
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload combined stats
-        uses: actions/upload-artifact@v4
-        with:
-          name: combined-stats
-          path: stats-all.json
-          retention-days: 14
-
-  # Commits the day's stats plus the tested openseek submodule pin in one
-  # commit, so every stats file is attributable to an exact agent version.
-  # Runs even when a task failed: a red day still records what it measured.
-  # Skipped for ad-hoc runs: a named ref is not the timeline's HEAD, so
-  # committing it would rewind the submodule pin and forge a day's entry.
+  # Commits the day's stats and publishes the dashboard. Runs even when a task
+  # failed: a red day still records what it measured. Ad-hoc runs report here
+  # too -- their stats carry their own openseek_commit, so the dashboard can
+  # show a named ref beside the HEAD timeline.
   report:
     needs: [prepare, bench]
-    if: ${{ !cancelled() && needs.prepare.outputs.adhoc != 'true' }}
+    if: ${{ !cancelled() && needs.prepare.outputs.reporting == 'true' }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -233,6 +220,7 @@ jobs:
       id-token: write
     env:
       OPENSEEK_COMMIT: ${{ needs.prepare.outputs.openseek_commit }}
+      ADHOC: ${{ needs.prepare.outputs.adhoc }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -265,18 +253,45 @@ jobs:
           mkdir -p stats
           jq -s 'sort_by(.task)' "${files[@]}" > "$out"
 
-          git -C openseek fetch --depth 1 origin "$OPENSEEK_COMMIT"
-          git -C openseek checkout --quiet "$OPENSEEK_COMMIT"
+          note=""
+          [ "$ADHOC" = true ] && note=", ad-hoc"
+          {
+            echo "### openseek \`$OPENSEEK_COMMIT\`${note:+ · ad-hoc}"
+            echo
+            echo "| task | runs passed | tests per run |"
+            echo "| --- | --- | --- |"
+            jq -r '.[] | "| \(.task) | \(.passed)/\(.runs | length) | " +
+                         "\([.runs[] | "\(.test_result.passed)/\(.test_result.total)"]
+                            | join(", ")) |"' "$out"
+          } >> "$GITHUB_STEP_SUMMARY"
 
           git config user.name 'github-actions[bot]'
           git config user.email '41898203+github-actions[bot]@users.noreply.github.com'
-          git add openseek "$out"
-          git commit -m "bench: ${date} (openseek ${OPENSEEK_COMMIT:0:9})"
-          for _ in 1 2 3; do
+          git add "$out"
+          # The submodule pin records which HEAD was measured, so only a HEAD
+          # run may move it -- an ad-hoc run of an older ref would rewind it.
+          # Its stats still land; they carry their own openseek_commit.
+          if [ "$ADHOC" != true ]; then
+            git -C openseek fetch --depth 1 origin "$OPENSEEK_COMMIT"
+            git -C openseek checkout --quiet "$OPENSEEK_COMMIT"
+            git add openseek
+          fi
+          git commit -m "bench: ${date} (openseek ${OPENSEEK_COMMIT:0:9}${note})"
+          # Every reporting run pushes to this one branch, and runs of
+          # different refs report in parallel, so a rejection just means
+          # someone else got there first: rebase and go again. The old loop
+          # gave up after three pushes -- and rebased a fourth time on the way
+          # out, preparing a commit it then threw away. Back off between
+          # attempts so a pile-up spreads out instead of colliding again.
+          attempts=8
+          for attempt in $(seq 1 "$attempts"); do
             git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
+            [ "$attempt" -lt "$attempts" ] || break
+            sleep $(( attempt * 5 ))
             git pull --rebase origin "${GITHUB_REF_NAME}"
           done
-          echo "::error::could not push stats after 3 attempts"; exit 1
+          echo "::error::could not push stats after ${attempts} attempts"
+          exit 1
 
       # Viewer HTML is heavy and never enters git history: it lives as assets
       # on a single rolling "viewers" release (durable, no expiry), keyed
@@ -290,15 +305,27 @@ jobs:
           if [ ${#files[@]} -eq 0 ]; then
             echo "no viewer HTML this run"; exit 0
           fi
-          date="$(date -u +%F)"
           gh release view viewers >/dev/null 2>&1 ||
             gh release create viewers --title "Session viewers" --latest=false \
-              --notes "Standalone session-viewer archives, one asset per task-day."
+              --notes "Standalone session-viewer archives, one asset per task-run."
+          # Keyed by run number, the same key that separates the day's stats
+          # files: a day can be benchmarked more than once -- the nightly plus
+          # an ad-hoc ref, or a re-dispatch of an unchanged HEAD -- and each
+          # measurement needs its own viewer. The commit does not separate that
+          # last case; the run number separates all of them.
+          #
+          # The date comes from the task's own stats record, never from the
+          # clock here: a matrix job that graded before UTC midnight stamped
+          # yesterday into its record, and the dashboard rebuilds this name
+          # from that record. Reading it back keeps the two in step, per task.
+          # The date stays first: the GC step below reads it by position.
           for f in "${files[@]}"; do
             task="$(basename "$f" .html)"
             task="${task#bench-}"
-            cp "$f" "bench-${date}-${task}.html"
-            gh release upload viewers "bench-${date}-${task}.html" --clobber
+            d="$(jq -r '.date' "collected/stats-${task}.json")"
+            name="bench-${d}-${GITHUB_RUN_NUMBER}-${task}.html"
+            cp "$f" "$name"
+            gh release upload viewers "$name" --clobber
           done
 
       # Retire viewer assets older than 90 days — the asset name carries its
@@ -329,7 +356,28 @@ jobs:
         run: |
           mkdir -p _site/viewer
           cp pages/index.html _site/
-          jq -s 'flatten | sort_by(.date)' stats/*.json > _site/data.json
+          # Benchmarks of different refs run in parallel and all commit to one
+          # branch, so another run's stats may have landed since the commit
+          # step pushed. Take stats/ from the branch as it stands now, not as
+          # this job checked it out, so the site is built from every result
+          # committed so far.
+          #
+          # Deliberately not a concurrency group on this job: a group keeps
+          # only one pending member, so a third report would cancel the second
+          # and lose a whole benchmark's stats. Committing must never be
+          # cancellable. The residue is that two runs deploying within seconds
+          # of each other can leave the later-published one off the site until
+          # the next run rebuilds it -- stale, never lost.
+          git fetch --quiet origin "$GITHUB_REF_NAME"
+          git checkout --quiet FETCH_HEAD -- stats
+          # Sorted by run within a day, not by filename: the glob puts
+          # ...-100.json before ...-99.json, sort_by is stable, and the
+          # dashboard reads the last record of a day as the latest one.
+          # Records predating the run field sort as 0 and keep their relative
+          # order, which for the single-digit runs they came from is the same
+          # thing.
+          jq -s 'flatten | sort_by([.date, (.run // "0" | tonumber)])' \
+            stats/*.json > _site/data.json
           gh release download viewers --dir _site/viewer \
             --pattern 'bench-*.html' || echo "no viewers published yet"
           ls _site/viewer | jq -R . | jq -s . > _site/viewers.json

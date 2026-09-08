@@ -204,6 +204,7 @@ function toPoint(rec) {
   }
   return {
     date: rec.date,
+    run: rec.run ?? null,
     commit: (rec.openseek_commit || "").slice(0, 9),
     k,
     passed: rec.passed,
@@ -399,13 +400,23 @@ function stepsChart(points, onPick) {
   });
 }
 
-// Session-viewer archive published per task-day beside the dashboard. The
-// manifest (viewers.json) lists which task-days still exist — old ones are
-// GC'd from the release; with no manifest (local preview) links stay on.
+// Session-viewer archive published per task-run beside the dashboard. The
+// asset is keyed by the workflow run, so two runs landing on one day — the
+// nightly and an ad-hoc one, or a re-dispatch of an unchanged HEAD — cannot
+// overwrite each other. Records written before that key existed carry no
+// `run` and keep the date-only name they were published under; that is the
+// only case the old name is used, because a record that *has* a run must not
+// silently borrow another run's archive when its own upload is missing — the
+// session ids would not be in it. The manifest (viewers.json) lists which
+// assets still exist, since old ones are GC'd from the release; with no
+// manifest (local preview) links stay on.
 let VIEWERS = null;
-const viewerHref = (date, task) => `viewer/bench-${date}-${task}.html`;
-const viewerExists = (date, task) =>
-  VIEWERS === null || VIEWERS.has(`bench-${date}-${task}.html`);
+const viewerName = (p, task) => p.run
+  ? `bench-${p.date}-${p.run}-${task}.html`
+  : `bench-${p.date}-${task}.html`;
+const viewerHref = (p, task) => `viewer/${viewerName(p, task)}`;
+const viewerExists = (p, task) =>
+  VIEWERS === null || VIEWERS.has(viewerName(p, task));
 
 // The per-run tool-call rail: one segment per call, in session order.
 function rail(run) {
@@ -420,7 +431,7 @@ function rail(run) {
 }
 
 // Per-run detail for the selected day: the accessible table view.
-function runTable(runs, date, task) {
+function runTable(runs, point, task) {
   const table = el("table");
   const head = el("tr");
   for (const [name, numeric] of [["run", false], ["tests", true], ["warn", true],
@@ -433,9 +444,9 @@ function runTable(runs, date, task) {
     const t = run.test_result, c = run.check_result;
     const runCell = el("td");
     const runName = run.dir.replace(/^tasks\//, "");
-    if (run.session_id && viewerExists(date, task)) {
+    if (run.session_id && viewerExists(point, task)) {
       const link = el("a", "run-link mono", runName);
-      link.href = `${viewerHref(date, task)}#s=${encodeURIComponent(run.session_id)}`;
+      link.href = `${viewerHref(point, task)}#s=${encodeURIComponent(run.session_id)}`;
       link.target = "_blank";
       link.rel = "noopener";
       runCell.append(link);
@@ -605,10 +616,10 @@ function taskCard(task, records) {
     const p = points[i];
     runsTitle.textContent = `runs · ${p.date}` +
       (points.length > 1 ? " — click a day in the charts to switch" : "");
-    runsBody.replaceChildren(runTable(p.runs, p.date, task));
+    runsBody.replaceChildren(runTable(p.runs, p, task));
     for (const panel of panels) panel.setSelected(i);
-    viewer.hidden = !viewerExists(p.date, task);
-    if (!viewer.hidden) viewer.href = viewerHref(p.date, task);
+    viewer.hidden = !viewerExists(p, task);
+    if (!viewer.hidden) viewer.href = viewerHref(p, task);
   };
 
   const legend = el("div", "legend");
