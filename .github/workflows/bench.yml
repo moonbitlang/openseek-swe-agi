@@ -254,6 +254,46 @@ jobs:
           mkdir -p stats
           jq -s 'sort_by(.task)' "${files[@]}" > "$out"
 
+          note=""
+          [ "$ADHOC" = true ] && note=", ad-hoc"
+          {
+            echo "### openseek \`$OPENSEEK_COMMIT\`${note:+ · ad-hoc}"
+            echo
+            echo "| task | runs passed | tests per run |"
+            echo "| --- | --- | --- |"
+            jq -r '.[] | "| \(.task) | \(.passed)/\(.runs | length) | " +
+                         "\([.runs[] | "\(.test_result.passed)/\(.test_result.total)"]
+                            | join(", ")) |"' "$out"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898203+github-actions[bot]@users.noreply.github.com'
+          git add "$out"
+          # The submodule pin records which HEAD was measured, so only a HEAD
+          # run may move it -- an ad-hoc run of an older ref would rewind it.
+          # Its stats still land; they carry their own openseek_commit.
+          if [ "$ADHOC" != true ]; then
+            git -C openseek fetch --depth 1 origin "$OPENSEEK_COMMIT"
+            git -C openseek checkout --quiet "$OPENSEEK_COMMIT"
+            git add openseek
+          fi
+          git commit -m "bench: ${date} (openseek ${OPENSEEK_COMMIT:0:9}${note})"
+          # Every reporting run pushes to this one branch, and runs of
+          # different refs report in parallel, so a rejection just means
+          # someone else got there first: rebase and go again. The old loop
+          # gave up after three pushes -- and rebased a fourth time on the way
+          # out, preparing a commit it then threw away. Back off between
+          # attempts so a pile-up spreads out instead of colliding again.
+          attempts=8
+          for attempt in $(seq 1 "$attempts"); do
+            git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
+            [ "$attempt" -lt "$attempts" ] || break
+            sleep $(( attempt * 5 ))
+            git pull --rebase origin "${GITHUB_REF_NAME}"
+          done
+          echo "::error::could not push stats after ${attempts} attempts"
+          exit 1
+
       # Viewer HTML is heavy and never enters git history: it lives as assets
       # on a single rolling "viewers" release (durable, no expiry), keyed
       # bench-<date>-<run>-<task>.html — the name the dashboard links to.
@@ -289,44 +329,10 @@ jobs:
             gh release upload viewers "$name" --clobber
           done
 
-          note=""
-          [ "$ADHOC" = true ] && note=", ad-hoc"
-          {
-            echo "### openseek \`$OPENSEEK_COMMIT\`${note:+ · ad-hoc}"
-            echo
-            echo "| task | runs passed | tests per run |"
-            echo "| --- | --- | --- |"
-            jq -r '.[] | "| \(.task) | \(.passed)/\(.runs | length) | " +
-                         "\([.runs[] | "\(.test_result.passed)/\(.test_result.total)"]
-                            | join(", ")) |"' "$out"
-          } >> "$GITHUB_STEP_SUMMARY"
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898203+github-actions[bot]@users.noreply.github.com'
-          git add "$out"
-          # The submodule pin records which HEAD was measured, so only a HEAD
-          # run may move it -- an ad-hoc run of an older ref would rewind it.
-          # Its stats still land; they carry their own openseek_commit.
-          if [ "$ADHOC" != true ]; then
-            git -C openseek fetch --depth 1 origin "$OPENSEEK_COMMIT"
-            git -C openseek checkout --quiet "$OPENSEEK_COMMIT"
-            git add openseek
-          fi
-          git commit -m "bench: ${date} (openseek ${OPENSEEK_COMMIT:0:9}${note})"
-          # Every reporting run pushes to this one branch, and runs of
-          # different refs report in parallel, so a rejection just means
-          # someone else got there first: rebase and go again. The old loop
-          # gave up after three pushes -- and rebased a fourth time on the way
-          # out, preparing a commit it then threw away. Back off between
-          # attempts so a pile-up spreads out instead of colliding again.
-          attempts=8
-          for attempt in $(seq 1 "$attempts"); do
-            git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
-            [ "$attempt" -lt "$attempts" ] || break
-            sleep $(( attempt * 5 ))
-            git pull --rebase origin "${GITHUB_REF_NAME}"
-          done
-          echo "::error::could not push stats after ${attempts} attempts"
-          exit 1
+      # Retire viewer assets older than 90 days — the asset name carries its
+      # date, so age needs no API timestamps. The dashboard reads the manifest
+      # below and stops linking a day once its viewer is gone.
+
       # The stats push above cannot trigger pages.yml on its own: it is
       # authenticated with GITHUB_TOKEN, and pushes made with that token
       # create no workflow runs. Dispatching is the documented way through --
@@ -336,9 +342,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run pages.yml --ref "$GITHUB_REF_NAME"
 
-      # Retire viewer assets older than 90 days — the asset name carries its
-      # date, so age needs no API timestamps. The dashboard reads the manifest
-      # below and stops linking a day once its viewer is gone.
       - name: GC old session viewers
         env:
           GH_TOKEN: ${{ github.token }}
