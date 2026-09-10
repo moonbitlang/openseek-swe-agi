@@ -149,6 +149,12 @@ jobs:
         env:
           DEEPSEEK: ${{ secrets.DEEPSEEK }}
         run: |
+          # Use the measured commit's resources, with an absolute path because
+          # each agent runs in its own task directory. Older ad-hoc refs may
+          # predate share/, so only advertise resources when they exist.
+          if [ -d "$GITHUB_WORKSPACE/openseek/share" ]; then
+            export OPENSEEK_REFERENCES="$GITHUB_WORKSPACE/openseek/share"
+          fi
           moon -C openseek run --target native cmd/openseek -- run \
             --dir "../tasks/$TASK" \
             --concurrency 3 \
