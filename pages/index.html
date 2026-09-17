@@ -94,6 +94,8 @@
   .swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
 
   .chart-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 16px 0 4px; }
+  .metric-section { margin-top: 16px; }
+  .metric-section > summary { cursor: pointer; font-weight: 500; padding: 4px 0; }
   select { font: inherit; color: var(--text-primary); background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; }
   .runs-body { overflow-x: auto; }
   .chart-wrap { position: relative; }
@@ -628,8 +630,7 @@ class TaskCard {
     const point = this.points[index];
     const platform = this.platformSelect.value;
     const detail = point.platforms.get(platform);
-    this.rates.setSelected(index);
-    this.steps.setSelected(index);
+    for (const panel of this.charts) panel.setSelected(index);
     this.runsTitle.textContent = `runs · ${platform} · ${detail?.date ?? point.date}` +
       (point.run ? ` · #${point.run}` : "") + (point.adhoc ? " · ad-hoc" : "");
     this.runsBody.replaceChildren(detail
@@ -664,24 +665,20 @@ class TaskCard {
     const legend = el("div", "legend");
     for (const platform of this.series) legend.append(ttRow(platform.color, platform.label));
 
-    const metricLabel = el("label", "chart-controls", "Compare ");
-    const metricSelect = el("select");
-    for (const [value, title] of [["passRate", "Agent pass rate (pass@k)"],
-      ["testRatio", "Average tests passed"], ["toolRate", "Tool-call pass rate"]]) {
-      const option = el("option", "", title);
-      option.value = value;
-      metricSelect.append(option);
+    // All metrics start expanded. Native details/summary supports keyboard
+    // folding while retaining each chart and its synchronized run selection.
+    const metrics = el("div");
+    this.charts = [];
+    for (const [metric, title] of [["passRate", "Agent pass rate (pass@k)"],
+      ["testRatio", "Average tests passed"], ["toolRate", "Tool-call pass rate"],
+      ["avgSteps", "Average steps · finished runs only"]]) {
+      const section = el("details", "metric-section");
+      section.open = true;
+      const panel = this.metricChart(metric, metric === "avgSteps");
+      this.charts.push(panel);
+      section.append(el("summary", "", title), panel.node);
+      metrics.append(section);
     }
-    metricLabel.append(metricSelect);
-    const rateBody = el("div");
-    this.rates = this.metricChart("passRate");
-    rateBody.append(this.rates.node);
-    metricSelect.addEventListener("change", () => {
-      this.rates = this.metricChart(metricSelect.value);
-      rateBody.replaceChildren(this.rates.node);
-      this.rates.setSelected(this.selected);
-    });
-    this.steps = this.metricChart("avgSteps", true);
 
     const platformLabel = el("label", "chart-controls", "Run details ");
     this.platformSelect = el("select");
@@ -695,8 +692,7 @@ class TaskCard {
     this.runsTitle = el("div", "table-title");
     this.runsBody = el("div", "runs-body");
     this.toolBody = el("div");
-    this.card.append(head, legend, metricLabel, rateBody,
-      titled("average steps · finished runs only", this.steps.node),
+    this.card.append(head, legend, metrics,
       platformLabel, this.runsTitle, this.runsBody,
       titled("tool calls · selected platform", this.toolBody));
     this.select(this.selected);
