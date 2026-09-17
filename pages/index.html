@@ -90,9 +90,14 @@
   .task-name { font-size: 16px; font-weight: 600; }
   .task-latest { color: var(--text-secondary); }
 
-  .legend { display: flex; gap: 16px; margin: 12px 0 4px; color: var(--text-secondary); font-size: 12px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin: 12px 0 4px; color: var(--text-secondary); font-size: 12px; }
   .swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
 
+  .chart-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 16px 0 4px; }
+  .metric-section { margin-top: 16px; }
+  .metric-section > summary { cursor: pointer; font-weight: 500; padding: 4px 0; }
+  select { font: inherit; color: var(--text-primary); background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; }
+  .runs-body { overflow-x: auto; }
   .chart-wrap { position: relative; }
   svg { display: block; width: 100%; height: auto; }
   .grid-line { stroke: var(--grid); stroke-width: 1; }
@@ -205,6 +210,9 @@ function toPoint(rec) {
   return {
     date: rec.date,
     run: rec.run ?? null,
+    // Keep absence intact: older records use viewer filenames without a platform.
+    os: rec.os ?? null,
+    target: rec.target ?? null,
     // A benchmark of a named ref rather than of openseek HEAD. It is filed
     // under the day it ran, so it sorts last and would otherwise be read as
     // the timeline's newest state -- while the commit it measured is often
@@ -237,7 +245,7 @@ function toPoint(rec) {
 // tool that made no calls that day leaves a gap instead of a fake zero.
 // With onPick, clicking selects the nearest day (dashed marker, shown via
 // setSelected); returns {node, setSelected}.
-function chart(points, series, { height, ymax, ticks, fmt, tooltipRows, onPick }) {
+function chart(points, series, { height, ymax, ticks, fmt, tooltipRows, onPick, directLabels = true }) {
   const W = 880, H = height, PAD = { l: 40, r: 100, t: 12, b: 26 };
   const iw = W - PAD.l - PAD.r, ih = H - PAD.t - PAD.b;
   const x = i => points.length === 1
@@ -273,7 +281,7 @@ function chart(points, series, { height, ymax, ticks, fmt, tooltipRows, onPick }
     }
     return null;
   };
-  const direct = series.length <= 4;
+  const direct = directLabels && series.length <= 4;
   const endY = new Map();
   if (direct) {
     const ends = series
@@ -297,6 +305,7 @@ function chart(points, series, { height, ymax, ticks, fmt, tooltipRows, onPick }
     if (d.includes("L")) {
       const path = svgEl("path", { d, class: "series-line", stroke: s.color });
       if (s.id) path.dataset.series = s.id;
+      if (s.dash) path.setAttribute("stroke-dasharray", s.dash);
       svg.append(path);
     }
     points.forEach((p, j) => {
@@ -364,62 +373,15 @@ function ttRow(color, text) {
   return row;
 }
 
-const RATE_SERIES = [
-  { get: p => p.passRate, color: "var(--series-pass)", label: "pass@k" },
-  { get: p => p.testRatio, color: "var(--series-tests)", label: "tests" },
-  { get: p => p.toolRate, color: "var(--series-tools)", label: "tools" },
-];
-
-function ratesChart(points, onPick) {
-  return chart(points, RATE_SERIES, {
-    height: 220,
-    ymax: 1,
-    ticks: [0, 0.5, 1],
-    fmt: pct,
-    onPick,
-    tooltipRows: p => [
-      ttRow("var(--series-pass)", `pass@${p.k}: ${p.passed}/${p.k}`),
-      ttRow("var(--series-tests)", `tests: ${pct(p.testRatio)}`),
-      ttRow("var(--series-tools)", `tool calls: ${pct(p.toolRate)}`),
-      el("div", "tt-row", `check warnings: ${p.warnings}`),
-    ],
-  });
-}
-
-function stepsChart(points, onPick) {
-  const max = Math.max(20, ...points.map(p => p.avgSteps ?? 0));
-  const ymax = Math.ceil(max / 20) * 20;
-  return chart(points, [{ get: p => p.avgSteps, color: "var(--series-steps)", label: "avg steps" }], {
-    height: 140,
-    ymax,
-    ticks: [0, ymax / 2, ymax],
-    fmt: v => String(Math.round(v)),
-    onPick,
-    tooltipRows: p => [
-      ttRow("var(--series-steps)", p.avgSteps === null
-        ? "avg steps: no finished run"
-        : `avg steps (finished only): ${Math.round(p.avgSteps)}`),
-      el("div", "tt-row", `runs: ${p.runs.map(run => {
-        const kind = run.stop_reason ? run.stop_reason.kind : "missing";
-        return kind === "finished" ? String(run.steps) : `${run.steps} (${kind})`;
-      }).join(" / ")}`),
-    ],
-  });
-}
-
-// Session-viewer archive published per task-run beside the dashboard. The
-// asset is keyed by the workflow run, so two runs landing on one day — the
-// nightly and an ad-hoc one, or a re-dispatch of an unchanged HEAD — cannot
-// overwrite each other. Records written before that key existed carry no
-// `run` and keep the date-only name they were published under; that is the
-// only case the old name is used, because a record that *has* a run must not
-// silently borrow another run's archive when its own upload is missing — the
-// session ids would not be in it. The manifest (viewers.json) lists which
-// assets still exist, since old ones are GC'd from the release; with no
-// manifest (local preview) links stay on.
+// Viewer names include the workflow run, OS, agent target, and task so parallel
+// measurements cannot overwrite each other. Older records omit OS/target, and
+// the oldest omit the run number too; preserve the names originally published.
+// Never fall back to another measurement's archive when an upload is missing:
+// its session ids would not match. The manifest lists surviving assets after
+// release GC; without a manifest (local preview), links stay on.
 let VIEWERS = null;
 const viewerName = (p, task) => p.run
-  ? `bench-${p.date}-${p.run}-${task}.html`
+  ? `bench-${p.date}-${p.run}-${p.os && p.target ? `${p.os}-${p.target}-` : ""}${task}.html`
   : `bench-${p.date}-${task}.html`;
 const viewerHref = (p, task) => `viewer/${viewerName(p, task)}`;
 const viewerExists = (p, task) =>
@@ -597,58 +559,145 @@ function titled(title, node) {
   return wrap;
 }
 
-function taskCard(task, records) {
-  const points = records.map(toPoint);
-  const latest = points[points.length - 1];
-  const card = el("section", "task-card");
+// One task owns a shared timeline and one series per platform. Missing platform
+// measurements remain gaps; they must never borrow another platform's result.
+class TaskCard {
+  constructor(task, records) {
+    this.task = task;
+    this.platforms = new Map();
+    const timeline = new Map();
+    const legacyCounts = new Map();
+    for (const record of records) {
+      const platform = `${record.os ?? "linux"}/${record.target ?? "native"}`;
+      if (!this.platforms.has(platform)) this.platforms.set(platform, []);
+      const point = toPoint(record);
+      // Old records have no workflow run number. Keep multiple same-day runs
+      // distinct, with an ordinal within each platform/date/commit combination.
+      const base = `${record.date}/${record.openseek_commit ?? ""}`;
+      const legacyKey = `${platform}/${base}`;
+      const ordinal = legacyCounts.get(legacyKey) ?? 0;
+      if (!record.run) legacyCounts.set(legacyKey, ordinal + 1);
+      // Matrix jobs can finish on different UTC dates. The workflow run and
+      // measured commit still identify the same comparison column.
+      const key = record.run
+        ? `run-${record.run}/${record.openseek_commit ?? ""}`
+        : `${base}/legacy-${ordinal}`;
+      if (!timeline.has(key)) timeline.set(key, { ...point, platforms: new Map() });
+      const column = timeline.get(key);
+      column.date = column.date < point.date ? column.date : point.date;
+      column.platforms.set(platform, point);
+      this.platforms.get(platform).push(point);
+    }
+    this.points = [...timeline.values()].sort((a, b) =>
+      a.date.localeCompare(b.date) || Number(a.run ?? 0) - Number(b.run ?? 0));
+    const colors = ["var(--series-pass)", "var(--series-tests)", "var(--series-tools)"];
+    const dashes = ["", "7 4", "2 4"];
+    // Stable ordering gives each platform the same color across every task,
+    // including cards where one platform has not produced any data yet.
+    const order = ["linux/native", "linux/wasm", "windows/native"];
+    this.series = [...this.platforms.keys()].sort().map(platform => {
+      const index = Math.max(0, order.indexOf(platform));
+      return { label: platform, color: colors[index], dash: dashes[index] };
+    });
+    this.selected = this.points.length - 1;
+  }
 
-  const head = el("div", "task-head");
-  head.append(el("span", "task-name", task));
-  head.append(el("span", "task-latest",
-    `${latest.date}${latest.adhoc ? " (ad-hoc)" : ""}: ` +
-    `${latest.passed}/${latest.k} passed · tests ${pct(latest.testRatio)}`));
-  const viewer = el("a", "run-link", "sessions ↗");
-  viewer.target = "_blank";
-  viewer.rel = "noopener";
-  head.append(viewer);
-  card.append(head);
+  metricChart(metric, steps = false) {
+    const series = this.series.map(platform => ({
+      ...platform,
+      get: point => point.platforms.get(platform.label)?.[metric] ?? null,
+    }));
+    const max = Math.max(20, ...this.points.flatMap(point =>
+      series.map(s => s.get(point) ?? 0)));
+    const ymax = steps ? Math.ceil(max / 20) * 20 : 1;
+    const fmt = steps ? value => String(Math.round(value)) : pct;
+    return chart(this.points, series, {
+      height: steps ? 150 : 210,
+      ymax,
+      ticks: [0, ymax / 2, ymax],
+      fmt,
+      directLabels: false,
+      onPick: index => this.select(index),
+      tooltipRows: point => series.map(s => {
+        const value = s.get(point);
+        return ttRow(s.color, `${s.label}: ${value === null ? "no data" : fmt(value)}`);
+      }),
+    });
+  }
 
-  // Every chart picks the day whose runs the detail table shows; the dashed
-  // marker on each panel tracks the selection (latest by default).
-  const runsTitle = el("div", "table-title");
-  const runsBody = el("div");
-  const runsSection = el("div");
-  runsSection.append(runsTitle, runsBody);
-  const panels = [];
-  const selectDay = i => {
-    const p = points[i];
-    runsTitle.textContent = `runs · ${p.date}` +
-      (points.length > 1 ? " — click a day in the charts to switch" : "");
-    runsBody.replaceChildren(runTable(p.runs, p, task));
-    for (const panel of panels) panel.setSelected(i);
-    viewer.hidden = !viewerExists(p, task);
-    if (!viewer.hidden) viewer.href = viewerHref(p, task);
-  };
+  select(index) {
+    this.selected = index;
+    const point = this.points[index];
+    const platform = this.platformSelect.value;
+    const detail = point.platforms.get(platform);
+    for (const panel of this.charts) panel.setSelected(index);
+    this.runsTitle.textContent = `runs · ${platform} · ${detail?.date ?? point.date}` +
+      (point.run ? ` · #${point.run}` : "") + (point.adhoc ? " · ad-hoc" : "");
+    this.runsBody.replaceChildren(detail
+      ? runTable(detail.runs, detail, this.task)
+      : el("p", "empty", "No measurement for this platform in the selected run."));
+    this.viewer.hidden = !detail || !viewerExists(detail, this.task);
+    if (!this.viewer.hidden) this.viewer.href = viewerHref(detail, this.task);
+    const platformPoints = this.platforms.get(platform);
+    const detailIndex = platformPoints.indexOf(detail);
+    // A missing measurement also clears the tool detail rather than showing
+    // a stale selection from another platform or workflow run.
+    this.toolBody.replaceChildren();
+    if (detailIndex >= 0) {
+      const tools = toolTrend(platformPoints, this.card, i => {
+        this.select(this.points.findIndex(p => p.platforms.get(platform) === platformPoints[i]));
+      });
+      this.toolBody.append(tools.node);
+      tools.setSelected(detailIndex);
+    }
+  }
 
-  const legend = el("div", "legend");
-  legend.append(
-    ttRow("var(--series-pass)", "pass@k"),
-    ttRow("var(--series-tests)", "avg tests passed"),
-    ttRow("var(--series-tools)", "tool-call pass rate"),
-  );
-  const rates = ratesChart(points, selectDay);
-  const steps = stepsChart(points, selectDay);
-  const tools = toolTrend(points, card, selectDay);
-  panels.push(rates, steps, tools);
-  card.append(
-    legend,
-    rates.node,
-    steps.node,
-    runsSection,
-    titled("tool calls · pass rate", tools.node),
-  );
-  selectDay(points.length - 1);
-  return card;
+  render() {
+    this.card = el("section", "task-card");
+    const latest = this.points[this.points.length - 1];
+    const head = el("div", "task-head");
+    head.append(el("span", "task-name", this.task),
+      el("span", "task-latest", `latest ${latest.date} · ${this.series.length} platforms`));
+    this.viewer = el("a", "run-link", "sessions ↗");
+    this.viewer.target = "_blank";
+    this.viewer.rel = "noopener";
+    head.append(this.viewer);
+    const legend = el("div", "legend");
+    for (const platform of this.series) legend.append(ttRow(platform.color, platform.label));
+
+    // All metrics start expanded. Native details/summary supports keyboard
+    // folding while retaining each chart and its synchronized run selection.
+    const metrics = el("div");
+    this.charts = [];
+    for (const [metric, title] of [["passRate", "Agent pass rate (pass@k)"],
+      ["testRatio", "Average tests passed"], ["toolRate", "Tool-call pass rate"],
+      ["avgSteps", "Average steps · finished runs only"]]) {
+      const section = el("details", "metric-section");
+      section.open = true;
+      const panel = this.metricChart(metric, metric === "avgSteps");
+      this.charts.push(panel);
+      section.append(el("summary", "", title), panel.node);
+      metrics.append(section);
+    }
+
+    const platformLabel = el("label", "chart-controls", "Run details ");
+    this.platformSelect = el("select");
+    for (const platform of this.series) {
+      const option = el("option", "", platform.label);
+      option.value = platform.label;
+      this.platformSelect.append(option);
+    }
+    platformLabel.append(this.platformSelect);
+    this.platformSelect.addEventListener("change", () => this.select(this.selected));
+    this.runsTitle = el("div", "table-title");
+    this.runsBody = el("div", "runs-body");
+    this.toolBody = el("div");
+    this.card.append(head, legend, metrics,
+      platformLabel, this.runsTitle, this.runsBody,
+      titled("tool calls · selected platform", this.toolBody));
+    this.select(this.selected);
+    return this.card;
+  }
 }
 
 async function boot() {
@@ -681,8 +730,8 @@ async function boot() {
       ? " (ad-hoc: a named ref, not necessarily HEAD)" : ""),
   );
   const tasksRoot = document.getElementById("tasks");
-  for (const [task, recs] of [...byTask.entries()].sort()) {
-    tasksRoot.append(taskCard(task, recs));
+  for (const [, recs] of [...byTask.entries()].sort()) {
+    tasksRoot.append(new TaskCard(recs[0].task, recs).render());
   }
 }
 boot();
