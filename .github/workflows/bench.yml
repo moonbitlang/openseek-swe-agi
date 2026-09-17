@@ -27,7 +27,7 @@ jobs:
   # may name that commit instead, which makes the run "ad-hoc": it reports
   # without writing anything back to this repo (see the report job).
   prepare:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, macOS, ARM64]
     outputs:
       openseek_commit: ${{ steps.head.outputs.sha }}
       adhoc: ${{ steps.head.outputs.adhoc }}
@@ -89,7 +89,7 @@ jobs:
 
   bench:
     needs: prepare
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 300
     permissions:
       contents: read
@@ -225,7 +225,7 @@ jobs:
   report:
     needs: [prepare, bench]
     if: ${{ !cancelled() && needs.prepare.outputs.reporting == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, macOS, ARM64]
     permissions:
       contents: write
       actions: write
