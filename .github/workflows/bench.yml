@@ -75,7 +75,7 @@ jobs:
           # tag's *tag object*, since its patterns match the ref tail and so
           # never match the peeled `<ref>^{}` entry, and we would then publish
           # a SHA that is not the commit the bench jobs check out. A blobless
-          # single-commit fetch also proves the ref exists before six matrix
+          # single-commit fetch also proves the ref exists before the matrix
           # jobs try it.
           git init --quiet -b main resolve
           git -C resolve remote add origin "$url"
@@ -89,16 +89,28 @@ jobs:
 
   bench:
     needs: prepare
-    runs-on: ubuntu-latest
+    name: bench (${{ matrix.platform.os }}, ${{ matrix.platform.target }}, ${{ matrix.task }})
+    runs-on: ${{ matrix.platform.runner }}
     timeout-minutes: 300
     permissions:
       contents: read
+    defaults:
+      run:
+        # Git Bash keeps the benchmark and grading commands the same on Windows.
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
         task: [csv, ini, uri, toml, hpack, protobuf]
+        platform:
+          - { os: linux, runner: ubuntu-latest, target: native }
+          - { os: linux, runner: ubuntu-latest, target: wasm }
+          - { os: windows, runner: windows-latest, target: native }
     env:
       TASK: ${{ matrix.task }}
+      BENCH_OS: ${{ matrix.platform.os }}
+      BENCH_TARGET: ${{ matrix.platform.target }}
+      BENCH_KEY: ${{ matrix.platform.os }}-${{ matrix.platform.target }}-${{ matrix.task }}
       OPENSEEK_COMMIT: ${{ needs.prepare.outputs.openseek_commit }}
       ADHOC: ${{ needs.prepare.outputs.adhoc }}
       # openseek is a workspace and `moon` runs the prebuild of every member,
@@ -125,10 +137,33 @@ jobs:
           git -C openseek fetch --depth 1 origin "$OPENSEEK_COMMIT"
           git -C openseek checkout --quiet "$OPENSEEK_COMMIT"
 
-      - name: Install MoonBit
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up MSVC
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install MoonBit (Linux)
+        if: runner.os == 'Linux'
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s -- latest
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+
+      - name: Install MoonBit (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Invoke-RestMethod https://cli.moonbitlang.com/install/powershell.ps1 | Invoke-Expression
+          "$env:USERPROFILE\.moon\bin" >> $env:GITHUB_PATH
+          # The grader spawns cp directly; make Git's Unix tools available to
+          # child processes too. Append them so Git's link.exe cannot shadow
+          # the MSVC linker selected above.
+          "PATH=$env:PATH;$env:ProgramFiles\Git\usr\bin" >> $env:GITHUB_ENV
 
       - name: Setup MoonBit
         run: |
@@ -137,8 +172,8 @@ jobs:
 
       - name: Build the agent
         run: |
-          moon -C openseek build cmd/openseek
-          moon build tools/grade
+          moon -C openseek build cmd/openseek --target "$BENCH_TARGET"
+          moon build tools/grade --target wasm
 
       - name: Remove private test cases
         run: rm -f tasks/"$TASK"/*_priv_test.mbt
@@ -154,8 +189,11 @@ jobs:
           # predate share/, so only advertise resources when they exist.
           if [ -d "$GITHUB_WORKSPACE/openseek/share" ]; then
             export OPENSEEK_REFERENCES="$GITHUB_WORKSPACE/openseek/share"
+            if [ "$RUNNER_OS" = Windows ]; then
+              OPENSEEK_REFERENCES="$(cygpath -m "$OPENSEEK_REFERENCES")"
+            fi
           fi
-          moon -C openseek run --target native cmd/openseek -- run \
+          moon -C openseek run --target "$BENCH_TARGET" cmd/openseek -- run \
             --dir "../tasks/$TASK" \
             --concurrency 3 \
             --model deepseek-v4-flash \
@@ -167,45 +205,47 @@ jobs:
 
       - name: Grade runs
         run: |
-          moon run tools/grade -- "$TASK" > grade.json
+          moon run tools/grade --target wasm -- "$TASK" > grade.json
           jq --arg date "$(date -u +%F)" \
              --arg run "$GITHUB_RUN_NUMBER" \
+             --arg os "$BENCH_OS" \
+             --arg target "$BENCH_TARGET" \
              --argjson adhoc "$ADHOC" \
              --arg openseek_commit "$OPENSEEK_COMMIT" \
-             '{date: $date, run: $run, adhoc: $adhoc,
+             '{date: $date, run: $run, adhoc: $adhoc, os: $os, target: $target,
                openseek_commit: $openseek_commit} + .' \
-             grade.json | tee "stats-$TASK.json"
+             grade.json | tee "stats-$BENCH_KEY.json"
 
       - name: Export HTML
         continue-on-error: true
         run: |
           moon -C openseek build cmd/viz_app --target js
-          moon -C openseek run inspect -- --search-dir ../tasks --export "../bench-$TASK.html"
+          moon -C openseek run inspect --target native -- --search-dir ../tasks --export "../bench-$BENCH_KEY.html"
 
       - name: Pack run directories
         run: |
           shopt -s nullglob
           dirs=(tasks/"$TASK"_run_*)
           if [ ${#dirs[@]} -gt 0 ]; then
-            tar czf "runs-$TASK.tgz" \
-              --exclude='_build' --exclude='.mooncakes' "${dirs[@]}"
+            tar --exclude='_build' --exclude='.mooncakes' \
+              -czf "runs-$BENCH_KEY.tgz" "${dirs[@]}"
           fi
 
       - name: Upload run artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: runs-${{ matrix.task }}
+          name: runs-${{ env.BENCH_KEY }}
           path: |
-            runs-${{ matrix.task }}.tgz
-            bench-${{ matrix.task }}.html
+            runs-${{ env.BENCH_KEY }}.tgz
+            bench-${{ env.BENCH_KEY }}.html
           if-no-files-found: warn
           retention-days: 90
 
       - name: Upload stats
         uses: actions/upload-artifact@v4
         with:
-          name: stats-${{ matrix.task }}
-          path: stats-${{ matrix.task }}.json
+          name: stats-${{ env.BENCH_KEY }}
+          path: stats-${{ env.BENCH_KEY }}.json
           retention-days: 14
 
       - name: Fail if the fleet crashed
@@ -262,16 +302,16 @@ jobs:
           date="$(date -u +%F)"
           out="stats/${date}-${GITHUB_RUN_NUMBER}.json"
           mkdir -p stats
-          jq -s 'sort_by(.task)' "${files[@]}" > "$out"
+          jq -s 'sort_by([.os, .target, .task])' "${files[@]}" > "$out"
 
           note=""
           [ "$ADHOC" = true ] && note=", ad-hoc"
           {
             echo "### openseek \`$OPENSEEK_COMMIT\`${note:+ · ad-hoc}"
             echo
-            echo "| task | runs passed | tests per run |"
-            echo "| --- | --- | --- |"
-            jq -r '.[] | "| \(.task) | \(.passed)/\(.runs | length) | " +
+            echo "| OS | agent target | task | runs passed | tests per run |"
+            echo "| --- | --- | --- | --- | --- |"
+            jq -r '.[] | "| \(.os) | \(.target) | \(.task) | \(.passed)/\(.runs | length) | " +
                          "\([.runs[] | "\(.test_result.passed)/\(.test_result.total)"]
                             | join(", ")) |"' "$out"
           } >> "$GITHUB_STEP_SUMMARY"
@@ -315,7 +355,7 @@ jobs:
 
       # Viewer HTML is heavy and never enters git history: it lives as assets
       # on a single rolling "viewers" release (durable, no expiry), keyed
-      # bench-<date>-<run>-<task>.html — the name the dashboard links to.
+      # bench-<date>-<run>-<os>-<target>-<task>.html — the dashboard's key.
       - name: Publish session viewers
         env:
           GH_TOKEN: ${{ github.token }}
@@ -340,15 +380,15 @@ jobs:
           # from that record. Reading it back keeps the two in step, per task.
           # The date stays first: the GC step below reads it by position.
           for f in "${files[@]}"; do
-            task="$(basename "$f" .html)"
-            task="${task#bench-}"
-            d="$(jq -r '.date' "collected/stats-${task}.json" 2>/dev/null)" || d=""
+            key="$(basename "$f" .html)"
+            key="${key#bench-}"
+            d="$(jq -r '.date' "collected/stats-${key}.json" 2>/dev/null)" || d=""
             if [ -z "$d" ] || [ "$d" = null ]; then
-              echo "::warning::no stats record for $task, so its viewer has" \
+              echo "::warning::no stats record for $key, so its viewer has" \
                    "no date to file under -- skipping it."
               continue
             fi
-            name="bench-${d}-${GITHUB_RUN_NUMBER}-${task}.html"
+            name="bench-${d}-${GITHUB_RUN_NUMBER}-${key}.html"
             cp "$f" "$name"
             gh release upload viewers "$name" --clobber
           done

@@ -205,6 +205,9 @@ function toPoint(rec) {
   return {
     date: rec.date,
     run: rec.run ?? null,
+    // Keep absence intact: older records use viewer filenames without a platform.
+    os: rec.os ?? null,
+    target: rec.target ?? null,
     // A benchmark of a named ref rather than of openseek HEAD. It is filed
     // under the day it ran, so it sorts last and would otherwise be read as
     // the timeline's newest state -- while the commit it measured is often
@@ -407,19 +410,15 @@ function stepsChart(points, onPick) {
   });
 }
 
-// Session-viewer archive published per task-run beside the dashboard. The
-// asset is keyed by the workflow run, so two runs landing on one day — the
-// nightly and an ad-hoc one, or a re-dispatch of an unchanged HEAD — cannot
-// overwrite each other. Records written before that key existed carry no
-// `run` and keep the date-only name they were published under; that is the
-// only case the old name is used, because a record that *has* a run must not
-// silently borrow another run's archive when its own upload is missing — the
-// session ids would not be in it. The manifest (viewers.json) lists which
-// assets still exist, since old ones are GC'd from the release; with no
-// manifest (local preview) links stay on.
+// Viewer names include the workflow run, OS, agent target, and task so parallel
+// measurements cannot overwrite each other. Older records omit OS/target, and
+// the oldest omit the run number too; preserve the names originally published.
+// Never fall back to another measurement's archive when an upload is missing:
+// its session ids would not match. The manifest lists surviving assets after
+// release GC; without a manifest (local preview), links stay on.
 let VIEWERS = null;
 const viewerName = (p, task) => p.run
-  ? `bench-${p.date}-${p.run}-${task}.html`
+  ? `bench-${p.date}-${p.run}-${p.os && p.target ? `${p.os}-${p.target}-` : ""}${task}.html`
   : `bench-${p.date}-${task}.html`;
 const viewerHref = (p, task) => `viewer/${viewerName(p, task)}`;
 const viewerExists = (p, task) =>
@@ -603,7 +602,8 @@ function taskCard(task, records) {
   const card = el("section", "task-card");
 
   const head = el("div", "task-head");
-  head.append(el("span", "task-name", task));
+  head.append(el("span", "task-name",
+    `${task} · ${latest.os ?? "linux"}/${latest.target ?? "native"}`));
   head.append(el("span", "task-latest",
     `${latest.date}${latest.adhoc ? " (ad-hoc)" : ""}: ` +
     `${latest.passed}/${latest.k} passed · tests ${pct(latest.testRatio)}`));
@@ -670,8 +670,11 @@ async function boot() {
   }
   const byTask = new Map();
   for (const rec of records) {
-    if (!byTask.has(rec.task)) byTask.set(rec.task, []);
-    byTask.get(rec.task).push(rec);
+    // Old measurements all used Linux/native. Group them with that series,
+    // while keeping other platforms out of the same trend line.
+    const key = `${rec.task}/${rec.os ?? "linux"}/${rec.target ?? "native"}`;
+    if (!byTask.has(key)) byTask.set(key, []);
+    byTask.get(key).push(rec);
   }
   const last = records[records.length - 1];
   subtitle.replaceChildren(
@@ -681,8 +684,8 @@ async function boot() {
       ? " (ad-hoc: a named ref, not necessarily HEAD)" : ""),
   );
   const tasksRoot = document.getElementById("tasks");
-  for (const [task, recs] of [...byTask.entries()].sort()) {
-    tasksRoot.append(taskCard(task, recs));
+  for (const [, recs] of [...byTask.entries()].sort()) {
+    tasksRoot.append(taskCard(recs[0].task, recs));
   }
 }
 boot();
