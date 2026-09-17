@@ -1,0 +1,36 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "yaml"
+
+import {
+  "moonbitlang/core/bigint",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/quickcheck",
+  "moonbitlang/core/quickcheck/shrink",
+  "moonbitlang/core/quickcheck/splitmix",
+}
+
+// Values
+pub fn parse(StringView) -> Array[Yaml] raise
+
+pub fn print(Array[Yaml]) -> String
+
+// Errors
+
+// Types and methods
+pub(all) enum Yaml {
+  Null
+  Bool(Bool)
+  Integer(@bigint.BigInt)
+  Float(Double)
+  String(String)
+  Sequence(Array[Yaml])
+  Mapping(Map[Yaml, Yaml])
+} derive(@debug.Debug)
+pub impl Eq for Yaml
+pub impl Hash for Yaml
+pub impl @quickcheck.Arbitrary for Yaml
+pub impl @shrink.Shrink for Yaml
+
+// Type aliases
+
+// Traits
