@@ -104,7 +104,9 @@ Mapping rules:
   `%TAG` directive scopes to the document it precedes (§6.8.2).
 - **Anchors and aliases are resolved**: an alias is a copy of the most
   recent preceding node carrying that anchor (§7.1), as a value or as a
-  key. An alias to an undefined anchor, an alias to an anchor from a
+  key. Closing a collection does not rebind its anchor: after
+  `- &a [&a 1, *a]`, a following `- *a` resolves to the inner scalar `1`.
+  An alias to an undefined anchor, an alias to an anchor from a
   previous document, an alias into a node still being loaded (`&a [*a]`),
   and properties on an alias are errors.
 - **Mappings are maps with node keys.** Keys may be scalars of any type,

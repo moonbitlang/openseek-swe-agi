@@ -123,9 +123,11 @@ pub impl Hash for Yaml with fn hash_combine(self, hasher) {
 ///   handle used without a `%TAG` directive in the same document is an
 ///   error (§6.8.2);
 /// - anchors and aliases are resolved: an alias is a copy of the most
-///   recent preceding node carrying the anchor (§7.1). An alias to an
-///   undefined anchor, or one that refers back into a node still being
-///   loaded (a cycle, which no finite tree can represent), is an error;
+///   recent preceding node carrying the anchor (§7.1). Closing a collection
+///   does not rebind its anchor after a nested node reused the same name.
+///   An alias to an undefined anchor, or one that refers back into a node
+///   still being loaded (a cycle, which no finite tree can represent), is
+///   an error;
 /// - a mapping with two equal keys is an error (§3.2.1.3). Keys compare as
 ///   loaded nodes: `1` and `0x1` collide, `1` and `"1"` do not.
 ///

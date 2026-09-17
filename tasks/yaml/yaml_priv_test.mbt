@@ -5792,7 +5792,9 @@ test "spec/aliases/same-anchor-nested-is-not-a-cycle" {
   let expected : Array[@yaml.Yaml] = [
     Sequence([
       Sequence([Integer(1), Integer(1)]),
-      Sequence([Integer(1), Integer(1)]),
+      // The inner &a is the latest anchor event even after the outer
+      // sequence closes (YAML 1.2.2 section 3.2.2.2).
+      Integer(1),
     ]),
   ]
   assert_eq(@yaml.parse(in_yaml), expected)
