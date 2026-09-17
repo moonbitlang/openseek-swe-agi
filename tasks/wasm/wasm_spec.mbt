@@ -163,9 +163,11 @@ declare pub fn decode_module(data : Bytes) -> Module raise
 /// - `f32.const`/`f64.const` print `0x0p+0` for zero, `inf`, `nan`,
 ///   `nan:0x<payload>` (lower-case hex, no leading zeros) or
 ///   `0x1.<hex>p<±exp>` (fraction digits with trailing zeros trimmed and
-///   the dot dropped when there are none, subnormals normalised so the
-///   leading digit is 1, exponent always signed), all with a leading `-`
-///   when the sign bit is set, followed by ` (;=D;)` where D is `NaN`,
+///   the dot dropped when there are none for normal values; subnormals
+///   are normalised so the leading digit is 1 and always retain the dot,
+///   e.g. `0x1.p-149` and `0x1.p-1074`; exponent always signed), all with
+///   a leading `-` when the sign bit is set, followed by ` (;=D;)` where D
+///   is `NaN`,
 ///   `inf`, `-inf`, `-0`, `0` or the shortest decimal digit string that
 ///   rounds back to the same value, written positionally without an
 ///   exponent;
