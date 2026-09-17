@@ -36,7 +36,7 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, macOS, ARM64]
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
@@ -96,23 +96,10 @@ jobs:
           echo "built $(jq length _site/data.json) records," \
                "$(jq length _site/viewers.json) viewers"
 
-      # upload-pages-artifact shells out to gtar on macOS, which is not part
-      # of a stock self-hosted runner. Produce its artifact.tar contract with
-      # BSD tar instead; -h dereferences any symlinks in the generated site.
-      - name: Archive Pages artifact
-        env:
-          COPYFILE_DISABLE: "1"
-        run: |
-          tar -h -C _site -cvf "$RUNNER_TEMP/artifact.tar" \
-            --exclude=.git --exclude=.github .
-
       - name: Upload Pages artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: github-pages
-          path: ${{ runner.temp }}/artifact.tar
-          retention-days: 1
-          if-no-files-found: error
+          path: _site
 
       - name: Deploy Pages
         id: deploy
