@@ -207,8 +207,14 @@ well-formedness:
   `<!ENTITY % Name S (EntityValue | ExternalID) S? '>'`. In an entity
   value, character references are replaced when the replacement text is
   constructed and general-entity references are kept as written (section
-  4.5); a `%` inside any markup declaration of the internal subset is an
-  error (WFC: PEs in Internal Subset).
+  4.5). Parameter-entity references are forbidden within internal-subset
+  markup declarations (WFC: PEs in Internal Subset), including inside an
+  `EntityValue`, where `%Name;` is recognized. This is not a ban on the
+  percent character: in attribute defaults, system/public literals,
+  comments and PIs, `%Name;` is ordinary text. For example,
+  `<!ATTLIST doc a1 CDATA "%e;">` supplies the literal default `%e;`.
+  The `%` marker in `<!ENTITY % Name ...>` declares a parameter entity;
+  it is not a reference and is allowed.
 - `<!NOTATION Name S (ExternalID | PublicID) S? '>'`; public identifiers
   may only contain `PubidChar`s ([13]); system literals are free text.
 - Conditional sections are not allowed in the internal subset.

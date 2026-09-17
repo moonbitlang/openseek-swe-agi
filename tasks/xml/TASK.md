@@ -174,7 +174,7 @@ moon test
 
 The model should keep running until all tests pass.
 
-- **Public tests** (`*_pub_test.mbt`): 78 cases (including two
+- **Public tests** (`*_pub_test.mbt`): 80 cases (including two
   property-based tests), visible in this repository for development and
   debugging
 - **Private tests** (`*_priv_test.mbt`): 719 additional cases

@@ -1097,3 +1097,24 @@ test "quickcheck: parse should never panic" {
     }
   })
 }
+
+///|
+test "spec/dtd/percent-in-attribute-default-is-literal" {
+  // AttValue does not recognize parameter entities, unlike EntityValue.
+  let xml_text =
+    #|<!DOCTYPE doc [<!ATTLIST doc a1 CDATA "%e;">]><doc/>
+  assert_eq(@xml.parse(xml_text), [
+    DocType("doc"),
+    Start(name="doc", attributes={ "a1": "%e;" }),
+    End("doc"),
+  ])
+}
+
+///|
+test "spec/dtd/parameter-reference-in-entity-value-is-forbidden" {
+  // XML 1.0 section 2.8 forbids PE references inside internal-subset
+  // declarations, even inside the EntityValue's quotation marks.
+  let xml_text =
+    #|<!DOCTYPE doc [<!ENTITY % e "value"><!ENTITY text "%e;">]><doc/>
+  @test.assert_raise(() => @xml.parse(xml_text))
+}
