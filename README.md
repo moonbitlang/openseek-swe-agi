@@ -19,7 +19,9 @@ uses MSVC for native builds and Git Bash for the workflow commands.
 Stats include `os` and `target`, and each task has one dashboard card comparing
 platforms on shared charts. Agent, test, and tool-call pass rates and average
 steps are all shown by default; each chart can be collapsed independently.
-A platform selector controls run details and session-viewer links. Historical
+A platform selector controls run details and session-viewer links. Only platforms
+with measurements in the selected run appear in this selector and chart tooltips;
+missing measurements remain gaps in the charts. Historical
 records without those fields belong to Linux/native and retain their original
 session-viewer links.
 Artifacts are named `runs-<os>-<target>-<task>` and
