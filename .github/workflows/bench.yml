@@ -179,8 +179,24 @@ jobs:
 
       - name: Build the agent
         run: |
-          moon -C openseek build cmd/openseek --target "$BENCH_TARGET"
-          moon build tools/grade --target wasm
+          # Builds may still download packages after moon update. Retry brief
+          # registry connection failures, but keep a persistent failure fatal.
+          for attempt in 1 2 3; do
+            echo "Build attempt $attempt/3"
+            if moon -C openseek build cmd/openseek --target "$BENCH_TARGET" &&
+               moon build tools/grade --target wasm; then
+              exit 0
+            else
+              build_status=$?
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              delay=$((attempt * 10))
+              echo "::warning::Build attempt $attempt/3 failed (exit $build_status); retrying in ${delay}s"
+              sleep "$delay"
+            fi
+          done
+          echo "::error::Build failed after 3 attempts (exit $build_status)"
+          exit "$build_status"
 
       - name: Remove private test cases
         run: rm -f tasks/"$TASK"/*_priv_test.mbt
