@@ -27,7 +27,7 @@ jobs:
   # may name that commit instead, which makes the run "ad-hoc": it reports
   # without writing anything back to this repo (see the report job).
   prepare:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, macOS, ARM64]
     outputs:
       openseek_commit: ${{ steps.head.outputs.sha }}
       adhoc: ${{ steps.head.outputs.adhoc }}
@@ -77,19 +77,21 @@ jobs:
           # a SHA that is not the commit the bench jobs check out. A blobless
           # single-commit fetch also proves the ref exists before six matrix
           # jobs try it.
-          git init --quiet -b main resolve
-          git -C resolve remote add origin "$url"
-          git -C resolve fetch --quiet --depth 1 --filter=blob:none origin "$ref" || {
+          resolve="$(mktemp -d "${RUNNER_TEMP}/openseek-resolve.XXXXXX")"
+          trap 'rm -rf "$resolve"' EXIT
+          git init --quiet -b main "$resolve"
+          git -C "$resolve" remote add origin "$url"
+          git -C "$resolve" fetch --quiet --depth 1 --filter=blob:none origin "$ref" || {
             echo "::error::cannot fetch openseek ref '$ref' -- pass a full" \
                  "40-hex SHA, or a branch/tag name"; exit 1; }
-          sha="$(git -C resolve rev-parse "FETCH_HEAD^{commit}")"
+          sha="$(git -C "$resolve" rev-parse "FETCH_HEAD^{commit}")"
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
           echo "adhoc=$adhoc" >> "$GITHUB_OUTPUT"
           echo "benchmarking openseek $sha (ad-hoc: $adhoc)"
 
   bench:
     needs: prepare
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, macOS, ARM64]
     timeout-minutes: 300
     permissions:
       contents: read
@@ -225,7 +227,7 @@ jobs:
   report:
     needs: [prepare, bench]
     if: ${{ !cancelled() && needs.prepare.outputs.reporting == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, macOS, ARM64]
     permissions:
       contents: write
       actions: write
@@ -360,7 +362,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cutoff="$(date -u -d '90 days ago' +%F)"
+          cutoff="$(date -u -v-90d +%F)"
           gh release view viewers --json assets --jq '.assets[].name' 2>/dev/null |
           while read -r name; do
             day="${name#bench-}"
