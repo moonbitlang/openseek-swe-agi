@@ -618,7 +618,9 @@ class TaskCard {
       fmt,
       directLabels: false,
       onPick: index => this.select(index),
-      tooltipRows: point => series.map(s => {
+      // A failed build produces no measurement. Keep its chart gap, but do not
+      // add a placeholder row alongside the platforms that actually ran.
+      tooltipRows: point => series.filter(s => point.platforms.has(s.label)).map(s => {
         const value = s.get(point);
         return ttRow(s.color, `${s.label}: ${value === null ? "no data" : fmt(value)}`);
       }),
@@ -628,20 +630,28 @@ class TaskCard {
   select(index) {
     this.selected = index;
     const point = this.points[index];
+    const previous = this.platformSelect.value;
+    // Only offer measured platforms for this run. Preserve the user's choice
+    // when possible, otherwise select the first available platform.
+    this.platformSelect.replaceChildren(...this.series
+      .filter(s => point.platforms.has(s.label))
+      .map(s => {
+        const option = el("option", "", s.label);
+        option.value = s.label;
+        return option;
+      }));
+    if (point.platforms.has(previous)) this.platformSelect.value = previous;
     const platform = this.platformSelect.value;
     const detail = point.platforms.get(platform);
     for (const panel of this.charts) panel.setSelected(index);
-    this.runsTitle.textContent = `runs · ${platform} · ${detail?.date ?? point.date}` +
+    this.runsTitle.textContent = `runs · ${platform} · ${detail.date}` +
       (point.run ? ` · #${point.run}` : "") + (point.adhoc ? " · ad-hoc" : "");
-    this.runsBody.replaceChildren(detail
-      ? runTable(detail.runs, detail, this.task)
-      : el("p", "empty", "No measurement for this platform in the selected run."));
-    this.viewer.hidden = !detail || !viewerExists(detail, this.task);
+    this.runsBody.replaceChildren(runTable(detail.runs, detail, this.task));
+    this.viewer.hidden = !viewerExists(detail, this.task);
     if (!this.viewer.hidden) this.viewer.href = viewerHref(detail, this.task);
     const platformPoints = this.platforms.get(platform);
     const detailIndex = platformPoints.indexOf(detail);
-    // A missing measurement also clears the tool detail rather than showing
-    // a stale selection from another platform or workflow run.
+    // Rebuild tool details for the newly selected platform and measurement.
     this.toolBody.replaceChildren();
     if (detailIndex >= 0) {
       const tools = toolTrend(platformPoints, this.card, i => {
@@ -682,11 +692,6 @@ class TaskCard {
 
     const platformLabel = el("label", "chart-controls", "Run details ");
     this.platformSelect = el("select");
-    for (const platform of this.series) {
-      const option = el("option", "", platform.label);
-      option.value = platform.label;
-      this.platformSelect.append(option);
-    }
     platformLabel.append(this.platformSelect);
     this.platformSelect.addEventListener("change", () => this.select(this.selected));
     this.runsTitle = el("div", "table-title");
