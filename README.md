@@ -16,8 +16,10 @@ The target selects how the **agent** is compiled and run. Task code keeps its
 own configured target, and the grader runs on wasm on every platform. Windows
 uses MSVC for native builds and Git Bash for the workflow commands.
 
-Stats include `os` and `target`, and the dashboard shows a separate history
-for each task/platform combination. Historical records without those fields
+Stats include `os` and `target`, and each task has one dashboard card comparing
+platforms on shared charts. The metric selector switches between agent, test,
+and tool-call pass rates; average steps remain visible below. A separate
+platform selector controls run details and session-viewer links. Historical records without those fields
 belong to Linux/native and retain their original session-viewer links.
 Artifacts are named `runs-<os>-<target>-<task>` and
 `stats-<os>-<target>-<task>` so parallel jobs never overwrite each other.
