@@ -163,6 +163,13 @@ jobs:
           # the MSVC linker selected above.
           "PATH=$env:PATH;$env:ProgramFiles\Git\usr\bin" >> $env:GITHUB_ENV
 
+      - name: Install ripgrep (Windows)
+        if: runner.os == 'Windows'
+        # The agent's search tools invoke rg from PATH.
+        run: |
+          choco install ripgrep --yes --no-progress
+          rg --version
+
       - name: Install Linux build dependencies
         if: runner.os == 'Linux'
         # Moon runs workspace dependency prebuilds while building the agent.
