@@ -207,6 +207,23 @@ jobs:
           echo "::error::Build failed after 3 attempts (exit $build_status)"
           exit "$build_status"
 
+      - name: Stage agent resources
+        run: |
+          # current_exe resolves the native executable or Wasm module, and
+          # OpenSeek reads ../share from that file's directory. Ask moon run
+          # for its actual output path so staging matches the command below.
+          # Older ad-hoc refs may predate share/ entirely.
+          if [ -d openseek/share ]; then
+            agent_exe="$(moon -C openseek run --target "$BENCH_TARGET" \
+              --build-only --output-json cmd/openseek | jq -er '.artifacts_path[0]')"
+            if [ "$RUNNER_OS" = Windows ]; then
+              agent_exe="$(cygpath -u "$agent_exe")"
+            fi
+            agent_share="$(dirname "$agent_exe")/../share"
+            mkdir -p "$agent_share"
+            cp -R openseek/share/. "$agent_share/"
+          fi
+
       - name: Remove private test cases
         run: rm -f tasks/"$TASK"/*_priv_test.mbt
 
@@ -216,9 +233,8 @@ jobs:
         env:
           DEEPSEEK: ${{ secrets.DEEPSEEK }}
         run: |
-          # Use the measured commit's resources, with an absolute path because
-          # each agent runs in its own task directory. Older ad-hoc refs may
-          # predate share/, so only advertise resources when they exist.
+          # Older ad-hoc refs still use this variable instead of current_exe.
+          # Keep it absolute because each agent runs in its own task directory.
           if [ -d "$GITHUB_WORKSPACE/openseek/share" ]; then
             export OPENSEEK_REFERENCES="$GITHUB_WORKSPACE/openseek/share"
             if [ "$RUNNER_OS" = Windows ]; then
