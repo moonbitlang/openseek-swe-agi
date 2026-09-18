@@ -22,7 +22,7 @@
     --cat-5: #e87ba4;
     --cat-6: #008300;
     --cat-8: #e34948;
-    --rail-ok: #d9d8d3;
+    --rail-ok: #a8d5b0;
     --status-good: #0ca30c;
     --status-serious: #ec835a;
     --status-critical: #d03b3b;
@@ -45,7 +45,6 @@
       --cat-5: #d55181;
       --cat-6: #008300;
       --cat-8: #e66767;
-      --rail-ok: #454542;
     }
   }
   :root[data-theme="dark"] {
@@ -65,7 +64,6 @@
     --cat-5: #d55181;
     --cat-6: #008300;
     --cat-8: #e66767;
-    --rail-ok: #454542;
   }
 
   body {
@@ -94,6 +92,13 @@
   .swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
 
   .chart-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 16px 0 4px; }
+  .tool-control { display: inline-flex; align-items: center; gap: 8px; }
+  .tool-toggle { appearance: none; width: 30px; height: 18px; margin: 0; border: 1px solid var(--border); border-radius: 10px; background: var(--grid); cursor: pointer; }
+  .tool-toggle::before { content: ""; display: block; width: 12px; height: 12px; margin: 2px; border-radius: 50%; background: var(--text-secondary); transition: transform 0.1s; }
+  .tool-toggle:checked { background: var(--series-pass); border-color: var(--series-pass); }
+  .tool-toggle:checked::before { background: white; transform: translateX(12px); }
+  .tool-toggle:focus-visible { outline: 2px solid var(--series-pass); outline-offset: 2px; }
+  .tool-toggle:disabled { opacity: 0.4; cursor: default; }
   .metric-section { margin-top: 16px; }
   .metric-section > summary { cursor: pointer; font-weight: 500; padding: 4px 0; }
   select { font: inherit; color: var(--text-primary); background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; }
@@ -105,7 +110,6 @@
   .end-label { fill: var(--text-secondary); font-size: 11px; }
   .series-line { fill: none; stroke-width: 2; transition: opacity 0.1s; }
   .dot { stroke: var(--card); stroke-width: 2; transition: opacity 0.1s; }
-  .faded { opacity: 0.12; }
   .crosshair { stroke: var(--border); stroke-width: 1; visibility: hidden; }
   .selection { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 4 3; visibility: hidden; }
   svg.pickable { cursor: pointer; }
@@ -125,7 +129,7 @@
     z-index: 2;
   }
   .tooltip .tt-date { color: var(--text-primary); font-weight: 600; }
-  .tooltip .tt-row, .legend .tt-row { display: flex; align-items: center; gap: 6px; }
+  .tooltip .tt-row, .legend .tt-row, .tool-legend .tt-row { display: flex; align-items: center; gap: 6px; }
 
   .table-title { margin: 16px 0 4px; font-size: 12px; color: var(--text-muted); }
   a.run-link {
@@ -399,178 +403,31 @@ function rail(run) {
   return strip;
 }
 
-// Per-run detail for the selected day: the accessible table view.
-function runTable(runs, point, task) {
-  const table = el("table");
-  const head = el("tr");
-  for (const [name, numeric] of [["run", false], ["tests", true], ["warn", true],
-    ["err", true], ["steps", true], ["elapsed", true], ["stop", false]]) {
-    head.append(el("th", numeric ? "num" : "", name));
-  }
-  table.append(head);
-  for (const run of runs) {
-    const row = el("tr");
-    const t = run.test_result, c = run.check_result;
-    const runCell = el("td");
-    const runName = run.dir.replace(/^tasks\//, "");
-    if (run.session_id && viewerExists(point, task)) {
-      const link = el("a", "run-link mono", runName);
-      link.href = `${viewerHref(point, task)}#s=${encodeURIComponent(run.session_id)}`;
-      link.target = "_blank";
-      link.rel = "noopener";
-      runCell.append(link);
-    } else {
-      runCell.append(el("span", "mono", runName));
-    }
-    row.append(runCell);
-    row.append(el("td", "num", `${t.passed}/${t.total}`));
-    row.append(el("td", "num", String(c.warnings)));
-    row.append(el("td", "num", String(c.errors)));
-    row.append(el("td", "num", String(run.steps)));
-    row.append(el("td", "num", `${Math.round(run.elapsed)}s`));
-    const kind = run.stop_reason ? run.stop_reason.kind : "missing";
-    const stop = el("span", "stop");
-    const dot = el("span", "stop-dot");
-    dot.style.background = STOP_COLORS[kind] || "var(--text-muted)";
-    stop.append(dot, document.createTextNode(kind));
-    const cell = el("td");
-    if (run.stop_reason && kind !== "finished") cell.title = run.stop_reason.message;
-    cell.append(stop);
-    row.append(cell);
-    table.append(row);
-
-    if ((run.tool_calls || []).length > 0) {
-      row.className = "has-rail";
-      const railRow = el("tr", "rail-row");
-      const cell = el("td");
-      cell.colSpan = 7;
-      cell.append(rail(run));
-      railRow.append(cell);
-      table.append(railRow);
-    }
-  }
-  return table;
-}
-
-// Fixed slot order from the reference palette; a tool keeps its color for the
-// whole period (identity, not rank), and past eight tools only the busiest
-// eight are drawn.
-const TOOL_COLORS = [
-  "var(--series-pass)", "var(--series-tests)", "var(--series-tools)",
-  "var(--cat-4)", "var(--cat-5)", "var(--cat-6)", "var(--series-steps)",
-  "var(--cat-8)",
-];
-
-// Per-day per-tool aggregate for one chart point.
-function toolAgg(p) {
-  const agg = new Map();
-  for (const run of p.runs) {
-    for (const [tool, s] of Object.entries(run.tool_call_stats)) {
-      const cur = agg.get(tool) || { ok: 0, calls: 0 };
-      cur.ok += s.passed;
-      cur.calls += s.passed + s.failed;
-      agg.set(tool, cur);
-    }
-  }
-  return agg;
-}
-
-// Hovering a tool dims everything else: the other tools' lines and dots, and
-// every non-matching segment on the run rails.
-function highlightTool(card, tool) {
-  for (const seg of card.querySelectorAll(".rail span")) {
-    seg.classList.toggle("dim", tool !== null && seg.dataset.tool !== tool);
-  }
-  for (const mark of card.querySelectorAll("[data-series]")) {
-    mark.classList.toggle("faded", tool !== null && mark.dataset.series !== tool);
-  }
-}
-
-// Per-tool pass-rate trend: one line per tool, plus a hoverable legend row
-// carrying the selected day's rate and call volume.
-function toolTrend(points, card, onPick) {
-  for (const p of points) p.toolsByDay = toolAgg(p);
-  const totals = new Map();
-  for (const p of points) {
-    for (const [tool, s] of p.toolsByDay) {
-      totals.set(tool, (totals.get(tool) || 0) + s.calls);
-    }
-  }
-  const shown = [...totals.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, TOOL_COLORS.length)
-    .map(entry => entry[0]);
-
-  const series = shown.map((tool, i) => ({
-    id: tool,
-    label: tool,
-    color: TOOL_COLORS[i],
-    get: p => {
-      const s = p.toolsByDay.get(tool);
-      return s && s.calls > 0 ? s.ok / s.calls : null;
-    },
-  }));
-
-  const legend = el("div", "tool-legend");
-  const valueEls = new Map();
-  shown.forEach((tool, i) => {
-    const row = el("div", "tool-row");
-    const swatch = el("span", "swatch");
-    swatch.style.background = TOOL_COLORS[i];
-    const value = el("span", "tool-value");
-    valueEls.set(tool, value);
-    row.append(swatch, el("span", "mono", tool), value);
-    row.addEventListener("mouseenter", () => highlightTool(card, tool));
-    row.addEventListener("mouseleave", () => highlightTool(card, null));
-    legend.append(row);
-  });
-
-  const panel = chart(points, series, {
-    height: 200,
-    ymax: 1,
-    ticks: [0, 0.5, 1],
-    fmt: pct,
-    onPick,
-    tooltipRows: p => shown.flatMap((tool, i) => {
-      const s = p.toolsByDay.get(tool);
-      if (!s || s.calls === 0) return [];
-      return [ttRow(TOOL_COLORS[i], `${tool}: ${pct(s.ok / s.calls)} (${s.calls})`)];
-    }),
-  });
-
-  const wrap = el("div");
-  wrap.append(legend, panel.node);
-  const setSelected = i => {
-    panel.setSelected(i);
-    const day = points[i].toolsByDay;
-    for (const [tool, value] of valueEls) {
-      const s = day.get(tool);
-      value.textContent = s && s.calls > 0
-        ? `${pct(s.ok / s.calls)} · ${s.calls} calls`
-        : "no calls";
-    }
-  };
-  return { node: wrap, setSelected };
-}
-
-function titled(title, node) {
-  const wrap = el("div");
-  wrap.append(el("div", "table-title", title), node);
-  return wrap;
-}
-
 // One task owns a shared timeline and one series per platform. Missing platform
 // measurements remain gaps; they must never borrow another platform's result.
 class TaskCard {
   constructor(task, records) {
     this.task = task;
     this.platforms = new Map();
+    const tools = new Set();
     const timeline = new Map();
     const legacyCounts = new Map();
     for (const record of records) {
       const platform = `${record.os ?? "linux"}/${record.target ?? "native"}`;
       if (!this.platforms.has(platform)) this.platforms.set(platform, []);
       const point = toPoint(record);
+      // Sum calls across trials before dividing, so a short trial cannot have
+      // the same weight as a trial with many calls. Keep each platform separate.
+      point.tools = new Map();
+      for (const run of point.runs) {
+        for (const [tool, stats] of Object.entries(run.tool_call_stats)) {
+          tools.add(tool);
+          const counts = point.tools.get(tool) ?? { ok: 0, calls: 0 };
+          counts.ok += stats.passed;
+          counts.calls += stats.passed + stats.failed;
+          point.tools.set(tool, counts);
+        }
+      }
       // Old records have no workflow run number. Keep multiple same-day runs
       // distinct, with an ordinal within each platform/date/commit combination.
       const base = `${record.date}/${record.openseek_commit ?? ""}`;
@@ -599,6 +456,8 @@ class TaskCard {
       const index = Math.max(0, order.indexOf(platform));
       return { label: platform, color: colors[index], dash: dashes[index] };
     });
+    // Keep every observed tool available, including tools used by just one platform.
+    this.tools = [...tools].sort();
     this.selected = this.points.length - 1;
   }
 
@@ -627,39 +486,152 @@ class TaskCard {
     });
   }
 
+  toolChart(tool) {
+    // Tool charts use the same comparison columns and platform styles as the
+    // task metrics. Missing measurements and zero calls both leave a gap.
+    const series = this.series.map(platform => ({
+      ...platform,
+      get: point => {
+        const counts = point.platforms.get(platform.label)?.tools.get(tool);
+        return counts?.calls > 0 ? counts.ok / counts.calls : null;
+      },
+    }));
+    const legend = el("div", "tool-legend");
+    const values = new Map();
+    for (const platform of series) {
+      const row = el("div", "tool-row");
+      const value = el("span", "tool-value");
+      values.set(platform.label, value);
+      row.append(ttRow(platform.color, platform.label), value);
+      legend.append(row);
+    }
+    const panel = chart(this.points, series, {
+      height: 200,
+      ymax: 1,
+      ticks: [0, 0.5, 1],
+      fmt: pct,
+      directLabels: false,
+      onPick: index => this.select(index),
+      tooltipRows: point => series.flatMap(platform => {
+        const counts = point.platforms.get(platform.label)?.tools.get(tool);
+        return counts?.calls > 0
+          ? [ttRow(platform.color, `${platform.label}: ${pct(counts.ok / counts.calls)} (${counts.ok}/${counts.calls} calls)`)]
+          : [];
+      }),
+    });
+    const node = el("div", "tool-section");
+    node.append(legend, panel.node);
+    const points = this.points;
+    return {
+      node,
+      setSelected(index) {
+        panel.setSelected(index);
+        for (const [platform, value] of values) {
+          const point = points[index].platforms.get(platform);
+          const counts = point?.tools.get(tool);
+          value.textContent = !point ? "no data" : counts?.calls > 0
+            ? `${pct(counts.ok / counts.calls)} · ${counts.ok}/${counts.calls} calls`
+            : "no calls";
+        }
+      },
+    };
+  }
+
+  // Show every measured platform together; each row keeps its own point so
+  // viewer links still identify the correct platform, date, and workflow run.
+  runTable(point) {
+    const table = el("table");
+    const head = el("tr");
+    for (const [name, numeric] of [["platform", false], ["run", false], ["tests", true], ["warn", true],
+      ["err", true], ["steps", true], ["elapsed", true], ["stop", false]]) {
+      head.append(el("th", numeric ? "num" : "", name));
+    }
+    table.append(head);
+    const entries = this.series.flatMap(platform => {
+      const detail = point.platforms.get(platform.label);
+      return detail ? detail.runs.map(run => ({ run, detail, platform })) : [];
+    });
+    for (const { run, detail, platform } of entries) {
+      const row = el("tr");
+      const t = run.test_result, c = run.check_result;
+      const runCell = el("td");
+      const runName = run.dir.replace(/^tasks\//, "");
+      if (run.session_id && viewerExists(detail, this.task)) {
+        const link = el("a", "run-link mono", runName);
+        link.href = `${viewerHref(detail, this.task)}#s=${encodeURIComponent(run.session_id)}`;
+        link.target = "_blank";
+        link.rel = "noopener";
+        runCell.append(link);
+      } else {
+        runCell.append(el("span", "mono", runName));
+      }
+      row.append(el("td", "mono", platform.label), runCell);
+      row.append(el("td", "num", `${t.passed}/${t.total}`));
+      row.append(el("td", "num", String(c.warnings)));
+      row.append(el("td", "num", String(c.errors)));
+      row.append(el("td", "num", String(run.steps)));
+      row.append(el("td", "num", `${Math.round(run.elapsed)}s`));
+      const kind = run.stop_reason ? run.stop_reason.kind : "missing";
+      const stop = el("span", "stop");
+      const dot = el("span", "stop-dot");
+      dot.style.background = STOP_COLORS[kind] || "var(--text-muted)";
+      stop.append(dot, document.createTextNode(kind));
+      const cell = el("td");
+      if (run.stop_reason && kind !== "finished") cell.title = run.stop_reason.message;
+      cell.append(stop);
+      row.append(cell);
+      table.append(row);
+
+      if ((run.tool_calls || []).length > 0) {
+        row.className = "has-rail";
+        const railRow = el("tr", "rail-row");
+        const cell = el("td");
+        cell.colSpan = 8;
+        cell.append(rail(run));
+        railRow.append(cell);
+        table.append(railRow);
+      }
+    }
+    return table;
+  }
+
+  selectTool() {
+    // Changing the tool preserves the selected workflow run and all run details.
+    this.toolPanel = this.tools.length ? this.toolChart(this.toolSelect.value) : null;
+    this.toolBody.replaceChildren(...(this.toolPanel ? [this.toolPanel.node]
+      : [el("div", "tool-value", "no tool calls")]));
+    this.toolPanel?.setSelected(this.selected);
+    this.highlightToolCalls();
+  }
+
+  highlightToolCalls() {
+    // Retain the order and width of every call, including failures. Dimming
+    // other tools keeps the selected tool's positions visible in the full run.
+    for (const segment of this.runsBody.querySelectorAll(".rail span")) {
+      segment.classList.toggle("dim", this.toolOnly.checked &&
+        segment.dataset.tool !== this.toolSelect.value);
+    }
+  }
+
   select(index) {
     this.selected = index;
     const point = this.points[index];
-    const previous = this.platformSelect.value;
-    // Only offer measured platforms for this run. Preserve the user's choice
-    // when possible, otherwise select the first available platform.
-    this.platformSelect.replaceChildren(...this.series
-      .filter(s => point.platforms.has(s.label))
-      .map(s => {
-        const option = el("option", "", s.label);
-        option.value = s.label;
-        return option;
-      }));
-    if (point.platforms.has(previous)) this.platformSelect.value = previous;
-    const platform = this.platformSelect.value;
-    const detail = point.platforms.get(platform);
     for (const panel of this.charts) panel.setSelected(index);
-    this.runsTitle.textContent = `runs · ${platform} · ${detail.date}` +
+    this.toolPanel?.setSelected(index);
+    this.runsTitle.textContent = `Run details · ${point.date}` +
       (point.run ? ` · #${point.run}` : "") + (point.adhoc ? " · ad-hoc" : "");
-    this.runsBody.replaceChildren(runTable(detail.runs, detail, this.task));
-    this.viewer.hidden = !viewerExists(detail, this.task);
-    if (!this.viewer.hidden) this.viewer.href = viewerHref(detail, this.task);
-    const platformPoints = this.platforms.get(platform);
-    const detailIndex = platformPoints.indexOf(detail);
-    // Rebuild tool details for the newly selected platform and measurement.
-    this.toolBody.replaceChildren();
-    if (detailIndex >= 0) {
-      const tools = toolTrend(platformPoints, this.card, i => {
-        this.select(this.points.findIndex(p => p.platforms.get(platform) === platformPoints[i]));
-      });
-      this.toolBody.append(tools.node);
-      tools.setSelected(detailIndex);
-    }
+    this.runsBody.replaceChildren(this.runTable(point));
+    this.highlightToolCalls();
+    // There is no selected platform now, so name each available viewer link.
+    this.viewers.replaceChildren(...this.series.flatMap(platform => {
+      const detail = point.platforms.get(platform.label);
+      if (!detail || !viewerExists(detail, this.task)) return [];
+      const link = el("a", "run-link", `${platform.label} sessions ↗`);
+      link.href = viewerHref(detail, this.task);
+      link.target = "_blank";
+      link.rel = "noopener";
+      return [link];
+    }));
   }
 
   render() {
@@ -668,10 +640,7 @@ class TaskCard {
     const head = el("div", "task-head");
     head.append(el("span", "task-name", this.task),
       el("span", "task-latest", `latest ${latest.date} · ${this.series.length} platforms`));
-    this.viewer = el("a", "run-link", "sessions ↗");
-    this.viewer.target = "_blank";
-    this.viewer.rel = "noopener";
-    head.append(this.viewer);
+    this.viewers = el("div", "legend");
     const legend = el("div", "legend");
     for (const platform of this.series) legend.append(ttRow(platform.color, platform.label));
 
@@ -690,16 +659,31 @@ class TaskCard {
       metrics.append(section);
     }
 
-    const platformLabel = el("label", "chart-controls", "Run details ");
-    this.platformSelect = el("select");
-    platformLabel.append(this.platformSelect);
-    this.platformSelect.addEventListener("change", () => this.select(this.selected));
     this.runsTitle = el("div", "table-title");
     this.runsBody = el("div", "runs-body");
+    const toolControls = el("div", "chart-controls");
+    const toolLabel = el("label", "tool-control", "Tool name ");
+    this.toolSelect = el("select");
+    for (const tool of this.tools) {
+      const option = el("option", "", tool);
+      option.value = tool;
+      this.toolSelect.append(option);
+    }
+    this.toolSelect.disabled = this.tools.length === 0;
+    toolLabel.append(this.toolSelect);
+    const toggleLabel = el("label", "tool-control");
+    this.toolOnly = el("input", "tool-toggle");
+    this.toolOnly.type = "checkbox";
+    this.toolOnly.setAttribute("role", "switch");
+    this.toolOnly.disabled = this.tools.length === 0;
+    this.toolOnly.addEventListener("change", () => this.highlightToolCalls());
+    toggleLabel.append(this.toolOnly, document.createTextNode("only show this tool in overview"));
+    toolControls.append(toolLabel, toggleLabel);
     this.toolBody = el("div");
+    this.toolSelect.addEventListener("change", () => this.selectTool());
+    this.selectTool();
     this.card.append(head, legend, metrics,
-      platformLabel, this.runsTitle, this.runsBody,
-      titled("tool calls · selected platform", this.toolBody));
+      this.runsTitle, this.viewers, this.runsBody, toolControls, this.toolBody);
     this.select(this.selected);
     return this.card;
   }

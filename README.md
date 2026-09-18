@@ -19,11 +19,16 @@ uses MSVC for native builds and Git Bash for the workflow commands.
 Stats include `os` and `target`, and each task has one dashboard card comparing
 platforms on shared charts. Agent, test, and tool-call pass rates and average
 steps are all shown by default; each chart can be collapsed independently.
-A platform selector controls run details and session-viewer links. Only platforms
-with measurements in the selected run appear in this selector and chart tooltips;
-missing measurements remain gaps in the charts. Historical
-records without those fields belong to Linux/native and retain their original
-session-viewer links.
+A tool-name selector chooses one tool-call chart, with a line for each platform
+and success rates weighted by call count across trials. All observed tools are
+available; no calls leave a gap. Changing the tool preserves the selected workflow
+run. Run details list all measured platforms together in one table with a platform
+column: three trials on each of three platforms produce nine rows.
+The “only show this tool in overview” toggle dims other tools in the run-detail
+call strips, preserving call order and success/failure colors as the tool or run changes.
+Viewer links remain specific to each platform. Missing measurements remain gaps in the charts
+and do not produce run-detail rows. Historical records without platform fields
+belong to Linux/native and retain their original session-viewer links.
 Artifacts are named `runs-<os>-<target>-<task>` and
 `stats-<os>-<target>-<task>` so parallel jobs never overwrite each other.
 
