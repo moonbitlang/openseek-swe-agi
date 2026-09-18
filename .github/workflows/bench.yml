@@ -217,6 +217,8 @@ jobs:
             agent_exe="$(moon -C openseek run --target "$BENCH_TARGET" \
               --build-only --output-json cmd/openseek | jq -er '.artifacts_path[0]')"
             if [ "$RUNNER_OS" = Windows ]; then
+              # Git Bash's cygpath converts C:\... to /c/... so dirname and
+              # the shell file commands can handle Moon's Windows path.
               agent_exe="$(cygpath -u "$agent_exe")"
             fi
             agent_share="$(dirname "$agent_exe")/../share"
@@ -238,6 +240,7 @@ jobs:
           if [ -d "$GITHUB_WORKSPACE/openseek/share" ]; then
             export OPENSEEK_REFERENCES="$GITHUB_WORKSPACE/openseek/share"
             if [ "$RUNNER_OS" = Windows ]; then
+              # Native OpenSeek needs a Windows path; -m uses C:/... spelling.
               OPENSEEK_REFERENCES="$(cygpath -m "$OPENSEEK_REFERENCES")"
             fi
           fi
