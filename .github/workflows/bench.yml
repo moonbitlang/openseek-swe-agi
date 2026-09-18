@@ -165,19 +165,21 @@ jobs:
 
       - name: Install ripgrep (Windows)
         if: runner.os == 'Windows'
-        # The agent's search tools invoke rg from PATH.
         run: |
           choco install ripgrep --yes --no-progress
-          rg --version
 
-      - name: Install Linux build dependencies
+      - name: Install Linux dependencies
         if: runner.os == 'Linux'
         # Moon runs workspace dependency prebuilds while building the agent.
         # proton_tray@0.3.0 queries GTK flags through pkg-config; the wasm row
         # also exports its viewer with a native build later in this job.
         run: |
           sudo apt-get update
-          sudo apt-get install --yes pkg-config libgtk-3-dev libx11-dev
+          sudo apt-get install --yes pkg-config libgtk-3-dev libx11-dev ripgrep
+
+      - name: Verify ripgrep
+        # The agent's search tools invoke rg from PATH on every platform.
+        run: rg --version
 
       - name: Setup MoonBit
         run: |
