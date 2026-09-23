@@ -207,24 +207,19 @@ jobs:
           echo "::error::Build failed after 3 attempts (exit $build_status)"
           exit "$build_status"
 
-      - name: Stage agent resources
+      - name: Package the agent
         run: |
-          # current_exe resolves the native executable or Wasm module, and
-          # OpenSeek reads ../share from that file's directory. Ask moon run
-          # for its actual output path so staging matches the command below.
-          # Older ad-hoc refs may predate share/ entirely.
-          if [ -d openseek/share ]; then
-            agent_exe="$(moon -C openseek run --target "$BENCH_TARGET" \
-              --build-only --output-json cmd/openseek | jq -er '.artifacts_path[0]')"
-            if [ "$RUNNER_OS" = Windows ]; then
-              # Git Bash's cygpath converts C:\... to /c/... so dirname and
-              # the shell file commands can handle Moon's Windows path.
-              agent_exe="$(cygpath -u "$agent_exe")"
-            fi
-            agent_share="$(dirname "$agent_exe")/../share"
-            mkdir -p "$agent_share"
-            cp -R openseek/share/. "$agent_share/"
-          fi
+          node --test .github/scripts/stage-agent.test.mjs
+          # JSONL also contains diagnostics: validate the single artifact record
+          # before staging bin/ + share/ with this revision's upstream packager.
+          moon -C openseek run --target "$BENCH_TARGET" \
+            --build-only --output-json cmd/openseek > "$RUNNER_TEMP/agent-build.jsonl"
+          node .github/scripts/stage-agent.mjs openseek \
+            "$RUNNER_TEMP/openseek-agent" "$BENCH_TARGET" "$RUNNER_TEMP/agent-build.jsonl"
+          cp "$RUNNER_TEMP/openseek-agent/bundle.json" "bundle-$BENCH_KEY.json"
+
+      - name: Verify bundled workflow
+        run: node .github/scripts/check-bundle.mjs
 
       - name: Remove private test cases
         run: rm -f tasks/"$TASK"/*_priv_test.mbt
@@ -235,21 +230,24 @@ jobs:
         env:
           DEEPSEEK: ${{ secrets.DEEPSEEK }}
         run: |
-          # Older ad-hoc refs still use this variable instead of current_exe.
-          # Keep it absolute because each agent runs in its own task directory.
-          if [ -d "$GITHUB_WORKSPACE/openseek/share" ]; then
-            export OPENSEEK_REFERENCES="$GITHUB_WORKSPACE/openseek/share"
-            if [ "$RUNNER_OS" = Windows ]; then
-              # Native OpenSeek needs a Windows path; -m uses C:/... spelling.
-              OPENSEEK_REFERENCES="$(cygpath -m "$OPENSEEK_REFERENCES")"
-            fi
+          agent="$OPENSEEK_AGENT"
+          if [ "$RUNNER_OS" = Windows ]; then
+            agent="$(cygpath -u "$agent")"
           fi
-          moon -C openseek run --target "$BENCH_TARGET" cmd/openseek -- run \
+          command=("$agent")
+          if [ "$BENCH_TARGET" = wasm ]; then
+            command=(moonrun "$agent" --)
+          fi
+          task="$(cat "tasks/$TASK/TASK.md")"
+          # Preserve the previous moon -C working directory, but launch the
+          # installed artifact directly so the build tree is no longer involved.
+          cd openseek
+          "${command[@]}" run \
             --dir "../tasks/$TASK" \
             --concurrency 3 \
             --model deepseek-v4-flash \
             --max-steps 600 \
-            "$(cat "tasks/$TASK/TASK.md")"
+            "$task"
 
       - name: Restore private test cases
         run: git checkout -- "tasks/$TASK"
@@ -289,6 +287,7 @@ jobs:
           path: |
             runs-${{ env.BENCH_KEY }}.tgz
             bench-${{ env.BENCH_KEY }}.html
+            bundle-${{ env.BENCH_KEY }}.json
           if-no-files-found: warn
           retention-days: 90
 
