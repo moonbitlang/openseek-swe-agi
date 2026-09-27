@@ -167,6 +167,10 @@ struct RunStats {
 impl ToJson for RunStats with fn to_json(self) {
   let stop_reason : Json = match self.stop_reason {
     Some(Finished(message)) => { "kind": "finished", "message": message }
+    Some(ContextYield(message)) =>
+      { "kind": "context_yield", "message": message }
+    Some(MaxStepsExhausted) =>
+      { "kind": "max_steps_exhausted", "message": "max steps exhausted" }
     Some(Aborted(message)) => { "kind": "aborted", "message": message }
     Some(Interrupted(message)) => { "kind": "interrupted", "message": message }
     Some(Failed(message)) => { "kind": "failed", "message": message }
