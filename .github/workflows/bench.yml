@@ -242,12 +242,30 @@ jobs:
           # Preserve the previous moon -C working directory, but launch the
           # installed artifact directly so the build tree is no longer involved.
           cd openseek
-          "${command[@]}" run \
-            --dir "../tasks/$TASK" \
-            --concurrency 3 \
-            --model deepseek-v4-flash \
-            --max-steps 600 \
-            "$task"
+          # openseek dropped fleet mode (`run --concurrency`), so launch the
+          # attempts here the way it did: each works in its own copy of the
+          # task at tasks/<task>_run_<i> and records its own session there,
+          # which is the layout tools/grade reads. A single run exits nonzero
+          # unless its turn finished; like the fleet, fail only when no
+          # attempt did.
+          pids=()
+          for i in 1 2 3; do
+            run_dir="../tasks/${TASK}_run_$i"
+            rm -rf "$run_dir"
+            cp -R "../tasks/$TASK" "$run_dir"
+            ( "${command[@]}" run \
+                --dir "$run_dir" \
+                --model deepseek-v4-flash \
+                --max-steps 600 \
+                "$task" 2>&1 >/dev/null | sed -u "s/^/[run $i] /" ) &
+            pids+=("$!")
+          done
+          completed=0
+          for pid in "${pids[@]}"; do
+            if wait "$pid"; then completed=$((completed + 1)); fi
+          done
+          echo "$completed/${#pids[@]} attempts completed"
+          [ "$completed" -gt 0 ]
 
       - name: Restore private test cases
         run: git checkout -- "tasks/$TASK"
@@ -298,10 +316,10 @@ jobs:
           path: stats-${{ env.BENCH_KEY }}.json
           retention-days: 14
 
-      - name: Fail if the fleet crashed
+      - name: Fail if no attempt completed
         if: steps.fleet.outcome == 'failure'
         run: |
-          echo "::error::openseek fleet exited nonzero; partial results were still graded and uploaded"
+          echo "::error::no openseek attempt completed; partial results were still graded and uploaded"
           exit 1
 
   # Publishes the run, ordered by what can afford to fail: the stats commit

@@ -67,8 +67,8 @@ try {
   if (failure) throw failure;
   assert.equal(code, 0, output);
   assert.equal(requests, 2, output);
-  const events = output.split(/\r?\n/).filter(line => line.startsWith("{")).map(JSON.parse);
-  assert.ok(events.some(event => event.event === "tool_result" && event.tool_name === "mbtx" && !event.is_error));
+  // The second request above already saw the read's output. run no longer
+  // prints JSONL events, so there is nothing more to check on stdout.
   console.log("PASS: installed engine executes @builtin/read.mbtx from an unrelated working directory");
 } finally {
   child?.kill("SIGKILL");
