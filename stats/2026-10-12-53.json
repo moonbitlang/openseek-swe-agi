@@ -1,0 +1,7128 @@
+[
+  {
+    "date": "2026-10-12",
+    "run": "53",
+    "adhoc": false,
+    "os": "linux",
+    "target": "native",
+    "openseek_commit": "aec474ca8346bfeb92dc391ebdc4b9d35bf1c680",
+    "task": "csv",
+    "passed": 2,
+    "runs": [
+      {
+        "dir": "tasks/csv_run_1",
+        "session_id": "cli-20261012-102238-622-6158dc1decf9",
+        "steps": 14,
+        "elapsed": 227.51,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 16,
+            "failed": 5
+          },
+          "web_search": {
+            "passed": 1,
+            "failed": 0
+          },
+          "write": {
+            "passed": 4,
+            "failed": 1
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": false
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          }
+        ],
+        "test_result": {
+          "exit_code": 1,
+          "total": 0,
+          "passed": 0,
+          "failed": 0
+        },
+        "check_result": {
+          "exit_code": 255,
+          "warnings": 7,
+          "errors": 1
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 1f847c78-d44a-4265-a680-7669edba949c)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1050 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/csv_run_2",
+        "session_id": "cli-20261012-102238-626-6165f7ee8e5f",
+        "steps": 11,
+        "elapsed": 229.724,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 11,
+            "failed": 2
+          },
+          "web_search": {
+            "passed": 3,
+            "failed": 0
+          },
+          "plan": {
+            "passed": 1,
+            "failed": 0
+          },
+          "write": {
+            "passed": 4,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "plan",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 0,
+          "total": 100,
+          "passed": 100,
+          "failed": 0
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 12,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 8fab7882-7636-4402-929d-bbfc3cb6ff02)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 982 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/csv_run_3",
+        "session_id": "cli-20261012-102238-628-61725d40a35e",
+        "steps": 16,
+        "elapsed": 230.009,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 12,
+            "failed": 5
+          },
+          "job_output": {
+            "passed": 1,
+            "failed": 0
+          },
+          "write": {
+            "passed": 6,
+            "failed": 0
+          },
+          "multi_edit": {
+            "passed": 2,
+            "failed": 2
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": false
+          }
+        ],
+        "test_result": {
+          "exit_code": 0,
+          "total": 121,
+          "passed": 121,
+          "failed": 0
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 54e5537d-c215-4917-a33b-584dfec7f9e8)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1045 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-10-12",
+    "run": "53",
+    "adhoc": false,
+    "os": "linux",
+    "target": "native",
+    "openseek_commit": "aec474ca8346bfeb92dc391ebdc4b9d35bf1c680",
+    "task": "hpack",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/hpack_run_1",
+        "session_id": "cli-20261012-102855-034-61962c3f6505",
+        "steps": 0,
+        "elapsed": 0.979,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 183,
+          "passed": 0,
+          "failed": 183
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 16,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: c49c9def-db2d-4ec9-9067-d9b530f1fc7a)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 973 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/hpack_run_2",
+        "session_id": "cli-20261012-102855-037-6204ed2b47d",
+        "steps": 0,
+        "elapsed": 0.963,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 183,
+          "passed": 0,
+          "failed": 183
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 16,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 3438af42-f0ef-4d42-a0c5-c0898415ff16)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 959 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/hpack_run_3",
+        "session_id": "cli-20261012-102855-040-6211957453b1",
+        "steps": 0,
+        "elapsed": 1.096,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 183,
+          "passed": 0,
+          "failed": 183
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 16,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: e619aa9b-d190-4055-8ee1-26595147aad5)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1093 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-10-12",
+    "run": "53",
+    "adhoc": false,
+    "os": "linux",
+    "target": "native",
+    "openseek_commit": "aec474ca8346bfeb92dc391ebdc4b9d35bf1c680",
+    "task": "ini",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/ini_run_1",
+        "session_id": "cli-20261012-102707-220-6392b7e6a11b",
+        "steps": 4,
+        "elapsed": 10.805,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 3,
+            "failed": 1
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 120,
+          "passed": 0,
+          "failed": 120
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 23751127-2f76-435f-ac9c-0df8dc2b2c5b)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1170 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/ini_run_2",
+        "session_id": "cli-20261012-102707-224-640036817ee7",
+        "steps": 4,
+        "elapsed": 10.675,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 5,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 120,
+          "passed": 0,
+          "failed": 120
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: a9e8a810-32bd-4c8d-9a35-69811610707c)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 909 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/ini_run_3",
+        "session_id": "cli-20261012-102707-228-6407c5ddc0c6",
+        "steps": 5,
+        "elapsed": 104.349,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 8,
+            "failed": 2
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 120,
+          "passed": 0,
+          "failed": 120
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 28d249f6-59e5-469b-b3b1-fc1d5ae4cb58)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1069 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-10-12",
+    "run": "53",
+    "adhoc": false,
+    "os": "linux",
+    "target": "native",
+    "openseek_commit": "aec474ca8346bfeb92dc391ebdc4b9d35bf1c680",
+    "task": "protobuf",
+    "passed": 2,
+    "runs": [
+      {
+        "dir": "tasks/protobuf_run_1",
+        "session_id": "cli-20261012-102122-848-616768cb2e04",
+        "steps": 29,
+        "elapsed": 321.484,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 23,
+            "failed": 5
+          },
+          "job_wait": {
+            "passed": 1,
+            "failed": 0
+          },
+          "job_output": {
+            "passed": 1,
+            "failed": 0
+          },
+          "write": {
+            "passed": 7,
+            "failed": 0
+          },
+          "edit": {
+            "passed": 3,
+            "failed": 2
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "job_wait",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 185,
+          "passed": 184,
+          "failed": 1
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 13,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 89bb9ef8-ee3c-49a2-a7af-46990c76b1b5)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1037 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/protobuf_run_2",
+        "session_id": "cli-20261012-102122-851-6175bd01d142",
+        "steps": 33,
+        "elapsed": 303.632,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 28,
+            "failed": 7
+          },
+          "plan": {
+            "passed": 2,
+            "failed": 0
+          },
+          "write": {
+            "passed": 5,
+            "failed": 0
+          },
+          "multi_edit": {
+            "passed": 2,
+            "failed": 1
+          },
+          "edit": {
+            "passed": 1,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "plan",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "plan",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 0,
+          "total": 165,
+          "passed": 165,
+          "failed": 0
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: c3f71d59-016b-44c4-80cd-84c6a9941bee)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1002 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/protobuf_run_3",
+        "session_id": "cli-20261012-102122-853-618236de1394",
+        "steps": 45,
+        "elapsed": 343.216,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 31,
+            "failed": 7
+          },
+          "edit": {
+            "passed": 4,
+            "failed": 0
+          },
+          "write": {
+            "passed": 10,
+            "failed": 1
+          },
+          "multi_edit": {
+            "passed": 2,
+            "failed": 1
+          },
+          "plan": {
+            "passed": 1,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "plan",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": false
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 0,
+          "total": 165,
+          "passed": 165,
+          "failed": 0
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 5,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: ffac2a1c-b50e-4191-b1f7-9e94853083cf)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1058 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-10-12",
+    "run": "53",
+    "adhoc": false,
+    "os": "linux",
+    "target": "native",
+    "openseek_commit": "aec474ca8346bfeb92dc391ebdc4b9d35bf1c680",
+    "task": "toml",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/toml_run_1",
+        "session_id": "cli-20261012-102142-701-6390dabfa2a7",
+        "steps": 29,
+        "elapsed": 374.792,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 24,
+            "failed": 8
+          },
+          "job_output": {
+            "passed": 1,
+            "failed": 0
+          },
+          "write": {
+            "passed": 5,
+            "failed": 0
+          },
+          "edit": {
+            "passed": 1,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 705,
+          "passed": 481,
+          "failed": 224
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 9,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 81c75014-5d5f-4906-a94e-a08958aa8e4b)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1271 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/toml_run_2",
+        "session_id": "cli-20261012-102142-705-6397fe735513",
+        "steps": 30,
+        "elapsed": 294.542,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 37,
+            "failed": 8
+          },
+          "job_output": {
+            "passed": 2,
+            "failed": 0
+          },
+          "job_wait": {
+            "passed": 1,
+            "failed": 0
+          },
+          "edit": {
+            "passed": 2,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "job_wait",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 705,
+          "passed": 0,
+          "failed": 705
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 4cfea724-5eb0-4251-8f69-218a917dbf7a)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1109 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/toml_run_3",
+        "session_id": "cli-20261012-102142-709-640422b56178",
+        "steps": 33,
+        "elapsed": 311.525,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 31,
+            "failed": 9
+          },
+          "edit": {
+            "passed": 2,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 705,
+          "passed": 0,
+          "failed": 705
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 262851fa-353f-41ea-ab8f-806a597b8da3)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1149 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-10-12",
+    "run": "53",
+    "adhoc": false,
+    "os": "linux",
+    "target": "native",
+    "openseek_commit": "aec474ca8346bfeb92dc391ebdc4b9d35bf1c680",
+    "task": "uri",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/uri_run_1",
+        "session_id": "cli-20261012-102141-372-638445dc7013",
+        "steps": 25,
+        "elapsed": 300.506,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 23,
+            "failed": 4
+          },
+          "web_search": {
+            "passed": 2,
+            "failed": 0
+          },
+          "job_output": {
+            "passed": 1,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 141,
+          "passed": 0,
+          "failed": 141
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 329,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: c43346ed-d27c-443b-bfd8-d0c43195d905)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1040 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/uri_run_2",
+        "session_id": "cli-20261012-102141-376-63912a45b6ca",
+        "steps": 17,
+        "elapsed": 346.978,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 16,
+            "failed": 2
+          },
+          "web_search": {
+            "passed": 2,
+            "failed": 0
+          },
+          "write": {
+            "passed": 3,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 1,
+          "total": 0,
+          "passed": 0,
+          "failed": 0
+        },
+        "check_result": {
+          "exit_code": 255,
+          "warnings": 18,
+          "errors": 1
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 3d0be77c-0553-4f2e-8456-a65c292bf2b2)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1095 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/uri_run_3",
+        "session_id": "cli-20261012-102141-381-63993b8af65",
+        "steps": 17,
+        "elapsed": 293.651,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 14,
+            "failed": 3
+          },
+          "job_output": {
+            "passed": 2,
+            "failed": 0
+          },
+          "plan": {
+            "passed": 1,
+            "failed": 0
+          },
+          "write": {
+            "passed": 3,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "plan",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 1,
+          "total": 0,
+          "passed": 0,
+          "failed": 0
+        },
+        "check_result": {
+          "exit_code": 255,
+          "warnings": 12,
+          "errors": 9
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: e09c517f-ecc6-4cdd-86f5-af3356d96fc3)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1067 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-10-12",
+    "run": "53",
+    "adhoc": false,
+    "os": "linux",
+    "target": "wasm",
+    "openseek_commit": "aec474ca8346bfeb92dc391ebdc4b9d35bf1c680",
+    "task": "csv",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/csv_run_1",
+        "session_id": "cli-20261012-102842-491-57025d0ed68c",
+        "steps": 0,
+        "elapsed": 1.096,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 100,
+          "passed": 0,
+          "failed": 100
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 7772b324-cf9c-4477-b7f4-82c0fcae7f9f)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1070 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/csv_run_2",
+        "session_id": "cli-20261012-102842-502-5707c625fc93",
+        "steps": 0,
+        "elapsed": 1.039,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 100,
+          "passed": 0,
+          "failed": 100
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 2b31af16-036c-4763-af2e-9c3036fdb585)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1017 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/csv_run_3",
+        "session_id": "cli-20261012-102842-511-57132935420e",
+        "steps": 0,
+        "elapsed": 1.031,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 100,
+          "passed": 0,
+          "failed": 100
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: c85066fb-45df-44bd-8733-e4a5cc7650a0)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1009 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-10-12",
+    "run": "53",
+    "adhoc": false,
+    "os": "linux",
+    "target": "wasm",
+    "openseek_commit": "aec474ca8346bfeb92dc391ebdc4b9d35bf1c680",
+    "task": "hpack",
+    "passed": 1,
+    "runs": [
+      {
+        "dir": "tasks/hpack_run_1",
+        "session_id": "cli-20261012-102105-018-5689765f7736",
+        "steps": 32,
+        "elapsed": 324.005,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 23,
+            "failed": 3
+          },
+          "job_output": {
+            "passed": 3,
+            "failed": 0
+          },
+          "write": {
+            "passed": 8,
+            "failed": 0
+          },
+          "edit": {
+            "passed": 5,
+            "failed": 0
+          },
+          "job_wait": {
+            "passed": 1,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "job_wait",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 1,
+          "total": 0,
+          "passed": 0,
+          "failed": 0
+        },
+        "check_result": {
+          "exit_code": 255,
+          "warnings": 6,
+          "errors": 2
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 71a03820-e5eb-40e2-98e1-082dfb277f39)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1139 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/hpack_run_2",
+        "session_id": "cli-20261012-102105-057-5694c76d580f",
+        "steps": 29,
+        "elapsed": 373.215,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 28,
+            "failed": 8
+          },
+          "write": {
+            "passed": 10,
+            "failed": 0
+          },
+          "edit": {
+            "passed": 2,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 1,
+          "total": 0,
+          "passed": 0,
+          "failed": 0
+        },
+        "check_result": {
+          "exit_code": 255,
+          "warnings": 7,
+          "errors": 26
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 1ec89789-69bb-47bc-b030-af62ffb3bb20)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1155 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/hpack_run_3",
+        "session_id": "cli-20261012-102105-044-5700bb0a7468",
+        "steps": 38,
+        "elapsed": 323.439,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 28,
+            "failed": 3
+          },
+          "write": {
+            "passed": 10,
+            "failed": 0
+          },
+          "remove": {
+            "passed": 1,
+            "failed": 0
+          },
+          "edit": {
+            "passed": 3,
+            "failed": 1
+          },
+          "multi_edit": {
+            "passed": 2,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "remove",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 0,
+          "total": 188,
+          "passed": 188,
+          "failed": 0
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 0,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 901642e6-3973-4399-8a03-e2896c3e93e7)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1310 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-10-12",
+    "run": "53",
+    "adhoc": false,
+    "os": "linux",
+    "target": "wasm",
+    "openseek_commit": "aec474ca8346bfeb92dc391ebdc4b9d35bf1c680",
+    "task": "ini",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/ini_run_1",
+        "session_id": "cli-20261012-102222-490-573983fe209d",
+        "steps": 9,
+        "elapsed": 272.373,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 12,
+            "failed": 2
+          },
+          "web_search": {
+            "passed": 1,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 120,
+          "passed": 0,
+          "failed": 120
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: dd8d0558-8600-4a8f-a549-c1e852505323)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1460 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/ini_run_2",
+        "session_id": "cli-20261012-102222-484-574420cea30c",
+        "steps": 13,
+        "elapsed": 336.157,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 13,
+            "failed": 2
+          },
+          "web_search": {
+            "passed": 2,
+            "failed": 0
+          },
+          "job_wait": {
+            "passed": 1,
+            "failed": 0
+          },
+          "job_output": {
+            "passed": 1,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "job_wait",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 120,
+          "passed": 0,
+          "failed": 120
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 0826a0ae-d5a1-452e-9044-793b49dd17e0)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1148 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/ini_run_3",
+        "session_id": "cli-20261012-102222-498-5753276cb528",
+        "steps": 5,
+        "elapsed": 245.599,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 9,
+            "failed": 1
+          },
+          "web_search": {
+            "passed": 2,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 120,
+          "passed": 0,
+          "failed": 120
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: c5b6b4e3-546a-4940-b827-b9e9965a5985)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1375 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-10-12",
+    "run": "53",
+    "adhoc": false,
+    "os": "linux",
+    "target": "wasm",
+    "openseek_commit": "aec474ca8346bfeb92dc391ebdc4b9d35bf1c680",
+    "task": "protobuf",
+    "passed": 2,
+    "runs": [
+      {
+        "dir": "tasks/protobuf_run_1",
+        "session_id": "cli-20261012-102101-215-568350aa8064",
+        "steps": 44,
+        "elapsed": 325.118,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 25,
+            "failed": 4
+          },
+          "edit": {
+            "passed": 2,
+            "failed": 2
+          },
+          "job_output": {
+            "passed": 1,
+            "failed": 0
+          },
+          "plan": {
+            "passed": 1,
+            "failed": 0
+          },
+          "write": {
+            "passed": 5,
+            "failed": 0
+          },
+          "multi_edit": {
+            "passed": 2,
+            "failed": 2
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "plan",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 0,
+          "total": 165,
+          "passed": 165,
+          "failed": 0
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 361903fa-e561-4ecc-943d-7db7b5ee2f68)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1249 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/protobuf_run_2",
+        "session_id": "cli-20261012-102101-243-5688fa1ebe1",
+        "steps": 53,
+        "elapsed": 326.875,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 38,
+            "failed": 3
+          },
+          "job_output": {
+            "passed": 1,
+            "failed": 0
+          },
+          "write": {
+            "passed": 5,
+            "failed": 1
+          },
+          "remove": {
+            "passed": 1,
+            "failed": 0
+          },
+          "multi_edit": {
+            "passed": 1,
+            "failed": 1
+          },
+          "plan": {
+            "passed": 1,
+            "failed": 0
+          },
+          "edit": {
+            "passed": 1,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "remove",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": false
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "plan",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 1,
+          "total": 0,
+          "passed": 0,
+          "failed": 0
+        },
+        "check_result": {
+          "exit_code": 255,
+          "warnings": 51,
+          "errors": 1
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: fc14704c-b82b-49bd-b574-160c66ff7739)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1067 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/protobuf_run_3",
+        "session_id": "cli-20261012-102101-248-5697a9640e9b",
+        "steps": 33,
+        "elapsed": 327.18,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 21,
+            "failed": 5
+          },
+          "job_output": {
+            "passed": 2,
+            "failed": 0
+          },
+          "write": {
+            "passed": 5,
+            "failed": 0
+          },
+          "multi_edit": {
+            "passed": 1,
+            "failed": 0
+          },
+          "edit": {
+            "passed": 3,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "multi_edit",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 0,
+          "total": 165,
+          "passed": 165,
+          "failed": 0
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 13,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 530afee6-4a5c-4639-bc33-24a7e6326bd7)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1064 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-10-12",
+    "run": "53",
+    "adhoc": false,
+    "os": "linux",
+    "target": "wasm",
+    "openseek_commit": "aec474ca8346bfeb92dc391ebdc4b9d35bf1c680",
+    "task": "toml",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/toml_run_1",
+        "session_id": "cli-20261012-102104-388-54852850db2a",
+        "steps": 40,
+        "elapsed": 322.779,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 35,
+            "failed": 5
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 705,
+          "passed": 0,
+          "failed": 705
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 3bc0da0d-8ac1-4867-a28b-cedc478d606c)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1310 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/toml_run_2",
+        "session_id": "cli-20261012-102104-384-54903a83ae4a",
+        "steps": 44,
+        "elapsed": 387.261,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 27,
+            "failed": 12
+          },
+          "job_output": {
+            "passed": 3,
+            "failed": 0
+          },
+          "plan": {
+            "passed": 1,
+            "failed": 0
+          },
+          "multi_edit": {
+            "passed": 0,
+            "failed": 1
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "plan",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "multi_edit",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "job_output",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 705,
+          "passed": 0,
+          "failed": 705
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 3559f64a-a62b-486d-95f0-0bbc51c355a3)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1551 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/toml_run_3",
+        "session_id": "cli-20261012-102104-396-5499a03169d2",
+        "steps": 33,
+        "elapsed": 322.385,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 35,
+            "failed": 9
+          },
+          "plan": {
+            "passed": 1,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "plan",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 705,
+          "passed": 0,
+          "failed": 705
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 2dbecf8e-d61e-4bc1-9115-4dabaaf43076)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1078 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-10-12",
+    "run": "53",
+    "adhoc": false,
+    "os": "linux",
+    "target": "wasm",
+    "openseek_commit": "aec474ca8346bfeb92dc391ebdc4b9d35bf1c680",
+    "task": "uri",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/uri_run_1",
+        "session_id": "cli-20261012-102756-232-54962c9f94c1",
+        "steps": 0,
+        "elapsed": 1.043,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 141,
+          "passed": 0,
+          "failed": 141
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 329,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 01aa69fc-1553-41a3-a4bb-1476d3b458de)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1024 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/uri_run_2",
+        "session_id": "cli-20261012-102756-235-550123da1ee3",
+        "steps": 0,
+        "elapsed": 0.987,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 141,
+          "passed": 0,
+          "failed": 141
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 329,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: dec25b4e-0055-4b1d-af9c-2800996181c4)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 968 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/uri_run_3",
+        "session_id": "cli-20261012-102756-239-5510f0af8a43",
+        "steps": 0,
+        "elapsed": 1.027,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 141,
+          "passed": 0,
+          "failed": 141
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 329,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 61401dc6-5ade-4d9d-a4e7-97f818c4ceef)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1008 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-10-12",
+    "run": "53",
+    "adhoc": false,
+    "os": "windows",
+    "target": "native",
+    "openseek_commit": "aec474ca8346bfeb92dc391ebdc4b9d35bf1c680",
+    "task": "csv",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/csv_run_1",
+        "session_id": "cli-20261012-102201-293-9380ddd9955f",
+        "steps": 22,
+        "elapsed": 268.215,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 7,
+            "failed": 23
+          },
+          "remove": {
+            "passed": 0,
+            "failed": 1
+          },
+          "edit": {
+            "passed": 9,
+            "failed": 2
+          },
+          "web_search": {
+            "passed": 4,
+            "failed": 1
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "remove",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": false
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 100,
+          "passed": 0,
+          "failed": 100
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 41643907-a741-4cb0-9779-8c8127ebf163)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1031 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/csv_run_2",
+        "session_id": "cli-20261012-102201-363-8696c1145fe6",
+        "steps": 27,
+        "elapsed": 267.983,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 2,
+            "failed": 12
+          },
+          "remove": {
+            "passed": 0,
+            "failed": 1
+          },
+          "write": {
+            "passed": 16,
+            "failed": 2
+          },
+          "edit": {
+            "passed": 12,
+            "failed": 4
+          },
+          "web_search": {
+            "passed": 1,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "remove",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "write",
+            "ok": false
+          },
+          {
+            "tool": "write",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 100,
+          "passed": 0,
+          "failed": 100
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 39f9423a-0d5f-4d4c-b662-375ed283d2bf)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1085 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/csv_run_3",
+        "session_id": "cli-20261012-102201-431-85644b126e33",
+        "steps": 25,
+        "elapsed": 319.142,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 6,
+            "failed": 23
+          },
+          "remove": {
+            "passed": 0,
+            "failed": 3
+          },
+          "edit": {
+            "passed": 16,
+            "failed": 6
+          },
+          "write": {
+            "passed": 2,
+            "failed": 0
+          },
+          "web_search": {
+            "passed": 2,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "remove",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "remove",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "remove",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 100,
+          "passed": 0,
+          "failed": 100
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: d528c98d-d636-44d3-a458-d7c33cc5dce7)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1046 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-10-12",
+    "run": "53",
+    "adhoc": false,
+    "os": "windows",
+    "target": "native",
+    "openseek_commit": "aec474ca8346bfeb92dc391ebdc4b9d35bf1c680",
+    "task": "hpack",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/hpack_run_1",
+        "session_id": "cli-20261012-102845-517-8bc96ebdd",
+        "steps": 0,
+        "elapsed": 0.958,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 183,
+          "passed": 0,
+          "failed": 183
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 16,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 4d8ccfdd-f862-41b6-b5ec-cf4fc24d70d1)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 954 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/hpack_run_2",
+        "session_id": "cli-20261012-102845-561-3996acadf71e",
+        "steps": 0,
+        "elapsed": 1.059,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 183,
+          "passed": 0,
+          "failed": 183
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 16,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 111b2b57-4f5a-4aac-8838-3a50a6d6cb76)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1057 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/hpack_run_3",
+        "session_id": "cli-20261012-102845-604-23403fee48be",
+        "steps": 0,
+        "elapsed": 0.999,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 183,
+          "passed": 0,
+          "failed": 183
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 16,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 3d21029b-bbb6-4c5e-9adb-27e44dae6e11)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 995 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-10-12",
+    "run": "53",
+    "adhoc": false,
+    "os": "windows",
+    "target": "native",
+    "openseek_commit": "aec474ca8346bfeb92dc391ebdc4b9d35bf1c680",
+    "task": "ini",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/ini_run_1",
+        "session_id": "cli-20261012-102225-580-42764a160b63",
+        "steps": 16,
+        "elapsed": 414.907,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 4,
+            "failed": 11
+          },
+          "edit": {
+            "passed": 15,
+            "failed": 7
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 120,
+          "passed": 0,
+          "failed": 120
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 4dd973a3-c6ec-4875-9488-1fc2292b0b1f)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1086 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/ini_run_2",
+        "session_id": "cli-20261012-102225-636-77522a72c461",
+        "steps": 16,
+        "elapsed": 325.012,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 4,
+            "failed": 10
+          },
+          "remove": {
+            "passed": 0,
+            "failed": 1
+          },
+          "edit": {
+            "passed": 0,
+            "failed": 12
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "remove",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 120,
+          "passed": 0,
+          "failed": 120
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 3fa55653-7b2b-4792-87e1-558024b6f6e3)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 933 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/ini_run_3",
+        "session_id": "cli-20261012-102225-689-26964c3df4af",
+        "steps": 21,
+        "elapsed": 247.693,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 16,
+            "failed": 27
+          },
+          "remove": {
+            "passed": 0,
+            "failed": 1
+          },
+          "multi_edit": {
+            "passed": 2,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "remove",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "multi_edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "multi_edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 120,
+          "passed": 0,
+          "failed": 120
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 19faf8d1-1033-4f19-8a59-ba28260a9cca)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1027 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-10-12",
+    "run": "53",
+    "adhoc": false,
+    "os": "windows",
+    "target": "native",
+    "openseek_commit": "aec474ca8346bfeb92dc391ebdc4b9d35bf1c680",
+    "task": "protobuf",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/protobuf_run_1",
+        "session_id": "cli-20261012-102159-667-176867545523",
+        "steps": 15,
+        "elapsed": 306.699,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 2,
+            "failed": 11
+          },
+          "edit": {
+            "passed": 1,
+            "failed": 18
+          },
+          "write": {
+            "passed": 2,
+            "failed": 1
+          },
+          "web_search": {
+            "passed": 1,
+            "failed": 0
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "write",
+            "ok": false
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 165,
+          "passed": 1,
+          "failed": 164
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 92,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 279cb65f-c066-43f2-8fb5-a2357514b774)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1170 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/protobuf_run_2",
+        "session_id": "cli-20261012-102159-742-2724c33ef809",
+        "steps": 16,
+        "elapsed": 268.586,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 3,
+            "failed": 14
+          },
+          "remove": {
+            "passed": 0,
+            "failed": 1
+          },
+          "write": {
+            "passed": 1,
+            "failed": 1
+          },
+          "edit": {
+            "passed": 5,
+            "failed": 9
+          },
+          "web_search": {
+            "passed": 1,
+            "failed": 0
+          },
+          "multi_edit": {
+            "passed": 0,
+            "failed": 1
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "remove",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "write",
+            "ok": false
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "web_search",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "multi_edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": false
+          },
+          {
+            "tool": "edit",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 165,
+          "passed": 0,
+          "failed": 165
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 92,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: b4d8e775-76fb-4aab-8b58-9b584988f930)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1475 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/protobuf_run_3",
+        "session_id": "cli-20261012-102159-797-9116789016c1",
+        "steps": 21,
+        "elapsed": 267.79,
+        "tool_call_stats": {
+          "mbtx": {
+            "passed": 9,
+            "failed": 17
+          },
+          "write": {
+            "passed": 8,
+            "failed": 4
+          }
+        },
+        "tool_calls": [
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "write",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "write",
+            "ok": false
+          },
+          {
+            "tool": "write",
+            "ok": false
+          },
+          {
+            "tool": "write",
+            "ok": false
+          },
+          {
+            "tool": "write",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": false
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          },
+          {
+            "tool": "mbtx",
+            "ok": true
+          }
+        ],
+        "test_result": {
+          "exit_code": 2,
+          "total": 165,
+          "passed": 0,
+          "failed": 165
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 92,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 948c5542-4d4c-495b-8ed1-ef013646420b)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1517 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-10-12",
+    "run": "53",
+    "adhoc": false,
+    "os": "windows",
+    "target": "native",
+    "openseek_commit": "aec474ca8346bfeb92dc391ebdc4b9d35bf1c680",
+    "task": "toml",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/toml_run_1",
+        "session_id": "cli-20261012-102943-210-8712852541f1",
+        "steps": 0,
+        "elapsed": 1.052,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 705,
+          "passed": 0,
+          "failed": 705
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 10f24759-42d0-4b56-b5b7-c78d9529bddf)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1042 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/toml_run_2",
+        "session_id": "cli-20261012-102943-276-1704399a2a97",
+        "steps": 0,
+        "elapsed": 0.895,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 705,
+          "passed": 0,
+          "failed": 705
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: f9397ba7-1468-4e8f-a7e4-ffce20de79d4)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 889 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/toml_run_3",
+        "session_id": "cli-20261012-102943-346-2560437bbdd7",
+        "steps": 0,
+        "elapsed": 0.874,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 705,
+          "passed": 0,
+          "failed": 705
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 55f0413b-dd24-452b-a97d-16581a368904)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 870 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-10-12",
+    "run": "53",
+    "adhoc": false,
+    "os": "windows",
+    "target": "native",
+    "openseek_commit": "aec474ca8346bfeb92dc391ebdc4b9d35bf1c680",
+    "task": "uri",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/uri_run_1",
+        "session_id": "cli-20261012-102935-939-587292208a5b",
+        "steps": 0,
+        "elapsed": 0.869,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 141,
+          "passed": 0,
+          "failed": 141
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 329,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 2c6abac1-5755-4474-8b93-644d1716e134)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 865 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/uri_run_2",
+        "session_id": "cli-20261012-102935-989-74921cabaa8",
+        "steps": 0,
+        "elapsed": 0.832,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 141,
+          "passed": 0,
+          "failed": 141
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 329,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 03cc345c-d1bc-412d-9484-5aadfab1ae68)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 828 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/uri_run_3",
+        "session_id": "cli-20261012-102936-042-41244c598f63",
+        "steps": 0,
+        "elapsed": 0.842,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 141,
+          "passed": 0,
+          "failed": 141
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 329,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 5b4783be-2494-474a-936c-a194b7c8d507)\\\",\\\"type\\\":\\\"unknown_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 837 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  }
+]
