@@ -1,0 +1,1460 @@
+[
+  {
+    "date": "2026-11-02",
+    "run": "74",
+    "adhoc": false,
+    "os": "linux",
+    "target": "native",
+    "openseek_commit": "602a9bc9ac3fb5b383fadc9f517de78d233bc606",
+    "task": "csv",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/csv_run_1",
+        "session_id": "cli-20261102-101119-881-64779b3f09fa",
+        "steps": 0,
+        "elapsed": 1.1,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 100,
+          "passed": 0,
+          "failed": 100
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 9e3af5ce-5441-49fe-8f34-e84a61ea4997)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1097 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/csv_run_2",
+        "session_id": "cli-20261102-101119-884-64842006d5b0",
+        "steps": 0,
+        "elapsed": 1.036,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 100,
+          "passed": 0,
+          "failed": 100
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 8f042004-4086-4d42-969d-a5a3e0a084a6)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1034 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/csv_run_3",
+        "session_id": "cli-20261102-101119-887-6492b9a8aef5",
+        "steps": 0,
+        "elapsed": 1.075,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 100,
+          "passed": 0,
+          "failed": 100
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 52b9eb41-f2a1-4a18-80d1-957865c3b6bb)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1074 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-11-02",
+    "run": "74",
+    "adhoc": false,
+    "os": "linux",
+    "target": "native",
+    "openseek_commit": "602a9bc9ac3fb5b383fadc9f517de78d233bc606",
+    "task": "hpack",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/hpack_run_1",
+        "session_id": "cli-20261102-101200-523-6697a3dd6c37",
+        "steps": 0,
+        "elapsed": 0.858,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 183,
+          "passed": 0,
+          "failed": 183
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 16,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 3f59f4af-97ca-413f-8992-2b752a3585f3)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 854 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/hpack_run_2",
+        "session_id": "cli-20261102-101200-527-6703885ae37c",
+        "steps": 0,
+        "elapsed": 0.86,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 183,
+          "passed": 0,
+          "failed": 183
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 16,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 64d1aa8c-bea8-4a4b-a2ca-c6b73bf9a66b)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 856 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/hpack_run_3",
+        "session_id": "cli-20261102-101200-532-6712965a08f2",
+        "steps": 0,
+        "elapsed": 0.927,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 183,
+          "passed": 0,
+          "failed": 183
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 16,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 8cb5cf5e-5c37-4a0f-9647-9055b0e2c9e6)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 922 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-11-02",
+    "run": "74",
+    "adhoc": false,
+    "os": "linux",
+    "target": "native",
+    "openseek_commit": "602a9bc9ac3fb5b383fadc9f517de78d233bc606",
+    "task": "ini",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/ini_run_1",
+        "session_id": "cli-20261102-101119-285-66803dbdaec2",
+        "steps": 0,
+        "elapsed": 1.077,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 120,
+          "passed": 0,
+          "failed": 120
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 20bb250a-5a40-4051-a2f1-752a02efed08)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1073 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/ini_run_2",
+        "session_id": "cli-20261102-101119-289-6687e50d14f8",
+        "steps": 0,
+        "elapsed": 1.057,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 120,
+          "passed": 0,
+          "failed": 120
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 112283c9-474d-4ac1-bcaa-ccb9c3ee292d)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1053 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/ini_run_3",
+        "session_id": "cli-20261102-101119-294-6695fb55849a",
+        "steps": 0,
+        "elapsed": 1.059,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 120,
+          "passed": 0,
+          "failed": 120
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 6e3b79bb-8103-4ebe-8b67-47487b3f70a6)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1057 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-11-02",
+    "run": "74",
+    "adhoc": false,
+    "os": "linux",
+    "target": "native",
+    "openseek_commit": "602a9bc9ac3fb5b383fadc9f517de78d233bc606",
+    "task": "protobuf",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/protobuf_run_1",
+        "session_id": "cli-20261102-101120-462-673283cc3523",
+        "steps": 0,
+        "elapsed": 1.092,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 165,
+          "passed": 0,
+          "failed": 165
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 92,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 0b41122b-f2be-4d23-a0ac-98e15c4db91f)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1088 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/protobuf_run_2",
+        "session_id": "cli-20261102-101120-466-673953fdcece",
+        "steps": 0,
+        "elapsed": 1.049,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 165,
+          "passed": 0,
+          "failed": 165
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 92,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: ffdd8991-e499-4cfb-abc0-b3c19c639ce4)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1044 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/protobuf_run_3",
+        "session_id": "cli-20261102-101120-471-67477379bd84",
+        "steps": 0,
+        "elapsed": 1.055,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 165,
+          "passed": 0,
+          "failed": 165
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 92,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: cc5a4aca-a0b9-43ee-88e0-f2123d4acc3e)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1051 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-11-02",
+    "run": "74",
+    "adhoc": false,
+    "os": "linux",
+    "target": "native",
+    "openseek_commit": "602a9bc9ac3fb5b383fadc9f517de78d233bc606",
+    "task": "toml",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/toml_run_1",
+        "session_id": "cli-20261102-101130-424-66769cd575ca",
+        "steps": 0,
+        "elapsed": 1.075,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 705,
+          "passed": 0,
+          "failed": 705
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: cd0a9280-31a2-46c3-8bad-c3109b229bba)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1071 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/toml_run_2",
+        "session_id": "cli-20261102-101130-429-668422af99bf",
+        "steps": 0,
+        "elapsed": 1.046,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 705,
+          "passed": 0,
+          "failed": 705
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 4e18d8b4-4c69-4d62-a6b5-5f7c232fa1a8)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1041 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/toml_run_3",
+        "session_id": "cli-20261102-101130-433-6690dd74fe32",
+        "steps": 0,
+        "elapsed": 1.041,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 705,
+          "passed": 0,
+          "failed": 705
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 00a7dca2-4143-42d7-8b04-f63a744c60b4)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1038 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-11-02",
+    "run": "74",
+    "adhoc": false,
+    "os": "linux",
+    "target": "native",
+    "openseek_commit": "602a9bc9ac3fb5b383fadc9f517de78d233bc606",
+    "task": "uri",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/uri_run_1",
+        "session_id": "cli-20261102-101118-132-675326405420",
+        "steps": 0,
+        "elapsed": 0.993,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 141,
+          "passed": 0,
+          "failed": 141
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 329,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 75f2550c-14a4-49d2-88bd-3bda5283b41a)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 988 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/uri_run_2",
+        "session_id": "cli-20261102-101118-136-67618ef70e4a",
+        "steps": 0,
+        "elapsed": 0.982,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 141,
+          "passed": 0,
+          "failed": 141
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 329,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: ed958f7d-33e6-4856-9f90-413e8aa68ce6)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 979 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/uri_run_3",
+        "session_id": "cli-20261102-101118-141-6768cd0616cb",
+        "steps": 0,
+        "elapsed": 0.973,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 141,
+          "passed": 0,
+          "failed": 141
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 329,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 51611216-d3cc-477e-9819-4e8bf340ca29)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 971 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-11-02",
+    "run": "74",
+    "adhoc": false,
+    "os": "linux",
+    "target": "wasm",
+    "openseek_commit": "602a9bc9ac3fb5b383fadc9f517de78d233bc606",
+    "task": "csv",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/csv_run_1",
+        "session_id": "cli-20261102-101115-857-600122cb65d5",
+        "steps": 0,
+        "elapsed": 1.118,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 100,
+          "passed": 0,
+          "failed": 100
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 0548c954-7825-40bf-bfa4-148bc15c8d7c)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1095 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/csv_run_2",
+        "session_id": "cli-20261102-101115-863-600673b9dd47",
+        "steps": 0,
+        "elapsed": 1.065,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 100,
+          "passed": 0,
+          "failed": 100
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: ddae3bdc-b6e8-4c19-ba49-0220aecbafd2)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1036 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/csv_run_3",
+        "session_id": "cli-20261102-101115-879-60124066d5e4",
+        "steps": 0,
+        "elapsed": 1.039,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 100,
+          "passed": 0,
+          "failed": 100
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 49192f77-d2f1-49e8-abd4-3137f6c5fc91)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1017 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-11-02",
+    "run": "74",
+    "adhoc": false,
+    "os": "linux",
+    "target": "wasm",
+    "openseek_commit": "602a9bc9ac3fb5b383fadc9f517de78d233bc606",
+    "task": "hpack",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/hpack_run_1",
+        "session_id": "cli-20261102-101104-451-6069f17a1593",
+        "steps": 0,
+        "elapsed": 1.09,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 183,
+          "passed": 0,
+          "failed": 183
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 16,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: a8c52255-e87e-45a4-b5fe-ed904dc655e7)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1068 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/hpack_run_2",
+        "session_id": "cli-20261102-101104-439-60746274fe3f",
+        "steps": 0,
+        "elapsed": 1.053,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 183,
+          "passed": 0,
+          "failed": 183
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 16,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 513babc9-a271-4e0c-8dcb-49d39f4bbcbb)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1024 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/hpack_run_3",
+        "session_id": "cli-20261102-101104-459-60804a6ea0ba",
+        "steps": 0,
+        "elapsed": 1.023,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 183,
+          "passed": 0,
+          "failed": 183
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 16,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 5ebb7572-2162-4517-bd37-99e5d03fc735)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 997 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-11-02",
+    "run": "74",
+    "adhoc": false,
+    "os": "linux",
+    "target": "wasm",
+    "openseek_commit": "602a9bc9ac3fb5b383fadc9f517de78d233bc606",
+    "task": "ini",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/ini_run_1",
+        "session_id": "cli-20261102-101119-009-6006cb5ac1b6",
+        "steps": 0,
+        "elapsed": 1.147,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 120,
+          "passed": 0,
+          "failed": 120
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 527f3092-9ea9-4330-aa0b-e719886bab08)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1120 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/ini_run_2",
+        "session_id": "cli-20261102-101119-014-6011d2608422",
+        "steps": 0,
+        "elapsed": 1.175,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 120,
+          "passed": 0,
+          "failed": 120
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: ba1db440-0a0b-4fd4-8741-beb8a4c35a0d)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1145 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/ini_run_3",
+        "session_id": "cli-20261102-101119-018-60174d16089b",
+        "steps": 0,
+        "elapsed": 1.141,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 120,
+          "passed": 0,
+          "failed": 120
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 64e2b724-5e1c-42df-996f-ec26e0259d16)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1113 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-11-02",
+    "run": "74",
+    "adhoc": false,
+    "os": "linux",
+    "target": "wasm",
+    "openseek_commit": "602a9bc9ac3fb5b383fadc9f517de78d233bc606",
+    "task": "protobuf",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/protobuf_run_1",
+        "session_id": "cli-20261102-101101-541-5997bbe64a0e",
+        "steps": 0,
+        "elapsed": 1.019,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 165,
+          "passed": 0,
+          "failed": 165
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 92,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 23dc5d45-b871-4f00-bf0f-3158276deb19)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 993 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/protobuf_run_2",
+        "session_id": "cli-20261102-101101-529-6003306c8ffc",
+        "steps": 0,
+        "elapsed": 0.997,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 165,
+          "passed": 0,
+          "failed": 165
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 92,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: b384a1a2-54ec-48e4-93b2-82680fcb133b)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 970 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/protobuf_run_3",
+        "session_id": "cli-20261102-101101-529-60094834e205",
+        "steps": 0,
+        "elapsed": 1.062,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 165,
+          "passed": 0,
+          "failed": 165
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 92,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: ab397b04-7b62-4722-8493-45778d53b376)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1030 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-11-02",
+    "run": "74",
+    "adhoc": false,
+    "os": "linux",
+    "target": "wasm",
+    "openseek_commit": "602a9bc9ac3fb5b383fadc9f517de78d233bc606",
+    "task": "toml",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/toml_run_1",
+        "session_id": "cli-20261102-101110-907-5879fd6a466a",
+        "steps": 0,
+        "elapsed": 1.027,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 705,
+          "passed": 0,
+          "failed": 705
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: a927f4c8-ca3e-4f8d-a60d-148fc07fca47)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1015 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/toml_run_2",
+        "session_id": "cli-20261102-101110-910-588445d01a93",
+        "steps": 0,
+        "elapsed": 1.029,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 705,
+          "passed": 0,
+          "failed": 705
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: cb1944ae-535c-44b4-978b-864de9e73785)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1014 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/toml_run_3",
+        "session_id": "cli-20261102-101110-929-58936680838e",
+        "steps": 0,
+        "elapsed": 0.995,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 705,
+          "passed": 0,
+          "failed": 705
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: e6de4aa6-1c11-4d84-867e-f90e5488541f)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 983 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-11-02",
+    "run": "74",
+    "adhoc": false,
+    "os": "linux",
+    "target": "wasm",
+    "openseek_commit": "602a9bc9ac3fb5b383fadc9f517de78d233bc606",
+    "task": "uri",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/uri_run_1",
+        "session_id": "cli-20261102-101121-360-6014e014ac08",
+        "steps": 0,
+        "elapsed": 1.058,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 141,
+          "passed": 0,
+          "failed": 141
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 329,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: bd71f36d-f781-445a-aefd-4e3619e31dfe)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1033 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/uri_run_2",
+        "session_id": "cli-20261102-101121-372-6019be26239e",
+        "steps": 0,
+        "elapsed": 1.022,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 141,
+          "passed": 0,
+          "failed": 141
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 329,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: cee1f0b9-ec6c-45b9-9995-2ff79574be12)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1004 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/uri_run_3",
+        "session_id": "cli-20261102-101121-362-6025eb310b2d",
+        "steps": 0,
+        "elapsed": 1.088,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 141,
+          "passed": 0,
+          "failed": 141
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 329,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 48b6acc2-d17a-4086-ad6c-c6d6dc10fe62)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1061 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-11-02",
+    "run": "74",
+    "adhoc": false,
+    "os": "windows",
+    "target": "native",
+    "openseek_commit": "602a9bc9ac3fb5b383fadc9f517de78d233bc606",
+    "task": "csv",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/csv_run_1",
+        "session_id": "cli-20261102-101217-050-971242049fdd",
+        "steps": 0,
+        "elapsed": 1.017,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 100,
+          "passed": 0,
+          "failed": 100
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 16f443be-898b-4cab-9406-0ad487e1eb9a)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1013 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/csv_run_2",
+        "session_id": "cli-20261102-101217-105-2168f075a49d",
+        "steps": 0,
+        "elapsed": 0.985,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 100,
+          "passed": 0,
+          "failed": 100
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 28a2db89-bfb6-4c07-a57b-b97377106542)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 981 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/csv_run_3",
+        "session_id": "cli-20261102-101217-162-390426885dc5",
+        "steps": 0,
+        "elapsed": 0.925,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 100,
+          "passed": 0,
+          "failed": 100
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 62aaa4e1-cbf8-4b88-b949-68571c819ca6)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 922 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-11-02",
+    "run": "74",
+    "adhoc": false,
+    "os": "windows",
+    "target": "native",
+    "openseek_commit": "602a9bc9ac3fb5b383fadc9f517de78d233bc606",
+    "task": "hpack",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/hpack_run_1",
+        "session_id": "cli-20261102-101230-628-9120e3d62e91",
+        "steps": 0,
+        "elapsed": 0.936,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 183,
+          "passed": 0,
+          "failed": 183
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 16,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: e071785e-2278-409b-a901-6f5cf2a9aea4)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 930 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/hpack_run_2",
+        "session_id": "cli-20261102-101230-691-5408abb618a9",
+        "steps": 0,
+        "elapsed": 1.009,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 183,
+          "passed": 0,
+          "failed": 183
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 16,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: d519740e-404b-4011-9c79-c9eead43cfa8)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 1005 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/hpack_run_3",
+        "session_id": "cli-20261102-101230-750-115648ac5b11",
+        "steps": 0,
+        "elapsed": 0.894,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 183,
+          "passed": 0,
+          "failed": 183
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 16,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 129487de-c4c5-491b-b65a-eac8afe3b68e)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 890 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-11-02",
+    "run": "74",
+    "adhoc": false,
+    "os": "windows",
+    "target": "native",
+    "openseek_commit": "602a9bc9ac3fb5b383fadc9f517de78d233bc606",
+    "task": "ini",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/ini_run_1",
+        "session_id": "cli-20261102-101158-688-8216131c1b6f",
+        "steps": 0,
+        "elapsed": 0.957,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 120,
+          "passed": 0,
+          "failed": 120
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 54f50ed5-2c76-4562-b34d-d36410685a05)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 953 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/ini_run_2",
+        "session_id": "cli-20261102-101158-748-452022218380",
+        "steps": 0,
+        "elapsed": 0.921,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 120,
+          "passed": 0,
+          "failed": 120
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 7621a622-ba3b-4a03-aa85-1147a65824e3)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 918 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/ini_run_3",
+        "session_id": "cli-20261102-101158-803-8544bc76b655",
+        "steps": 0,
+        "elapsed": 0.876,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 120,
+          "passed": 0,
+          "failed": 120
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 8,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 09355e0f-6fe6-4585-8fac-944f75bb5bfc)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 872 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-11-02",
+    "run": "74",
+    "adhoc": false,
+    "os": "windows",
+    "target": "native",
+    "openseek_commit": "602a9bc9ac3fb5b383fadc9f517de78d233bc606",
+    "task": "protobuf",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/protobuf_run_1",
+        "session_id": "cli-20261102-101219-893-360095abe008",
+        "steps": 0,
+        "elapsed": 0.927,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 165,
+          "passed": 0,
+          "failed": 165
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 92,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: afc57e90-7957-477f-abf6-d5f6179b23a9)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 921 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/protobuf_run_2",
+        "session_id": "cli-20261102-101219-956-78729ed91bd1",
+        "steps": 0,
+        "elapsed": 0.879,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 165,
+          "passed": 0,
+          "failed": 165
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 92,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 2e2787ee-d21a-48ea-9f52-b385068265c1)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 875 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/protobuf_run_3",
+        "session_id": "cli-20261102-101220-022-4016b19d8b21",
+        "steps": 0,
+        "elapsed": 0.899,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 165,
+          "passed": 0,
+          "failed": 165
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 92,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 8a173dc5-4e8f-42de-b92f-3ab2adc20244)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 895 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-11-02",
+    "run": "74",
+    "adhoc": false,
+    "os": "windows",
+    "target": "native",
+    "openseek_commit": "602a9bc9ac3fb5b383fadc9f517de78d233bc606",
+    "task": "toml",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/toml_run_1",
+        "session_id": "cli-20261102-101226-408-33569e2b5c9a",
+        "steps": 0,
+        "elapsed": 0.92,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 705,
+          "passed": 0,
+          "failed": 705
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: baf6bcfe-932c-4b79-9994-dbfc8222c84f)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 912 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/toml_run_2",
+        "session_id": "cli-20261102-101226-490-8552bd40c80d",
+        "steps": 0,
+        "elapsed": 0.911,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 705,
+          "passed": 0,
+          "failed": 705
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: bc8c276d-61d1-4e87-97e4-f20b525714a2)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 906 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/toml_run_3",
+        "session_id": "cli-20261102-101226-579-3388a759ac97",
+        "steps": 0,
+        "elapsed": 0.885,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 705,
+          "passed": 0,
+          "failed": 705
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 11,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: b8fa0b29-dd39-43f6-b3b8-94a1c9d66bf6)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 881 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  },
+  {
+    "date": "2026-11-02",
+    "run": "74",
+    "adhoc": false,
+    "os": "windows",
+    "target": "native",
+    "openseek_commit": "602a9bc9ac3fb5b383fadc9f517de78d233bc606",
+    "task": "uri",
+    "passed": 0,
+    "runs": [
+      {
+        "dir": "tasks/uri_run_1",
+        "session_id": "cli-20261102-101205-650-62408fe81f60",
+        "steps": 0,
+        "elapsed": 0.901,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 141,
+          "passed": 0,
+          "failed": 141
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 329,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 8efe7c19-3584-4a7d-9a32-0bedbb7eda8f)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 897 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/uri_run_2",
+        "session_id": "cli-20261102-101205-713-34204b0f319f",
+        "steps": 0,
+        "elapsed": 0.839,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 141,
+          "passed": 0,
+          "failed": 141
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 329,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: 7c30df63-507b-489d-a331-0f478e52851c)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 836 ms; HTTP status: 402)"
+        }
+      },
+      {
+        "dir": "tasks/uri_run_3",
+        "session_id": "cli-20261102-101205-779-828480ca960f",
+        "steps": 0,
+        "elapsed": 0.765,
+        "tool_call_stats": {},
+        "tool_calls": [],
+        "test_result": {
+          "exit_code": 2,
+          "total": 141,
+          "passed": 0,
+          "failed": 141
+        },
+        "check_result": {
+          "exit_code": 0,
+          "warnings": 329,
+          "errors": 0
+        },
+        "stop_reason": {
+          "kind": "failed",
+          "message": "agent failed: Failure(deepseek/client/client.mbt:335:20-335:63@moonbitlang/openseek FAILED: Model request failed: Failure(\"deepseek/client/client.mbt:411:5-411:53@moonbitlang/openseek FAILED: DeepSeek API error 402: {\\\"error\\\":{\\\"message\\\":\\\"Insufficient Balance (request_id: c82e7a4f-6b2f-4666-9e8c-20b59b183078)\\\",\\\"type\\\":\\\"insufficient_balance_error\\\",\\\"param\\\":null,\\\"code\\\":\\\"invalid_request_error\\\"}}\"). This error cannot be retried automatically. Model: deepseek-flash; stage: response_body; attempts: 1/5; elapsed: 763 ms; HTTP status: 402)"
+        }
+      }
+    ]
+  }
+]
