@@ -8,9 +8,14 @@ be stored as github artifacts
 ## Benchmark platforms
 
 Both scheduled and manually dispatched runs benchmark the OpenSeek agent on
-Linux/native, Linux/wasm, and Windows/native. Each combination runs all six
-tasks (csv, ini, uri, toml, hpack, protobuf) with three trials per task: 18
-jobs and 54 agent trials per workflow run.
+Linux/native, Linux/wasm, and Windows/native. Each combination runs five
+tasks (csv, ini, uri, toml, hpack) with three trials per task: 15 jobs and 45
+agent trials per workflow run. `tasks/protobuf` is kept for manual runs but
+left out of the matrix, since it has stopped producing failures.
+
+A run first checks that the DeepSeek account holds at least 100 CNY, a full
+night (about 63 CNY at off-peak prices) plus headroom. Below that it fails
+before any job starts and reports nothing.
 
 The target selects how the **agent** is compiled and run. Task code keeps its
 own configured target, and the grader runs on wasm on every platform. Windows

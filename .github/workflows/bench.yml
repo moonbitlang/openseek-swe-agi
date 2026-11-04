@@ -33,6 +33,36 @@ jobs:
       adhoc: ${{ steps.head.outputs.adhoc }}
       reporting: ${{ steps.gate.outputs.reporting }}
     steps:
+      # A full matrix costs about 63 CNY at off-peak prices (77 CNY measured
+      # on 2026-10-30, less the ~14 CNY of the since-dropped protobuf task),
+      # and every attempt shares one DeepSeek account. When the balance runs
+      # out mid-run, all attempts die on HTTP 402 together: the money already
+      # spent buys no result, and the report would still commit a 0/N day to
+      # the dashboard. Refuse to start below a full night's budget plus
+      # headroom instead; a failed prepare skips both bench and report.
+      - name: Require a full run's DeepSeek balance
+        env:
+          DEEPSEEK: ${{ secrets.DEEPSEEK }}
+          MIN_BALANCE_CNY: "100"
+        run: |
+          test -n "$DEEPSEEK" || {
+            echo "::error::the DEEPSEEK repository secret is not set"; exit 1; }
+          body="$(curl -fsS --retry 3 --max-time 30 \
+                    -H "Authorization: Bearer $DEEPSEEK" \
+                    https://api.deepseek.com/user/balance)" || {
+            echo "::error::cannot query the DeepSeek balance"; exit 1; }
+          available="$(jq -r '.is_available' <<<"$body")"
+          balance="$(jq -r '[.balance_infos[]? | select(.currency == "CNY")
+                             | .total_balance | tonumber] | add // 0' <<<"$body")"
+          echo "DeepSeek balance: $balance CNY (available: $available)"
+          if [ "$available" != true ] ||
+             ! awk -v b="$balance" -v m="$MIN_BALANCE_CNY" 'BEGIN { exit !(b >= m) }'; then
+            echo "::error::DeepSeek balance is $balance CNY, below the" \
+                 "$MIN_BALANCE_CNY CNY a full run needs -- top up before" \
+                 "re-running. Nothing was benchmarked or reported."
+            exit 1
+          fi
+
       # Reporting commits stats to the ref this workflow was dispatched from
       # and deploys the one repository-wide Pages site, so it belongs to the
       # default branch alone. A tag cannot be pushed to without force, and a
@@ -101,7 +131,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        task: [csv, ini, uri, toml, hpack, protobuf]
+        # protobuf stays in tasks/ but is out of the nightly: it passed all
+        # 228 trials from 2026-09-17 to 2026-10-30, so it no longer separates
+        # agent revisions, yet cost ~14 CNY a night.
+        task: [csv, ini, uri, toml, hpack]
         platform:
           - { os: linux, runner: ubuntu-latest, target: native }
           - { os: linux, runner: ubuntu-latest, target: wasm }
@@ -332,7 +365,7 @@ jobs:
   # marks them and shows the ref they measured.
   report:
     needs: [prepare, bench]
-    if: ${{ !cancelled() && needs.prepare.outputs.reporting == 'true' }}
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.prepare.outputs.reporting == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
