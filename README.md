@@ -67,14 +67,49 @@ own configured target, and the grader runs on wasm on every platform. Windows
 uses MSVC for native builds and Git Bash for the workflow commands.
 
 Stats include `os` and `target`, and each task has one dashboard card comparing
-platforms on shared charts. Agent, test, and tool-call pass rates and average
-steps are all shown by default; each chart can be collapsed independently.
+platforms on shared charts: agent pass rate, tool-call pass rate and average
+steps, all shown by default and each collapsible independently.
+
+The denominator is the part worth knowing. A trial that the harness killed
+before it ended — 613 of the 2214 trials recorded so far, 447 of them at step
+0, nearly all of them one DeepSeek client error — never got its chance, so it
+is dropped from the pass-rate and step averages rather than scored as a
+failure, and a column with no surviving trial is a gap instead of a zero.
+Counting those trials is what put a quarter of the page under DeepSeek's
+uptime: pass@k reads 69% over every recorded trial and 93% over the measured
+ones, 2026-10-12 drew a spike to zero on every series, and 2026-11-03 — the
+full matrix that died whole on HTTP 402, which is the run the balance gate
+above exists to prevent — read as every task regressing to nothing. A killed
+trial still counts when all its tests had gone green, since the agent had
+already finished by then; that only ever shrinks a denominator and never adds
+a pass. Dropping an unknown outcome cannot lower a rate, so every tooltip
+names how many trials it divided by, and a card opens on its newest column
+that measured something rather than on its newest column.
+
+There is no "average tests passed" chart. It tracked pass@k at r=0.925 while
+claiming a partial credit that barely exists — of 667 failing trials, 534
+scored about zero because nothing compiled and 124 scored above 95%, leaving 9
+in the band the chart was for — and `moon test` runs in the run directory, so
+its total counts the tests the agent wrote itself: 705 to 2119 on toml, which
+lets a trial failing one spec test present as 99.9%. The per-trial `passed/total`
+stays in the run table, where it is a fact about that trial rather than an
+average across trials. A real partial-credit metric needs the grader to record
+the task's own test results apart from the agent's.
+
 A tool-name selector chooses one tool-call chart, with a line for each platform
-and success rates weighted by call count across trials. All observed tools are
-available; no calls leave a gap. Changing the tool preserves the selected workflow
-run. Run details list all measured platforms together in one table with a platform
-column: three trials on each of three platforms produce nine rows, and a canary
-night produces one.
+and success rates weighted by call count across trials. It is ordered by call
+volume and carries each tool's count, so `mbtx` — 57% of all calls — comes
+first. A name that has never once succeeded is left out and listed under the
+selector instead: either a name the harness rejected (`mbTx` for `mbtx`,
+`mutli_edit`, `moon_check`; 36 calls across the whole history) or a tool that
+does not work here at all, which is `read_image`. Changing the tool preserves
+the selected workflow run. Run details list all measured platforms together in
+one table with a platform column: three trials on each of three platforms
+produce nine rows, and a canary night produces one. Trials the charts did not
+divide by are marked `not measured` there. `moon check` errors are appended to
+the warning count rather than given a column of their own, which was zeros in
+2199 of 2214 rows. A task with a single measurement — `lua` and `url`, one
+manual run each from 2026-09-01 — gets no charts at all, only its run details.
 The “only show this tool in overview” toggle dims other tools in the run-detail
 call strips, preserving call order and success/failure colors as the tool or run changes.
 Viewer links remain specific to each platform. Missing measurements remain gaps in the charts
