@@ -1,0 +1,85 @@
+name: smoke
+
+# The free half of the benchmark, every night.
+#
+# bench.yml spends money only in its "Run the agent" step. Everything before
+# it -- installing the toolchain, building openseek for each target, staging
+# the installed artifact, and running that artifact against a local fake model
+# server in check-bundle.mjs -- is local, and GitHub Actions is free on public
+# repositories, Windows runners included. So it costs nothing to keep running
+# nightly after the paid matrix moved to Saturdays.
+#
+# That matters because most of what breaks here is not the agent. The build
+# installs MoonBit `latest`, runs `moon update` against a live registry, and
+# leans on choco, msvc-dev-cmd and apt. Left to the weekly run alone, a
+# toolchain break would surface up to seven days late *and* cost that week its
+# only data point -- two weeks of silence for one bad commit upstream. This job
+# makes that visible the next morning, for free.
+#
+# It runs an hour before the Saturday matrix on purpose: a red smoke is a
+# reason to look before the paid run starts.
+on:
+  schedule:
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+    inputs:
+      openseek_ref:
+        description: >-
+          openseek commit to build: a full 40-hex SHA, or a branch/tag name.
+          Empty means openseek's current HEAD, which is what the schedule
+          builds and what the next benchmark will measure.
+        required: false
+        default: ""
+
+# Nothing here writes to the repository, so a superseded run has nothing to
+# lose. Cancel it and keep only the newest.
+concurrency:
+  group: smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: smoke (${{ matrix.platform.os }}, ${{ matrix.platform.target }})
+    runs-on: ${{ matrix.platform.runner }}
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      # The platforms, not the tasks: nothing below runs a task, and the build
+      # is per target. Keep these three in step with bench.yml's full matrix,
+      # since covering a platform the benchmark does not use, or missing one it
+      # does, is the one way this job can quietly stop being a canary.
+      matrix:
+        platform:
+          - { os: linux, runner: ubuntu-latest, target: native }
+          - { os: linux, runner: ubuntu-latest, target: wasm }
+          - { os: windows, runner: windows-latest, target: native }
+    env:
+      # Skip Proton's CEF setup for CLI-only builds, exactly as bench.yml does.
+      PROTON_CEF_SETUP_BOOTSTRAP: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - name: Build and package the agent
+        uses: ./.github/actions/build-agent
+        with:
+          openseek-commit: ${{ github.event.inputs.openseek_ref }}
+          target: ${{ matrix.platform.target }}
+
+      # No DEEPSEEK secret is referenced anywhere in this workflow, and no
+      # artifact is uploaded: a green run means the agent builds, packages and
+      # executes a bundled workflow on this platform, which is all this job
+      # claims. The paid trials, the grading and the dashboard stay in
+      # bench.yml.
+      - name: Say what was proven
+        run: |
+          echo "::notice::openseek builds, packages and executes a bundled" \
+               "workflow on ${{ matrix.platform.os }}/${{ matrix.platform.target }}" \
+               "-- no model was contacted and no balance was spent."
