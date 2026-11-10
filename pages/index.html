@@ -14,14 +14,14 @@
     --text-primary: #0b0b0b;
     --text-secondary: #52514e;
     --text-muted: #8a897f;
-    --series-pass: #2a78d6;   /* categorical slot 1: pass@k */
-    --series-tests: #eb6834;  /* categorical slot 2: test pass ratio */
-    --series-tools: #1baf7a;  /* categorical slot 3: tool-call pass rate */
-    --series-steps: #4a3aa7;  /* categorical slot 7: avg steps (own panel) */
-    --cat-4: #eda100;
-    --cat-5: #e87ba4;
-    --cat-6: #008300;
-    --cat-8: #e34948;
+    /* One hue per platform, held across every chart and card. They were named
+       after metrics -- pass@k, test ratio, tool-call rate -- which is what
+       they coloured before a chart carried three platforms instead of three
+       metrics, and the names outlived that by months. Slot 1 doubles as the
+       interface accent. */
+    --platform-1: #2a78d6;
+    --platform-2: #eb6834;
+    --platform-3: #1baf7a;
     --rail-ok: #a8d5b0;
     --status-good: #0ca30c;
     --status-serious: #ec835a;
@@ -37,14 +37,9 @@
       --text-primary: #ffffff;
       --text-secondary: #c3c2b7;
       --text-muted: #8a897f;
-      --series-pass: #3987e5;
-      --series-tests: #d95926;
-      --series-tools: #199e70;
-      --series-steps: #9085e9;
-      --cat-4: #c98500;
-      --cat-5: #d55181;
-      --cat-6: #008300;
-      --cat-8: #e66767;
+      --platform-1: #3987e5;
+      --platform-2: #d95926;
+      --platform-3: #199e70;
     }
   }
   :root[data-theme="dark"] {
@@ -56,14 +51,9 @@
     --text-primary: #ffffff;
     --text-secondary: #c3c2b7;
     --text-muted: #8a897f;
-    --series-pass: #3987e5;
-    --series-tests: #d95926;
-    --series-tools: #199e70;
-    --series-steps: #9085e9;
-    --cat-4: #c98500;
-    --cat-5: #d55181;
-    --cat-6: #008300;
-    --cat-8: #e66767;
+    --platform-1: #3987e5;
+    --platform-2: #d95926;
+    --platform-3: #199e70;
   }
 
   body {
@@ -95,9 +85,9 @@
   .tool-control { display: inline-flex; align-items: center; gap: 8px; }
   .tool-toggle { appearance: none; width: 30px; height: 18px; margin: 0; border: 1px solid var(--border); border-radius: 10px; background: var(--grid); cursor: pointer; }
   .tool-toggle::before { content: ""; display: block; width: 12px; height: 12px; margin: 2px; border-radius: 50%; background: var(--text-secondary); transition: transform 0.1s; }
-  .tool-toggle:checked { background: var(--series-pass); border-color: var(--series-pass); }
+  .tool-toggle:checked { background: var(--platform-1); border-color: var(--platform-1); }
   .tool-toggle:checked::before { background: white; transform: translateX(12px); }
-  .tool-toggle:focus-visible { outline: 2px solid var(--series-pass); outline-offset: 2px; }
+  .tool-toggle:focus-visible { outline: 2px solid var(--platform-1); outline-offset: 2px; }
   .tool-toggle:disabled { opacity: 0.4; cursor: default; }
   .metric-section { margin-top: 16px; }
   .metric-section > summary { cursor: pointer; font-weight: 500; padding: 4px 0; }
@@ -163,6 +153,10 @@
   .rail span.fail { background: var(--status-critical); }
   .rail span.dim { opacity: 0.15; }
 
+  .card-note { color: var(--text-muted); font-size: 12px; margin: 10px 0 0; max-width: 72ch; line-height: 1.5; flex-basis: 100%; }
+  .err-count { color: var(--status-critical); }
+  .excluded { color: var(--text-muted); }
+
   .tool-legend { display: flex; flex-wrap: wrap; gap: 2px 24px; margin: 4px 0 8px; }
   .tool-row { display: flex; align-items: center; gap: 8px; padding: 2px 0; cursor: default; }
   .tool-value { color: var(--text-secondary); font-size: 12px; font-variant-numeric: tabular-nums; }
@@ -199,11 +193,31 @@ const svgEl = (tag, attrs) => {
   return node;
 };
 
-// One chart point per task-day record.
+// A trial the harness killed is not a measurement of the agent. 613 of the
+// 2214 recorded trials ended on a DeepSeek client error rather than on their
+// own terms, 447 of them at step 0, and 195 whole records have no surviving
+// trial at all. Dividing by those trials is what made a quarter of this page
+// a chart of DeepSeek's uptime: pass@k reads 69% over every recorded trial
+// and 93% over the measured ones, and 2026-10-12 -- eighteen records, every
+// trial dead -- drew a spike to zero on every series.
+//
+// A killed trial still counts when every test passes, because the agent had
+// already reached a complete solution by then and a dropped connection
+// afterwards cannot take that back. So this rule only ever shrinks a
+// denominator; it never adds or removes a pass.
+const passes = run => run.test_result.failed === 0 && run.test_result.total > 0;
+const isMeasured = run =>
+  (run.stop_reason && run.stop_reason.kind === "finished") || passes(run);
+
+// One chart point per task-day record. A trial's outcome -- did it pass, how
+// many steps did it need -- is only observable if the trial ran, so those are
+// averaged over the measured trials alone and a record with none of them
+// leaves a gap. A tool call is observed as it happens, so the tool-call rate
+// keeps every call from every trial and only goes to a gap when there were no
+// calls to divide by.
 function toPoint(rec) {
-  const k = rec.runs.length;
-  const mean = f => (k === 0 ? 0 : rec.runs.reduce((acc, run) => acc + f(run), 0) / k);
-  const finished = rec.runs.filter(run => run.stop_reason && run.stop_reason.kind === "finished");
+  const measured = rec.runs.filter(isMeasured);
+  const k = measured.length;
   let toolOk = 0, toolAll = 0;
   for (const run of rec.runs) {
     for (const s of Object.values(run.tool_call_stats)) {
@@ -223,25 +237,33 @@ function toPoint(rec) {
     // an older one. Everywhere a point is called latest, say when it isn't.
     adhoc: rec.adhoc === true,
     commit: (rec.openseek_commit || "").slice(0, 9),
+    // Trials attempted, and the subset every rate below is divided by. Both
+    // are reported in the tooltips: a 1-of-3 day is thinner evidence than a
+    // 3-of-3 day and must not read the same.
+    trials: rec.runs.length,
     k,
-    passed: rec.passed,
-    passRate: k === 0 ? 0 : rec.passed / k,
-    testRatio: mean(run => {
-      const t = run.test_result;
-      return t.total > 0 ? t.passed / t.total : 0;
-    }),
-    toolRate: toolAll > 0 ? toolOk / toolAll : 0,
-    // Steps only over runs that ran to completion: a run cut short by an
-    // infra error (or one that looped until aborted) measures when the
-    // harness stopped it, not how many steps the agent needed. No finished
-    // run that day leaves a gap rather than a fake number.
-    avgSteps: finished.length === 0
+    passed: measured.filter(passes).length,
+    passRate: k === 0 ? null : measured.filter(passes).length / k,
+    toolCalls: toolAll,
+    toolRate: toolAll > 0 ? toolOk / toolAll : null,
+    avgSteps: k === 0
       ? null
-      : finished.reduce((acc, run) => acc + run.steps, 0) / finished.length,
-    warnings: rec.runs.reduce((acc, run) => acc + run.check_result.warnings, 0),
+      : measured.reduce((acc, run) => acc + run.steps, 0) / k,
     runs: rec.runs,
   };
 }
+
+// What a chart divided by, and what it means when there was nothing to divide.
+const TRIAL_SCOPE = detail => ({
+  of: detail.k === detail.trials
+    ? `${detail.k} trial${detail.k === 1 ? "" : "s"}`
+    : `${detail.k} of ${detail.trials} trials measured`,
+  empty: `no measured trial (${detail.trials} killed)`,
+});
+const CALL_SCOPE = detail => ({
+  of: `${detail.toolCalls.toLocaleString()} calls`,
+  empty: "no tool calls",
+});
 
 // Generic line+dot panel: one y-scale, crosshair, tooltip, direct end labels
 // (only when few enough series to stay legible — beyond 4 the legend rules).
@@ -409,7 +431,7 @@ class TaskCard {
   constructor(task, records) {
     this.task = task;
     this.platforms = new Map();
-    const tools = new Set();
+    const tools = new Map();
     const timeline = new Map();
     const legacyCounts = new Map();
     for (const record of records) {
@@ -421,11 +443,14 @@ class TaskCard {
       point.tools = new Map();
       for (const run of point.runs) {
         for (const [tool, stats] of Object.entries(run.tool_call_stats)) {
-          tools.add(tool);
           const counts = point.tools.get(tool) ?? { ok: 0, calls: 0 };
           counts.ok += stats.passed;
           counts.calls += stats.passed + stats.failed;
           point.tools.set(tool, counts);
+          const total = tools.get(tool) ?? { ok: 0, calls: 0 };
+          total.ok += stats.passed;
+          total.calls += stats.passed + stats.failed;
+          tools.set(tool, total);
         }
       }
       // Old records have no workflow run number. Keep multiple same-day runs
@@ -447,7 +472,7 @@ class TaskCard {
     }
     this.points = [...timeline.values()].sort((a, b) =>
       a.date.localeCompare(b.date) || Number(a.run ?? 0) - Number(b.run ?? 0));
-    const colors = ["var(--series-pass)", "var(--series-tests)", "var(--series-tools)"];
+    const colors = ["var(--platform-1)", "var(--platform-2)", "var(--platform-3)"];
     const dashes = ["", "7 4", "2 4"];
     // Stable ordering gives each platform the same color across every task,
     // including cards where one platform has not produced any data yet.
@@ -456,12 +481,41 @@ class TaskCard {
       const index = Math.max(0, order.indexOf(platform));
       return { label: platform, color: colors[index], dash: dashes[index] };
     });
-    // Keep every observed tool available, including tools used by just one platform.
-    this.tools = [...tools].sort();
-    this.selected = this.points.length - 1;
+    // Keep every tool the agent actually has, including one used by a single
+    // platform, and order the list by how much the agent leans on it rather
+    // than by spelling -- mbtx is 57% of all calls and belongs first.
+    //
+    // A name that has never once succeeded here is not a tool. It is either a
+    // name the harness rejected -- `mbTx` for `mbtx`, `mutli_edit`,
+    // `moon_check`, 36 calls in all across the whole history -- or a tool
+    // that does not work in this environment at all, which is read_image: 105
+    // calls, no successes, seventeen days. Charting one gives a line of gaps
+    // with a single 0% dot, and six of toml's nineteen options were this. Name
+    // them once under the selector instead, where the fact survives without
+    // costing a slot.
+    this.toolCounts = new Map([...tools].sort((a, b) => b[1].calls - a[1].calls));
+    this.tools = [...this.toolCounts].filter(([, t]) => t.ok > 0).map(([tool]) => tool);
+    this.rejected = [...this.toolCounts].filter(([, t]) => t.ok === 0)
+      .map(([tool, t]) => `${tool} (${t.calls})`);
+    // One measurement is not a trend; such a card shows its run details only.
+    this.trended = this.points.length > 1;
+    // Open on the newest column that measured something. The last full matrix,
+    // 2026-11-03, died in its entirety on HTTP 402 -- 54 trials, every one
+    // killed before it reached a step -- and landing a reader there offers
+    // three empty charts and a table of "not measured" as the current state of
+    // the agent. The gap stays on the charts and stays clickable; it is just
+    // not where the card opens.
+    let selected = this.points.length - 1;
+    const measured = point => [...point.platforms.values()].some(p => p.k > 0);
+    while (selected > 0 && !measured(this.points[selected])) selected--;
+    this.selected = selected;
   }
 
-  metricChart(metric, steps = false) {
+  // `scope` names what a value was divided by, which differs per metric: the
+  // trial-outcome charts divide by measured trials, the tool-call chart by
+  // calls. Saying "84%" without it invites reading a one-trial day as a
+  // three-trial one.
+  metricChart(metric, { steps = false, scope } = {}) {
     const series = this.series.map(platform => ({
       ...platform,
       get: point => point.platforms.get(platform.label)?.[metric] ?? null,
@@ -478,10 +532,15 @@ class TaskCard {
       directLabels: false,
       onPick: index => this.select(index),
       // A failed build produces no measurement. Keep its chart gap, but do not
-      // add a placeholder row alongside the platforms that actually ran.
+      // add a placeholder row alongside the platforms that actually ran. Name
+      // the denominator too, so a gap reads as "nothing survived to measure"
+      // rather than as missing data, and a thin day reads as a thin day.
       tooltipRows: point => series.filter(s => point.platforms.has(s.label)).map(s => {
+        const detail = point.platforms.get(s.label);
         const value = s.get(point);
-        return ttRow(s.color, `${s.label}: ${value === null ? "no data" : fmt(value)}`);
+        return ttRow(s.color, value === null
+          ? `${s.label}: ${scope ? scope(detail).empty : "no data"}`
+          : `${s.label}: ${fmt(value)}${scope ? ` · ${scope(detail).of}` : ""}`);
       }),
     });
   }
@@ -542,8 +601,11 @@ class TaskCard {
   runTable(point) {
     const table = el("table");
     const head = el("tr");
-    for (const [name, numeric] of [["platform", false], ["run", false], ["tests", true], ["warn", true],
-      ["err", true], ["steps", true], ["elapsed", true], ["stop", false]]) {
+    // `moon check` reported zero errors in 2199 of 2214 recorded trials, so a
+    // column of its own was 99.3% zeros. The 15 rows that have something to
+    // say get it appended to the warning count instead.
+    for (const [name, numeric] of [["platform", false], ["run", false], ["tests", true],
+      ["check", true], ["steps", true], ["elapsed", true], ["stop", false]]) {
       head.append(el("th", numeric ? "num" : "", name));
     }
     table.append(head);
@@ -566,9 +628,17 @@ class TaskCard {
         runCell.append(el("span", "mono", runName));
       }
       row.append(el("td", "mono", platform.label), runCell);
-      row.append(el("td", "num", `${t.passed}/${t.total}`));
-      row.append(el("td", "num", String(c.warnings)));
-      row.append(el("td", "num", String(c.errors)));
+      // `total` counts the tests the agent wrote alongside the task's own, so
+      // the denominator moves with the trial -- 705 to 2119 on toml. Shown as
+      // the raw pair it is a fact about this trial; it was also being averaged
+      // into a ratio across trials, which is why that chart is gone.
+      const tests = el("td", "num", `${t.passed}/${t.total}`);
+      tests.title = "moon test after the task's own tests were restored; " +
+        "the total includes tests the agent wrote itself";
+      row.append(tests);
+      const check = el("td", "num", String(c.warnings));
+      if (c.errors > 0) check.append(el("span", "err-count", ` · ${c.errors} err`));
+      row.append(check);
       row.append(el("td", "num", String(run.steps)));
       row.append(el("td", "num", `${Math.round(run.elapsed)}s`));
       const kind = run.stop_reason ? run.stop_reason.kind : "missing";
@@ -576,6 +646,9 @@ class TaskCard {
       const dot = el("span", "stop-dot");
       dot.style.background = STOP_COLORS[kind] || "var(--text-muted)";
       stop.append(dot, document.createTextNode(kind));
+      // Say which rows the charts above divided by, so a gap or a thin day has
+      // a visible cause in the table rather than looking like missing data.
+      if (!isMeasured(run)) stop.append(el("span", "excluded", " · not measured"));
       const cell = el("td");
       if (run.stop_reason && kind !== "finished") cell.title = run.stop_reason.message;
       cell.append(stop);
@@ -586,7 +659,7 @@ class TaskCard {
         row.className = "has-rail";
         const railRow = el("tr", "rail-row");
         const cell = el("td");
-        cell.colSpan = 8;
+        cell.colSpan = 7;
         cell.append(rail(run));
         railRow.append(cell);
         table.append(railRow);
@@ -636,27 +709,59 @@ class TaskCard {
 
   render() {
     this.card = el("section", "task-card");
-    const latest = this.points[this.points.length - 1];
+    // Date the last column that measured something, not the last column that
+    // exists: csv's newest is 2026-11-03, where nothing survived. And count
+    // the platforms in that column rather than the card's history -- ini's
+    // newest is one canary cell, and "3 platforms" on it claimed two
+    // measurements that were never taken.
+    const latest = this.points[this.selected];
     const head = el("div", "task-head");
     head.append(el("span", "task-name", this.task),
-      el("span", "task-latest", `latest ${latest.date} · ${this.series.length} platforms`));
+      el("span", "task-latest", [...latest.platforms.values()].some(p => p.k > 0)
+        ? `last measured ${latest.date} · ` +
+          `${latest.platforms.size} of ${this.series.length} platforms`
+        : `never measured · ${this.points.length} columns, every trial killed`));
     this.viewers = el("div", "legend");
     const legend = el("div", "legend");
     for (const platform of this.series) legend.append(ttRow(platform.color, platform.label));
 
-    // All metrics start expanded. Native details/summary supports keyboard
-    // folding while retaining each chart and its synchronized run selection.
+    // One measurement is not a trend: lua and url are each a single manual run
+    // from 2026-09-01 on one platform, and four charts of one dot each said
+    // nothing that the run details below do not say better.
     const metrics = el("div");
     this.charts = [];
-    for (const [metric, title] of [["passRate", "Agent pass rate (pass@k)"],
-      ["testRatio", "Average tests passed"], ["toolRate", "Tool-call pass rate"],
-      ["avgSteps", "Average steps · finished runs only"]]) {
+    if (!this.trended) {
+      metrics.append(el("div", "card-note",
+        "A single measurement, so there is nothing to trend — the run details are the whole record."));
+    }
+    // All metrics start expanded. Native details/summary supports keyboard
+    // folding while retaining each chart and its synchronized run selection.
+    //
+    // "Average tests passed" used to sit between the first two. It tracked
+    // pass@k at r=0.925 while claiming to add partial credit that barely
+    // exists -- of 667 failing trials, 534 scored ~0 because nothing compiled
+    // and 124 scored above 95%, leaving 9 in the band the chart was for -- and
+    // it divided by a denominator the agent itself writes tests into.
+    for (const [metric, title, scope] of this.trended ? [
+      ["passRate", "Agent pass rate (pass@k)", TRIAL_SCOPE],
+      ["toolRate", "Tool-call pass rate", CALL_SCOPE],
+      ["avgSteps", "Average steps", TRIAL_SCOPE]] : []) {
       const section = el("details", "metric-section");
       section.open = true;
-      const panel = this.metricChart(metric, metric === "avgSteps");
+      const panel = this.metricChart(metric, { steps: metric === "avgSteps", scope });
       this.charts.push(panel);
       section.append(el("summary", "", title), panel.node);
       metrics.append(section);
+    }
+    if (this.trended) {
+      metrics.append(el("div", "card-note",
+        "Pass rate and steps are over measured trials: a trial the harness " +
+        "killed before it ended never got its chance, so it is dropped rather " +
+        "than scored as a failure, and a column with none left is a gap. " +
+        "Dropping an unknown outcome can only raise the rate — on 2026-10-31 " +
+        "every trial was killed and six of nine had already gone green — so " +
+        "read the measured count in the tooltip before reading the level. " +
+        "Tool calls are counted wherever they happened."));
     }
 
     this.runsTitle = el("div", "table-title");
@@ -664,8 +769,11 @@ class TaskCard {
     const toolControls = el("div", "chart-controls");
     const toolLabel = el("label", "tool-control", "Tool name ");
     this.toolSelect = el("select");
+    // Carry the call count in the option itself: it is what orders the list,
+    // and it tells a reader before they pick whether a flat line at 100% is
+    // 1059 calls going right or a handful that happened to.
     for (const tool of this.tools) {
-      const option = el("option", "", tool);
+      const option = el("option", "", `${tool} · ${this.toolCounts.get(tool).calls.toLocaleString()} calls`);
       option.value = tool;
       this.toolSelect.append(option);
     }
@@ -679,11 +787,15 @@ class TaskCard {
     this.toolOnly.addEventListener("change", () => this.highlightToolCalls());
     toggleLabel.append(this.toolOnly, document.createTextNode("only show this tool in overview"));
     toolControls.append(toolLabel, toggleLabel);
+    if (this.rejected.length > 0) {
+      toolControls.append(el("div", "card-note",
+        `Never succeeded once, so not charted: ${this.rejected.join(", ")}.`));
+    }
     this.toolBody = el("div");
     this.toolSelect.addEventListener("change", () => this.selectTool());
-    this.selectTool();
-    this.card.append(head, legend, metrics,
-      this.runsTitle, this.viewers, this.runsBody, toolControls, this.toolBody);
+    if (this.trended) this.selectTool();
+    this.card.append(head, legend, metrics, this.runsTitle, this.viewers, this.runsBody,
+      ...(this.trended ? [toolControls, this.toolBody] : []));
     this.select(this.selected);
     return this.card;
   }
@@ -703,7 +815,7 @@ async function boot() {
   } catch {}
   if (!Array.isArray(records) || records.length === 0) {
     subtitle.textContent = "no benchmark data yet";
-    document.getElementById("tasks").append(el("div", "empty", "Stats will appear after the first daily run."));
+    document.getElementById("tasks").append(el("div", "empty", "Stats will appear after the first scheduled run."));
     return;
   }
   const byTask = new Map();
@@ -711,11 +823,25 @@ async function boot() {
     if (!byTask.has(rec.task)) byTask.set(rec.task, []);
     byTask.get(rec.task).push(rec);
   }
-  const last = records[records.length - 1];
+  // The newest record is one job of one shape. On a canary night it is ini on
+  // Windows and nothing else, and taking its commit as the fleet's state
+  // claimed four tasks had been measured at a commit they never saw -- while
+  // "daily" stopped being true when the full matrix moved to Saturdays. Name
+  // the run and what it actually covered; each card says when it was last
+  // measured itself.
+  const newest = records.reduce((a, b) => b.date > a.date ||
+    (b.date === a.date && Number(b.run ?? 0) >= Number(a.run ?? 0)) ? b : a);
+  const covered = new Set(records
+    .filter(r => r.date === newest.date && (r.run ?? null) === (newest.run ?? null))
+    .map(r => r.task));
   subtitle.replaceChildren(
-    document.createTextNode(`daily fleet benchmark · latest ${last.date} · openseek `),
-    Object.assign(el("code"), { textContent: (last.openseek_commit || "").slice(0, 9) }),
-    document.createTextNode(last.adhoc === true
+    document.createTextNode("fleet benchmark · newest run " +
+      `${newest.run ? `#${newest.run} ` : ""}${newest.date} · ` +
+      `${covered.size === byTask.size
+        ? `all ${byTask.size} tasks`
+        : `${[...covered].sort().join(", ")} only`} · openseek `),
+    Object.assign(el("code"), { textContent: (newest.openseek_commit || "").slice(0, 9) }),
+    document.createTextNode(newest.adhoc === true
       ? " (ad-hoc: a named ref, not necessarily HEAD)" : ""),
   );
   const tasksRoot = document.getElementById("tasks");
