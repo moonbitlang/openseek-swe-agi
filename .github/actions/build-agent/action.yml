@@ -1,0 +1,139 @@
+name: Build the openseek agent
+description: >-
+  Install the toolchain, build openseek at a given commit for a given target,
+  stage it as an installed artifact, and prove the installed copy executes a
+  bundled workflow. Everything here is local: no model is contacted and no
+  DeepSeek balance is spent, which is what lets smoke.yml run it nightly for
+  free while bench.yml runs it before the paid trials.
+
+inputs:
+  openseek-commit:
+    description: >-
+      The openseek commit to build. Empty means origin/HEAD, which is what a
+      smoke run wants; bench.yml passes the commit its matrix agreed on.
+    required: false
+    default: ""
+  target:
+    description: How the agent is compiled and run -- native or wasm.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # Composite steps do not inherit the caller's defaults.run.shell, so every
+    # step below names its own. bash is Git Bash on Windows, which is what
+    # keeps the benchmark commands identical across platforms.
+    - name: Pin openseek to the commit under test
+      shell: bash
+      env:
+        OPENSEEK_COMMIT: ${{ inputs.openseek-commit }}
+      run: |
+        ref="${OPENSEEK_COMMIT:-HEAD}"
+        git -C openseek fetch --depth 1 origin "$ref"
+        git -C openseek checkout --quiet FETCH_HEAD
+        sha="$(git -C openseek rev-parse HEAD)"
+        echo "building openseek $sha"
+        # stage-agent.mjs stamps this into bundle.json. bench.yml already sets
+        # it as a job env, which wins; this is what keeps a smoke run's
+        # manifest from recording a null commit.
+        echo "OPENSEEK_COMMIT=$sha" >> "$GITHUB_ENV"
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+
+    - name: Set up MSVC
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+
+    - name: Install MoonBit (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s -- latest
+        echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+
+    - name: Install MoonBit (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        Invoke-RestMethod https://cli.moonbitlang.com/install/powershell.ps1 | Invoke-Expression
+        "$env:USERPROFILE\.moon\bin" >> $env:GITHUB_PATH
+        # The grader spawns cp directly; make Git's Unix tools available to
+        # child processes too. Append them so Git's link.exe cannot shadow
+        # the MSVC linker selected above.
+        "PATH=$env:PATH;$env:ProgramFiles\Git\usr\bin" >> $env:GITHUB_ENV
+
+    - name: Install ripgrep (Windows)
+      if: runner.os == 'Windows'
+      shell: bash
+      run: choco install ripgrep --yes --no-progress
+
+    - name: Install Linux dependencies
+      if: runner.os == 'Linux'
+      # Moon runs workspace dependency prebuilds while building the agent.
+      # proton_tray@0.3.0 queries GTK flags through pkg-config; the wasm row
+      # also exports its viewer with a native build later in the bench job.
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install --yes pkg-config libgtk-3-dev libx11-dev ripgrep
+
+    - name: Verify ripgrep
+      # The agent's search tools invoke rg from PATH on every platform.
+      shell: bash
+      run: rg --version
+
+    - name: Setup MoonBit
+      shell: bash
+      run: |
+        moon version --all
+        moon update
+
+    - name: Build the agent
+      shell: bash
+      env:
+        BENCH_TARGET: ${{ inputs.target }}
+      run: |
+        # Builds may still download packages after moon update. Retry brief
+        # registry connection failures, but keep a persistent failure fatal.
+        for attempt in 1 2 3; do
+          echo "Build attempt $attempt/3"
+          if moon -C openseek build cmd/openseek --target "$BENCH_TARGET" &&
+             moon build tools/grade --target wasm; then
+            exit 0
+          else
+            build_status=$?
+          fi
+          if [ "$attempt" -lt 3 ]; then
+            delay=$((attempt * 10))
+            echo "::warning::Build attempt $attempt/3 failed (exit $build_status); retrying in ${delay}s"
+            sleep "$delay"
+          fi
+        done
+        echo "::error::Build failed after 3 attempts (exit $build_status)"
+        exit "$build_status"
+
+    - name: Package the agent
+      shell: bash
+      env:
+        BENCH_TARGET: ${{ inputs.target }}
+      run: |
+        node --test .github/scripts/stage-agent.test.mjs
+        # JSONL also contains diagnostics: validate the single artifact record
+        # before staging bin/ + share/ with this revision's upstream packager.
+        moon -C openseek run --target "$BENCH_TARGET" \
+          --build-only --output-json cmd/openseek > "$RUNNER_TEMP/agent-build.jsonl"
+        node .github/scripts/stage-agent.mjs openseek \
+          "$RUNNER_TEMP/openseek-agent" "$BENCH_TARGET" "$RUNNER_TEMP/agent-build.jsonl"
+
+    - name: Verify bundled workflow
+      # Runs the installed agent against a local fake model server, so this
+      # proves packaging end to end without spending anything.
+      shell: bash
+      env:
+        BENCH_TARGET: ${{ inputs.target }}
+      run: node .github/scripts/check-bundle.mjs

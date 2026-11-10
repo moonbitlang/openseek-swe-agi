@@ -1,24 +1,58 @@
 name: bench
 
+# Two schedules, two shapes of run. The whole matrix is expensive -- about 72
+# CNY of DeepSeek at off-peak prices, measured from the 2026-10-30 session
+# usage -- and a nightly full matrix spent ~2150 CNY a month to buy a
+# resolution the data does not support: a single night's 9 trials per task
+# estimate a failure rate to within about +/-14 points, so the signal only
+# appears in the trend across many nights, not in any one of them.
+#
+# So the matrix moved to once a week, and the one cell that still earns its
+# keep nightly -- ini on windows/native, the highest failure rate (21.7%) on
+# the hardest platform (9.2%, about twice either linux row, p=0.002) -- runs
+# as a canary on the other six nights for ~4 CNY. That keeps ini at 27 trials
+# a week instead of 9, keeps a real agent call exercising the key and the
+# balance daily, and costs about 14 CNY a day in all.
+#
+# Breakage in the toolchain or the packaging does not need paid trials to
+# surface, and smoke.yml catches it nightly for nothing. Check there first
+# when a weekly run comes back red.
 on:
   schedule:
-    - cron: "0 10 * * *" # Runs everyday 18:00 UTC+8
+    # The full matrix, Saturdays 18:00 UTC+8. Saturday is off-peak all day at
+    # DeepSeek (peak is 01:00-04:00 and 06:00-10:00 UTC, Mon-Fri), so unlike
+    # the old daily 10:00 UTC cron this one is not balanced on the edge of
+    # the discount window.
+    - cron: "0 10 * * 6"
+    # The ini/windows canary, the other six nights.
+    - cron: "0 10 * * 0-5"
   workflow_dispatch:
     inputs:
       openseek_ref:
         description: >-
           openseek commit to benchmark: a full 40-hex SHA, or a branch/tag
           name. Empty means openseek's current HEAD, which is exactly what the
-          nightly schedule measures.
+          schedules measure.
         required: false
         default: ""
+      mode:
+        description: >-
+          full = the whole matrix, 5 tasks x 3 platforms x 3 trials (~72 CNY).
+          canary = the nightly cell only, ini on windows/native, 3 trials
+          (~4 CNY).
+        required: false
+        type: choice
+        default: full
+        options: [full, canary]
 
-# One benchmark per target at a time. Runs of different refs may overlap: they
+# One benchmark per shape at a time. Runs of different refs may overlap: they
 # all commit to one branch, but the push loop below rebases, and each run then
 # dispatches pages.yml itself. Do not "simplify" that dispatch away on the
 # theory that the push triggers it -- a GITHUB_TOKEN push creates no runs.
+# The mode is part of the group so a Saturday full matrix and a dispatched
+# canary do not queue behind each other; they touch different stats files.
 concurrency:
-  group: bench-${{ github.event.inputs.openseek_ref || 'head' }}
+  group: bench-${{ github.event.inputs.mode || 'sched' }}-${{ github.event.inputs.openseek_ref || 'head' }}
   cancel-in-progress: false
 
 jobs:
@@ -32,18 +66,71 @@ jobs:
       openseek_commit: ${{ steps.head.outputs.sha }}
       adhoc: ${{ steps.head.outputs.adhoc }}
       reporting: ${{ steps.gate.outputs.reporting }}
+      mode: ${{ steps.mode.outputs.mode }}
+      matrix: ${{ steps.mode.outputs.matrix }}
     steps:
-      # A full matrix costs about 63 CNY at off-peak prices (77 CNY measured
-      # on 2026-10-30, less the ~14 CNY of the since-dropped protobuf task),
-      # and every attempt shares one DeepSeek account. When the balance runs
-      # out mid-run, all attempts die on HTTP 402 together: the money already
+      - name: Decide what this run measures
+        id: mode
+        env:
+          # Keep this in step with on.schedule above. GitHub allows no
+          # expressions in `on:`, so the Saturday cron is the one unavoidable
+          # duplicated string: edit both, or a Saturday quietly runs a canary.
+          FULL_MATRIX_CRON: "0 10 * * 6"
+          SCHEDULE: ${{ github.event.schedule }}
+          INPUT_MODE: ${{ github.event.inputs.mode }}
+        run: |
+          # A dispatch says what it wants. A schedule is identified by its own
+          # cron string; anything scheduled that is not the full-matrix cron is
+          # a canary, so adding canary nights needs no change here.
+          if [ -n "${INPUT_MODE:-}" ]; then
+            mode="$INPUT_MODE"
+          elif [ -z "${SCHEDULE:-}" ] || [ "$SCHEDULE" = "$FULL_MATRIX_CRON" ]; then
+            mode=full
+          else
+            mode=canary
+          fi
+
+          # The balance floor is this shape's own cost plus headroom, not a
+          # round number. The previous 100 CNY floor outlived its run cost and
+          # left the benchmark dark from 2026-11-04 to 2026-11-10 on a balance
+          # of 97.84 CNY -- a top-up's residue could never reach it again.
+          case "$mode" in
+            full)
+              tasks='["csv","ini","uri","toml","hpack"]'
+              platforms='[{"os":"linux","runner":"ubuntu-latest","target":"native"},
+                          {"os":"linux","runner":"ubuntu-latest","target":"wasm"},
+                          {"os":"windows","runner":"windows-latest","target":"native"}]'
+              min_balance=85
+              ;;
+            canary)
+              tasks='["ini"]'
+              platforms='[{"os":"windows","runner":"windows-latest","target":"native"}]'
+              min_balance=10
+              ;;
+            *)
+              echo "::error::unknown mode '$mode' -- expected full or canary"
+              exit 1
+              ;;
+          esac
+          matrix="$(jq -cn --argjson task "$tasks" --argjson platform "$platforms" '{$task, $platform}')"
+          {
+            echo "mode=$mode"
+            echo "matrix=$matrix"
+            echo "min_balance=$min_balance"
+          } >> "$GITHUB_OUTPUT"
+          echo "mode: $mode (floor ${min_balance} CNY)"
+          jq -n --argjson m "$matrix" \
+            '"jobs: \($m.task | length) tasks x \($m.platform | length) platforms"'
+
+      # Every attempt shares one DeepSeek account. When the balance runs out
+      # mid-run, all attempts die on HTTP 402 together: the money already
       # spent buys no result, and the report would still commit a 0/N day to
-      # the dashboard. Refuse to start below a full night's budget plus
-      # headroom instead; a failed prepare skips both bench and report.
-      - name: Require a full run's DeepSeek balance
+      # the dashboard. Refuse to start below this run's budget plus headroom
+      # instead; a failed prepare skips both bench and report.
+      - name: Require this run's DeepSeek balance
         env:
           DEEPSEEK: ${{ secrets.DEEPSEEK }}
-          MIN_BALANCE_CNY: "100"
+          MIN_BALANCE_CNY: ${{ steps.mode.outputs.min_balance }}
         run: |
           test -n "$DEEPSEEK" || {
             echo "::error::the DEEPSEEK repository secret is not set"; exit 1; }
@@ -58,7 +145,7 @@ jobs:
           if [ "$available" != true ] ||
              ! awk -v b="$balance" -v m="$MIN_BALANCE_CNY" 'BEGIN { exit !(b >= m) }'; then
             echo "::error::DeepSeek balance is $balance CNY, below the" \
-                 "$MIN_BALANCE_CNY CNY a full run needs -- top up before" \
+                 "$MIN_BALANCE_CNY CNY this run needs -- top up before" \
                  "re-running. Nothing was benchmarked or reported."
             exit 1
           fi
@@ -130,15 +217,12 @@ jobs:
         shell: bash
     strategy:
       fail-fast: false
-      matrix:
-        # protobuf stays in tasks/ but is out of the nightly: it passed all
-        # 228 trials from 2026-09-17 to 2026-10-30, so it no longer separates
-        # agent revisions, yet cost ~14 CNY a night.
-        task: [csv, ini, uri, toml, hpack]
-        platform:
-          - { os: linux, runner: ubuntu-latest, target: native }
-          - { os: linux, runner: ubuntu-latest, target: wasm }
-          - { os: windows, runner: windows-latest, target: native }
+      # Decided in prepare, because the shape depends on the mode: the weekly
+      # full matrix is 5 tasks x 3 platforms, the nightly canary is ini on
+      # windows/native alone. protobuf stays in tasks/ but is in neither: it
+      # passed all 228 trials from 2026-09-17 to 2026-10-30, so it no longer
+      # separates agent revisions, yet cost ~14 CNY a night.
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
     env:
       TASK: ${{ matrix.task }}
       BENCH_OS: ${{ matrix.platform.os }}
@@ -147,8 +231,9 @@ jobs:
       OPENSEEK_COMMIT: ${{ needs.prepare.outputs.openseek_commit }}
       ADHOC: ${{ needs.prepare.outputs.adhoc }}
       # Skip Proton's CEF setup for CLI-only benchmarks. This switch does not
-      # cover proton_tray's independent GTK prebuild; install its Linux build
-      # dependencies below even though the agent itself does not use the tray.
+      # cover proton_tray's independent GTK prebuild; the composite action
+      # installs its Linux build dependencies even though the agent itself
+      # does not use the tray.
       PROTON_CEF_SETUP_BOOTSTRAP: "1"
     steps:
       - name: Require DEEPSEEK secret
@@ -163,96 +248,17 @@ jobs:
         with:
           submodules: true
 
-      - name: Pin openseek to the commit under test
-        run: |
-          git -C openseek fetch --depth 1 origin "$OPENSEEK_COMMIT"
-          git -C openseek checkout --quiet "$OPENSEEK_COMMIT"
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      # Toolchain, build, staging and the bundled-workflow check. Shared with
+      # smoke.yml so the free nightly run exercises exactly this path; none of
+      # it contacts a model.
+      - name: Build and package the agent
+        uses: ./.github/actions/build-agent
         with:
-          node-version: 22
+          openseek-commit: ${{ needs.prepare.outputs.openseek_commit }}
+          target: ${{ matrix.platform.target }}
 
-      - name: Set up MSVC
-        if: runner.os == 'Windows'
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
-
-      - name: Install MoonBit (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s -- latest
-          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
-
-      - name: Install MoonBit (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          Invoke-RestMethod https://cli.moonbitlang.com/install/powershell.ps1 | Invoke-Expression
-          "$env:USERPROFILE\.moon\bin" >> $env:GITHUB_PATH
-          # The grader spawns cp directly; make Git's Unix tools available to
-          # child processes too. Append them so Git's link.exe cannot shadow
-          # the MSVC linker selected above.
-          "PATH=$env:PATH;$env:ProgramFiles\Git\usr\bin" >> $env:GITHUB_ENV
-
-      - name: Install ripgrep (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          choco install ripgrep --yes --no-progress
-
-      - name: Install Linux dependencies
-        if: runner.os == 'Linux'
-        # Moon runs workspace dependency prebuilds while building the agent.
-        # proton_tray@0.3.0 queries GTK flags through pkg-config; the wasm row
-        # also exports its viewer with a native build later in this job.
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes pkg-config libgtk-3-dev libx11-dev ripgrep
-
-      - name: Verify ripgrep
-        # The agent's search tools invoke rg from PATH on every platform.
-        run: rg --version
-
-      - name: Setup MoonBit
-        run: |
-          moon version --all
-          moon update
-
-      - name: Build the agent
-        run: |
-          # Builds may still download packages after moon update. Retry brief
-          # registry connection failures, but keep a persistent failure fatal.
-          for attempt in 1 2 3; do
-            echo "Build attempt $attempt/3"
-            if moon -C openseek build cmd/openseek --target "$BENCH_TARGET" &&
-               moon build tools/grade --target wasm; then
-              exit 0
-            else
-              build_status=$?
-            fi
-            if [ "$attempt" -lt 3 ]; then
-              delay=$((attempt * 10))
-              echo "::warning::Build attempt $attempt/3 failed (exit $build_status); retrying in ${delay}s"
-              sleep "$delay"
-            fi
-          done
-          echo "::error::Build failed after 3 attempts (exit $build_status)"
-          exit "$build_status"
-
-      - name: Package the agent
-        run: |
-          node --test .github/scripts/stage-agent.test.mjs
-          # JSONL also contains diagnostics: validate the single artifact record
-          # before staging bin/ + share/ with this revision's upstream packager.
-          moon -C openseek run --target "$BENCH_TARGET" \
-            --build-only --output-json cmd/openseek > "$RUNNER_TEMP/agent-build.jsonl"
-          node .github/scripts/stage-agent.mjs openseek \
-            "$RUNNER_TEMP/openseek-agent" "$BENCH_TARGET" "$RUNNER_TEMP/agent-build.jsonl"
-          cp "$RUNNER_TEMP/openseek-agent/bundle.json" "bundle-$BENCH_KEY.json"
-
-      - name: Verify bundled workflow
-        run: node .github/scripts/check-bundle.mjs
+      - name: Record the bundle manifest
+        run: cp "$RUNNER_TEMP/openseek-agent/bundle.json" "bundle-$BENCH_KEY.json"
 
       - name: Remove private test cases
         run: rm -f tasks/"$TASK"/*_priv_test.mbt
@@ -362,7 +368,9 @@ jobs:
   # would otherwise race the deletions; then the dispatch. Runs even when a
   # task failed: a red day still records what it measured. Ad-hoc runs report
   # here too; their stats carry their own openseek_commit, so the dashboard
-  # marks them and shows the ref they measured.
+  # marks them and shows the ref they measured. A canary run reports the same
+  # way, with one record instead of fifteen -- the dashboard already draws a
+  # missing measurement as a gap rather than a zero.
   report:
     needs: [prepare, bench]
     if: ${{ !cancelled() && needs.prepare.result == 'success' && needs.prepare.outputs.reporting == 'true' }}
@@ -373,6 +381,7 @@ jobs:
     env:
       OPENSEEK_COMMIT: ${{ needs.prepare.outputs.openseek_commit }}
       ADHOC: ${{ needs.prepare.outputs.adhoc }}
+      MODE: ${{ needs.prepare.outputs.mode }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -408,7 +417,7 @@ jobs:
           note=""
           [ "$ADHOC" = true ] && note=", ad-hoc"
           {
-            echo "### openseek \`$OPENSEEK_COMMIT\`${note:+ · ad-hoc}"
+            echo "### openseek \`$OPENSEEK_COMMIT\` · $MODE${note:+ · ad-hoc}"
             echo
             echo "| OS | agent target | task | runs passed | tests per run |"
             echo "| --- | --- | --- | --- | --- |"
@@ -421,9 +430,10 @@ jobs:
           git config user.email '41898203+github-actions[bot]@users.noreply.github.com'
           git add "$out"
           # The submodule pin records which HEAD was measured, so only a HEAD
-          # run may move it -- an ad-hoc run of an older ref would rewind it.
-          # Its stats still land; they carry their own openseek_commit.
-          if [ "$ADHOC" != true ]; then
+          # run of the full matrix may move it -- an ad-hoc run of an older ref
+          # would rewind it, and a canary measured one cell of it. Their stats
+          # still land; they carry their own openseek_commit.
+          if [ "$ADHOC" != true ] && [ "$MODE" = full ]; then
             git -C openseek fetch --depth 1 origin "$OPENSEEK_COMMIT"
             git -C openseek checkout --quiet "$OPENSEEK_COMMIT"
             git add openseek
@@ -437,7 +447,7 @@ jobs:
             echo "stats for run ${GITHUB_RUN_NUMBER} are already committed"
             exit 0
           fi
-          git commit -m "bench: ${date} (openseek ${OPENSEEK_COMMIT:0:9}${note})"
+          git commit -m "bench: ${date} (openseek ${OPENSEEK_COMMIT:0:9}, ${MODE}${note})"
           # Every reporting run pushes to this one branch, and runs of
           # different refs report in parallel, so a rejection just means
           # someone else got there first: rebase and go again. The old loop
@@ -470,10 +480,10 @@ jobs:
             gh release create viewers --title "Session viewers" --latest=false \
               --notes "Standalone session-viewer archives, one asset per task-run."
           # Keyed by run number, the same key that separates the day's stats
-          # files: a day can be benchmarked more than once -- the nightly plus
-          # an ad-hoc ref, or a re-dispatch of an unchanged HEAD -- and each
-          # measurement needs its own viewer. The commit does not separate that
-          # last case; the run number separates all of them.
+          # files: a day can be benchmarked more than once -- the weekly matrix
+          # plus an ad-hoc ref, or a re-dispatch of an unchanged HEAD -- and
+          # each measurement needs its own viewer. The commit does not separate
+          # that last case; the run number separates all of them.
           #
           # The date comes from the task's own stats record, never from the
           # clock here: a matrix job that graded before UTC midnight stamped
@@ -518,8 +528,8 @@ jobs:
       # authenticated with GITHUB_TOKEN, and pushes made with that token create
       # no workflow runs. workflow_dispatch is one of the two events exempt
       # from that rule, so this is the only thing that can put the committed
-      # stats on the dashboard before the next nightly -- which is why it runs
-      # even when publishing the viewers stumbled.
+      # stats on the dashboard before the next scheduled run -- which is why it
+      # runs even when publishing the viewers stumbled.
       - name: Deploy the dashboard
         if: ${{ !cancelled() }}
         env:
