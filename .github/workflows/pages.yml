@@ -35,15 +35,16 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  # Split build and deploy into separate jobs (GitHub Pages' recommended layout)
+  # and wait for the uploaded artifact to appear in the run's metadata API
+  # before calling deploy-pages. Running upload-pages-artifact and deploy-pages
+  # back-to-back in one job raced against GitHub's eventual consistency on
+  # ~650 MB uploads, failing with "No artifacts named github-pages were found"
+  # milliseconds after upload finalization.
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     permissions:
       contents: read
-      pages: write
-      id-token: write
     steps:
       # Pages is one production site, so what ships is always the default
       # branch -- never the ref a dispatch happened to name. `--ref` selects
@@ -97,10 +98,36 @@ jobs:
                "$(jq length _site/viewers.json) viewers"
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: _site
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    permissions:
+      actions: read
+      pages: write
+      id-token: write
+    steps:
+      - name: Wait for Pages artifact metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in $(seq 1 12); do
+            count="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts?name=github-pages" --jq '.total_count' 2>/dev/null || echo 0)"
+            if [ "${count:-0}" -ge 1 ]; then
+              echo "github-pages artifact metadata visible on attempt ${attempt} (count=${count})"
+              exit 0
+            fi
+            echo "attempt ${attempt}: github-pages artifact not yet visible; retrying in 5s"
+            sleep 5
+          done
+          echo "::warning::github-pages artifact metadata still not visible after 60s; proceeding to deploy-pages anyway"
+
       - name: Deploy Pages
         id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
