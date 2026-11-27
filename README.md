@@ -12,22 +12,21 @@ same part.
 
 | workflow | when | what | cost |
 | --- | --- | --- | --- |
-| `bench` (full) | Saturdays 18:00 UTC+8 | 5 tasks × 3 platforms × 3 trials — 15 jobs, 45 agent trials | ~72 CNY |
-| `bench` (canary) | the other six nights, same hour | ini on Windows/native, 3 trials | ~4 CNY |
-| `smoke` | every night, an hour earlier | build, package and execute the agent on all 3 platforms | free |
+| `bench` (full) | Saturdays 18:00 UTC+8 | 5 hard tasks (`url`, `yaml`, `xml`, `wasm`, `lua`) × 2 platforms (`Linux/native`, `Windows/native`) × 3 trials — 10 jobs, 30 agent trials | ~140 CNY (est.) |
+| `bench` (canary) | the other six nights, same hour | `ini` on `Windows/native`, 3 trials | ~4 CNY |
+| `smoke` | every night, an hour earlier | build, package and execute the agent on all 3 platforms (including `Linux/wasm`) | free |
 
-About 14 CNY a day in all. The full matrix used to run nightly, at ~2150 CNY
-a month, and that bought a resolution the data does not support: nine trials
-estimate a task's failure rate to within roughly ±14 points, so a single
-night says almost nothing and the signal lives in the trend. Spending the
-same money across seven nights bought seven noisy points where one would do.
+The full matrix runs once a week on five harder tasks (`url`, `yaml`, `xml`,
+`wasm`, `lua`) after the earlier suite (`csv`, `uri`, `toml`, `hpack`, `ini`,
+`protobuf`) reached 91%–100% pass rates on finished trials. Earlier data
+(2026-09-17 to 2026-11-03) showed `Linux/wasm` did not separate from
+`Linux/native` (p=0.12), while `Windows/native` failed roughly twice as often
+(9.2% vs 4.4%, Fisher p=0.002), so `Linux/wasm` is pruned from the paid matrix
+and kept in the free nightly `smoke` workflow instead.
 
-The canary is the one cell worth paying for daily: ini has the highest
-failure rate of the five tasks (21.7% of finished trials, 2026-09-17 to
-2026-11-03) and Windows/native the highest of the three platforms (9.2%,
-about twice either Linux row, Fisher p=0.002). It keeps ini at 27 trials a
-week rather than 9, and it puts a real agent call on the account every night,
-which is its own kind of check.
+The canary keeps `ini` on `Windows/native` on the other six nights (~4 CNY per
+night): it keeps a real agent call exercising the key, balance, and Windows
+platform path daily without paying hard-task token costs every night.
 
 `smoke` exists because most of what breaks is not the agent. `bench` spends
 money only in its *Run the agent* step; the toolchain install, the per-target
@@ -40,8 +39,10 @@ no cost, and shares one composite action
 (`.github/actions/build-agent`) with `bench` so the two cannot drift. When a
 weekly run comes back red, read `smoke` first.
 
-Each scheduled run checks the DeepSeek balance before starting anything: 85
-CNY for a full matrix, 10 for a canary — that shape's own cost plus headroom.
+Each scheduled run checks the DeepSeek balance before starting anything: 180
+CNY for a full matrix (initial estimate for 30 hard-task trials, to be
+recalibrated from session usage after the first completed run) and 10 for a
+canary — that shape's own cost plus headroom.
 Below it the run fails before any job starts and reports nothing, because a
 balance that runs out mid-run kills every attempt on HTTP 402 at once, buys no
 result with the money already spent, and would still commit a 0/N day to the
@@ -56,11 +57,12 @@ earlier into a weekday morning doubles the bill.
 
 ## Benchmark platforms
 
-A full run benchmarks the OpenSeek agent on Linux/native, Linux/wasm, and
-Windows/native, each with five tasks (csv, ini, uri, toml, hpack) and three
-trials per task. `tasks/protobuf` is kept for manual runs but left out of the
-matrix, since it has stopped producing failures: 228 of 228 trials passed
-between 2026-09-17 and 2026-10-30.
+A full run benchmarks the OpenSeek agent on Linux/native and Windows/native
+across five hard tasks (`url`, `yaml`, `xml`, `wasm`, `lua`) with three trials
+per task. `ini` continues as the nightly Windows/native canary, and `smoke.yml`
+continues to build, package, and execute Linux/wasm nightly for free. The
+earlier tasks (`csv`, `uri`, `toml`, `hpack`, `protobuf`) remain under `tasks/`
+for manual runs, having reached 92%–100% pass rates on finished trials.
 
 The target selects how the **agent** is compiled and run. Task code keeps its
 own configured target, and the grader runs on wasm on every platform. Windows
@@ -104,12 +106,12 @@ selector instead: either a name the harness rejected (`mbTx` for `mbtx`,
 `mutli_edit`, `moon_check`; 36 calls across the whole history) or a tool that
 does not work here at all, which is `read_image`. Changing the tool preserves
 the selected workflow run. Run details list all measured platforms together in
-one table with a platform column: three trials on each of three platforms
-produce nine rows, and a canary night produces one. Trials the charts did not
+one table with a platform column: three trials on each measured platform
+produce one row per trial, and a canary night produces three rows on Windows/native. Trials the charts did not
 divide by are marked `not measured` there. `moon check` errors are appended to
 the warning count rather than given a column of their own, which was zeros in
-2199 of 2214 rows. A task with a single measurement — `lua` and `url`, one
-manual run each from 2026-09-01 — gets no charts at all, only its run details.
+2199 of 2214 rows. A task with only a single measurement gets no charts at all,
+only its run details.
 The “only show this tool in overview” toggle dims other tools in the run-detail
 call strips, preserving call order and success/failure colors as the tool or run changes.
 Viewer links remain specific to each platform. Missing measurements remain gaps in the charts
