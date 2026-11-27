@@ -1,18 +1,15 @@
 name: bench
 
-# Two schedules, two shapes of run. The whole matrix is expensive -- about 72
-# CNY of DeepSeek at off-peak prices, measured from the 2026-10-30 session
-# usage -- and a nightly full matrix spent ~2150 CNY a month to buy a
-# resolution the data does not support: a single night's 9 trials per task
-# estimate a failure rate to within about +/-14 points, so the signal only
-# appears in the trend across many nights, not in any one of them.
+# Two schedules, two shapes of run. The weekly full matrix runs five hard tasks
+# (url, yaml, xml, wasm, lua) on linux/native and windows/native (10 jobs, 30
+# trials). Earlier data (2026-09-17 to 2026-11-03) showed linux/wasm did not
+# separate from linux/native (p=0.12) while windows/native failed roughly twice
+# as often (9.2% vs 4.4%, Fisher p=0.002), so linux/wasm is pruned from paid
+# trials and kept in the free nightly smoke.yml instead.
 #
-# So the matrix moved to once a week, and the one cell that still earns its
-# keep nightly -- ini on windows/native, the highest failure rate (21.7%) on
-# the hardest platform (9.2%, about twice either linux row, p=0.002) -- runs
-# as a canary on the other six nights for ~4 CNY. That keeps ini at 27 trials
-# a week instead of 9, keeps a real agent call exercising the key and the
-# balance daily, and costs about 14 CNY a day in all.
+# On the other six nights, ini on windows/native runs as a cheap canary (~4 CNY
+# for 3 trials): it exercises the key, balance, and Windows agent path daily
+# without paying hard-task token costs every night.
 #
 # Breakage in the toolchain or the packaging does not need paid trials to
 # surface, and smoke.yml catches it nightly for nothing. Check there first
@@ -37,7 +34,8 @@ on:
         default: ""
       mode:
         description: >-
-          full = the whole matrix, 5 tasks x 3 platforms x 3 trials (~72 CNY).
+          full = the whole matrix, 5 hard tasks (url, yaml, xml, wasm, lua) x
+          2 platforms (linux/native, windows/native) x 3 trials (~140 CNY est.).
           canary = the nightly cell only, ini on windows/native, 3 trials
           (~4 CNY).
         required: false
@@ -94,13 +92,15 @@ jobs:
           # round number. The previous 100 CNY floor outlived its run cost and
           # left the benchmark dark from 2026-11-04 to 2026-11-10 on a balance
           # of 97.84 CNY -- a top-up's residue could never reach it again.
+          # 180 CNY is the initial floor for 5 hard tasks x 2 platforms x 3
+          # trials (30 trials); recalibrate it from session usage once the
+          # first hard-matrix run completes.
           case "$mode" in
             full)
-              tasks='["csv","ini","uri","toml","hpack"]'
+              tasks='["url","yaml","xml","wasm","lua"]'
               platforms='[{"os":"linux","runner":"ubuntu-latest","target":"native"},
-                          {"os":"linux","runner":"ubuntu-latest","target":"wasm"},
                           {"os":"windows","runner":"windows-latest","target":"native"}]'
-              min_balance=85
+              min_balance=180
               ;;
             canary)
               tasks='["ini"]'
@@ -218,10 +218,11 @@ jobs:
     strategy:
       fail-fast: false
       # Decided in prepare, because the shape depends on the mode: the weekly
-      # full matrix is 5 tasks x 3 platforms, the nightly canary is ini on
-      # windows/native alone. protobuf stays in tasks/ but is in neither: it
-      # passed all 228 trials from 2026-09-17 to 2026-10-30, so it no longer
-      # separates agent revisions, yet cost ~14 CNY a night.
+      # full matrix is 5 hard tasks (url, yaml, xml, wasm, lua) x 2 platforms
+      # (linux/native, windows/native), and the nightly canary is ini on
+      # windows/native alone. linux/wasm stays covered nightly for free in
+      # smoke.yml. Older saturated tasks (csv, uri, toml, hpack, protobuf) stay
+      # in tasks/ for manual runs.
       matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
     env:
       TASK: ${{ matrix.task }}
@@ -369,7 +370,7 @@ jobs:
   # task failed: a red day still records what it measured. Ad-hoc runs report
   # here too; their stats carry their own openseek_commit, so the dashboard
   # marks them and shows the ref they measured. A canary run reports the same
-  # way, with one record instead of fifteen -- the dashboard already draws a
+  # way, with one record instead of ten -- the dashboard already draws a
   # missing measurement as a gap rather than a zero.
   report:
     needs: [prepare, bench]

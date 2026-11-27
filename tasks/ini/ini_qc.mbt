@@ -9,16 +9,16 @@
 /// break. Each of those forces a choice of carrier, and `\` and `\r` also
 /// have to survive whichever one is chosen.
 let name_char : @quickcheck.Generator[Char] = @quickcheck.frequency() <| [
-  (5, @quickcheck.char_range('a', 'z')),
-  (2, @quickcheck.char_range('0', '9')),
+  (5, @quickcheck.char_range('a', 'z', inclusive=true)),
+  (2, @quickcheck.char_range('0', '9', inclusive=true)),
   (2, @quickcheck.elements(['_', '-', '.'])),
   (1, @quickcheck.elements(['中', 'é', 'Ω'])),
 ]
 
 ///|
 let value_char : @quickcheck.Generator[Char] = @quickcheck.frequency() <| [
-  (5, @quickcheck.char_range('a', 'z')),
-  (2, @quickcheck.char_range('0', '9')),
+  (5, @quickcheck.char_range('a', 'z', inclusive=true)),
+  (2, @quickcheck.char_range('0', '9', inclusive=true)),
   (2, @quickcheck.elements([' ', ',', '=', ':', ';', '#', '"', '\''])),
   (1, @quickcheck.elements(['\\', '\n', '\r', '\t'])),
   (1, @quickcheck.elements(['你', '好', '😀', 'é'])),
@@ -27,10 +27,10 @@ let value_char : @quickcheck.Generator[Char] = @quickcheck.frequency() <| [
 ///|
 fn text(
   chars : @quickcheck.Generator[Char],
-  min~ : Int,
-  max~ : Int,
+  min~ : Int32,
+  max~ : Int32,
 ) -> @quickcheck.Generator[String] {
-  @quickcheck.int_range(min, max).flat_map() <| len => {
+  @quickcheck.int_range(min, max, inclusive=false).flat_map() <| len => {
     chars.array_with_size(len).map(cs => String::from_array(cs))
   }
 }
@@ -40,7 +40,9 @@ let key_gen : @quickcheck.Generator[String] = text(name_char, min=1, max=8)
 
 ///|
 let section_name_gen : @quickcheck.Generator[String] = @quickcheck.int_range(
-  1, 3,
+  1,
+  3,
+  inclusive=false,
 ).flat_map() <| words => {
   text(name_char, min=1, max=6).array_with_size(words).map(ws => ws.join(" "))
 }
@@ -52,7 +54,9 @@ let entry_gen : @quickcheck.Generator[(String, String)] = key_gen.flat_map() <| 
 
 ///|
 let fields_gen : @quickcheck.Generator[Map[String, String]] = @quickcheck.int_range(
-  0, 4,
+  0,
+  4,
+  inclusive=false,
 ).flat_map() <| n => {
   entry_gen
   .array_with_size(n)
@@ -72,7 +76,7 @@ let section_gen : @quickcheck.Generator[(String, Map[String, String])] = section
 
 ///|
 let doc_gen : @quickcheck.Generator[Doc] = fields_gen.flat_map() <| global => {
-  @quickcheck.int_range(0, 4).flat_map() <| count => {
+  @quickcheck.int_range(0, 4, inclusive=false).flat_map() <| count => {
     section_gen
     .array_with_size(count)
     .map(secs => {

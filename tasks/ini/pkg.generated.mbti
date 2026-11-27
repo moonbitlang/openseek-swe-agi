@@ -16,10 +16,11 @@ pub fn print(Doc) -> String
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) struct Doc {
   global : Map[String, String]
   sections : Map[String, Map[String, String]]
-} derive(Eq, @debug.Debug)
+}
 pub impl @quickcheck.Arbitrary for Doc
 pub impl @shrink.Shrink for Doc
 

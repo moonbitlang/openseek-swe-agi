@@ -15,10 +15,11 @@
 /// the variant, never the message text, but a helpful message (for
 /// example, in the `chunk:line: description` style of the reference
 /// interpreter) makes failures much easier to debug.
+#derive(Debug)
 pub(all) suberror LuaError {
   SyntaxError(String)
   RuntimeError(String)
-} derive(Debug)
+}
 
 ///|
 /// Execute a Lua 5.4 chunk in a fresh interpreter.

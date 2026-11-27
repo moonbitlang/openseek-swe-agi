@@ -9,10 +9,11 @@ import {
 pub fn exec(StringView) -> Unit raise LuaError
 
 // Errors
+#derive(@debug.Debug)
 pub(all) suberror LuaError {
   SyntaxError(String)
   RuntimeError(String)
-} derive(@debug.Debug)
+}
 
 // Types and methods
 
