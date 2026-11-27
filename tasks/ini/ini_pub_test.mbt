@@ -127,7 +127,7 @@ test "valid/empty-value" {
 ///|
 test "quickcheck: roundtrips" {
   @quickcheck.check(
-    (doc : Doc) => @ini.parse(@ini.print(doc)) == doc,
+    (doc : @ini.Doc) => @ini.parse(@ini.print(doc)) == doc,
     count=300,
   )
 }

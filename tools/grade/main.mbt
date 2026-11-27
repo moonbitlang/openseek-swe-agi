@@ -1,5 +1,5 @@
 ///|
-const TestTimeoutMs : Int = 600_000
+const TestTimeoutMs : Int32 = 600_000
 
 ///|
 async fn copy_glob(glob : String, dest : String) -> Unit {
@@ -9,12 +9,13 @@ async fn copy_glob(glob : String, dest : String) -> Unit {
 }
 
 ///|
+#derive(ToJson)
 struct TestResult {
-  exit_code : Int
-  total : Int
-  passed : Int
-  failed : Int
-} derive(ToJson)
+  exit_code : Int32
+  total : Int32
+  passed : Int32
+  failed : Int32
+}
 
 ///|
 const Digits : Regex = re"[[:digit:]]+"
@@ -52,11 +53,12 @@ async fn collect_test_result(run_dir~ : String) -> TestResult {
 }
 
 ///|
+#derive(ToJson)
 struct CheckResult {
-  exit_code : Int
-  warnings : Int
-  errors : Int
-} derive(ToJson)
+  exit_code : Int32
+  warnings : Int32
+  errors : Int32
+}
 
 ///|
 async fn collect_check_result(run_dir~ : String) -> CheckResult {
@@ -74,17 +76,19 @@ async fn collect_check_result(run_dir~ : String) -> CheckResult {
 }
 
 ///|
+#derive(ToJson)
 struct ToolCallStats {
-  passed : Int
-  failed : Int
-} derive(ToJson)
+  passed : Int32
+  failed : Int32
+}
 
 ///|
 /// One entry per tool call, in session order — the dashboard's per-run rail.
+#derive(ToJson)
 struct ToolCall {
   tool : String
   ok : Bool
-} derive(ToJson)
+}
 
 ///|
 async fn collect_run_stats(
@@ -153,7 +157,7 @@ async fn collect_run_stats(
 struct RunStats {
   dir : String
   session_id : String?
-  steps : Int
+  steps : Int32
   elapsed : Double
   // tool_call: name -> stats
   tool_call_stats : Map[String, ToolCallStats]
@@ -193,11 +197,12 @@ impl ToJson for RunStats with fn to_json(self) {
 }
 
 ///|
+#derive(ToJson)
 struct TaskStats {
   task : String
-  passed : Int
+  passed : Int32
   runs : Array[RunStats]
-} derive(ToJson)
+}
 
 ///|
 async fn main {

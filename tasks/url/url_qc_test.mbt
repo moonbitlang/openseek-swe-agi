@@ -9,15 +9,16 @@
 /// non-special schemes, every host kind, credentials, ports, dot
 /// segments, percent-encoding, Unicode, and stray tabs/newlines), and
 /// shrinking can safely reuse the core `String` shrinker.
-pub(all) struct QcUrlText(String) derive(Debug)
+#derive(Debug)
+pub(all) struct QcUrlText(String)
 
 ///|
 fn qc_text(
   chars : @quickcheck.Generator[Char],
-  min~ : Int,
-  max~ : Int,
+  min~ : Int32,
+  max~ : Int32,
 ) -> @quickcheck.Generator[String] {
-  @quickcheck.int_range(min, max).flat_map(len => {
+  @quickcheck.int_range(min, max, inclusive=false).flat_map(len => {
     chars.array_with_size(len).map(cs => String::from_array(cs))
   })
 }
@@ -36,8 +37,8 @@ let qc_scheme_gen : @quickcheck.Generator[String] = @quickcheck.frequency([
 
 ///|
 let qc_label_char : @quickcheck.Generator[Char] = @quickcheck.frequency([
-  (6, @quickcheck.char_range('a', 'z')),
-  (2, @quickcheck.char_range('0', '9')),
+  (6, @quickcheck.char_range('a', 'z', inclusive=true)),
+  (2, @quickcheck.char_range('0', '9', inclusive=true)),
   (1, @quickcheck.elements(['-', '_'])),
 ])
 
@@ -45,7 +46,7 @@ let qc_label_char : @quickcheck.Generator[Char] = @quickcheck.frequency([
 let qc_domain_gen : @quickcheck.Generator[String] = @quickcheck.frequency([
   (
     5,
-    @quickcheck.int_range(1, 3).flat_map(n => {
+    @quickcheck.int_range(1, 3, inclusive=false).flat_map(n => {
       qc_text(qc_label_char, min=1, max=6)
       .array_with_size(n)
       .map(labels => labels.join("."))
@@ -64,8 +65,8 @@ let qc_domain_gen : @quickcheck.Generator[String] = @quickcheck.frequency([
 let qc_ipv4_gen : @quickcheck.Generator[String] = @quickcheck.frequency([
   (
     3,
-    @quickcheck.int_range(0, 255).flat_map(a => {
-      @quickcheck.int_range(0, 255).map(b => "\{a}.0.\{b}.1")
+    @quickcheck.int_range(0, 255, inclusive=false).flat_map(a => {
+      @quickcheck.int_range(0, 255, inclusive=false).map(b => "\{a}.0.\{b}.1")
     }),
   ),
   (
@@ -102,14 +103,14 @@ let qc_userinfo_gen : @quickcheck.Generator[String] = @quickcheck.frequency([
 ///|
 let qc_port_gen : @quickcheck.Generator[String] = @quickcheck.frequency([
   (7, @quickcheck.pure("")),
-  (2, @quickcheck.int_range(0, 65535).map(p => ":\{p}")),
+  (2, @quickcheck.int_range(0, 65535, inclusive=false).map(p => ":\{p}")),
   (1, @quickcheck.elements([":80", ":443", ":21", ":008080", ":0"])),
 ])
 
 ///|
 let qc_path_char : @quickcheck.Generator[Char] = @quickcheck.frequency([
-  (8, @quickcheck.char_range('a', 'z')),
-  (2, @quickcheck.char_range('0', '9')),
+  (8, @quickcheck.char_range('a', 'z', inclusive=true)),
+  (2, @quickcheck.char_range('0', '9', inclusive=true)),
   (3, @quickcheck.elements(['.', '%', '~', '-', '_', ':', '@'])),
   (2, @quickcheck.elements([' ', '<', '>', '"', '`', '{', '}', '|', '^', '['])),
   (1, @quickcheck.elements(['é', '中', '😀', '\\', '\'', '&', '='])),
@@ -119,7 +120,7 @@ let qc_path_char : @quickcheck.Generator[Char] = @quickcheck.frequency([
 let qc_path_gen : @quickcheck.Generator[String] = @quickcheck.frequency([
   (
     6,
-    @quickcheck.int_range(0, 3).flat_map(n => {
+    @quickcheck.int_range(0, 3, inclusive=false).flat_map(n => {
       qc_text(qc_path_char, min=1, max=5)
       .array_with_size(n)
       .map(segs => if segs.is_empty() { "" } else { "/" + segs.join("/") })
@@ -136,7 +137,7 @@ let qc_path_gen : @quickcheck.Generator[String] = @quickcheck.frequency([
 
 ///|
 let qc_query_char : @quickcheck.Generator[Char] = @quickcheck.frequency([
-  (8, @quickcheck.char_range('a', 'z')),
+  (8, @quickcheck.char_range('a', 'z', inclusive=true)),
   (3, @quickcheck.elements(['=', '&', '+', '%', ' ', '\'', '"', '<', '>'])),
   (1, @quickcheck.elements(['é', '中', '😀'])),
 ])
@@ -201,9 +202,9 @@ fn qc_mangle(s : String) -> @quickcheck.Generator[String] {
       @quickcheck.pure(
         match s.find(":") {
           Some(i) =>
-            s.view(end_offset=i).to_owned() +
+            s.clamped_view(end=i).to_owned() +
             "\t:\n" +
-            s.view(start_offset=i + 1).to_owned()
+            s.clamped_view(start=i + 1).to_owned()
           None => "\t" + s
         },
       ),

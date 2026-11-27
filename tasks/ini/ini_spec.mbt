@@ -8,10 +8,11 @@
 /// takes the value of its last occurrence, and a repeated section header
 /// re-opens the existing section. Equality of documents is map equality and
 /// does not depend on iteration order.
+#derive(Eq, Debug)
 pub(all) struct Doc {
   global : Map[String, String]
   sections : Map[String, Map[String, String]]
-} derive(Eq, Debug)
+}
 
 ///|
 /// Parse INI text into a structured document

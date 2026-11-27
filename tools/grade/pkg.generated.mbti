@@ -1,20 +1,31 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "openseek-bench-tools/grade"
 
+import {
+  "moonbitlang/core/json",
+}
+
 // Values
 
 // Errors
 
 // Types and methods
-type CheckResult derive(ToJson)
+#derive(@json.ToJson)
+type CheckResult
 
 type RunStats
 
-type TaskStats derive(ToJson)
+#derive(@json.ToJson)
+type TaskStats
 
-type TestResult derive(ToJson)
+#derive(@json.ToJson)
+type TestResult
 
-type ToolCallStats derive(ToJson)
+#derive(@json.ToJson)
+type ToolCall
+
+#derive(@json.ToJson)
+type ToolCallStats
 
 // Type aliases
 

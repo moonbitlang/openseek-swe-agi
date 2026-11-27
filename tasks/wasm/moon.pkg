@@ -1,0 +1,6 @@
+import {
+  "moonbitlang/core/test",
+  "moonbitlang/core/quickcheck",
+} for "test"
+
+warnings = "+unnecessary_annotation"

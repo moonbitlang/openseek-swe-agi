@@ -1,0 +1,22 @@
+WebAssembly Core Specification, Release 3.0 (2026-07-10)
+W3C WebAssembly Community Group, Andreas Rossberg (editor)
+
+Vendored copies (this directory):
+
+  WebAssembly-3.0.pdf   the release artifact, byte-identical to
+                        https://webassembly.github.io/spec/versions/core/WebAssembly-3.0.pdf
+                        (sha256 6dc4a77d365a3bc4b953b1032d17617b5c10ddaf91764c57a1642427de8319b0);
+                        this is the authoritative text for the task
+  WebAssembly-3.0.txt   a mechanical plain-text rendering of that PDF for
+                        grepping, produced with exactly
+                        `pdftotext -layout WebAssembly-3.0.pdf WebAssembly-3.0.txt`
+                        (poppler pdftotext 26.04.0); where the two differ,
+                        the PDF wins
+
+Section numbers cited in wasm_spec.mbt, specs/wasm.md and TASK.md refer to
+this release (e.g. §5.1 Conventions of the binary format, §5.3.9 Limits,
+§3.1 Validation conventions, §7.8.2 Release 3.0 change history).
+
+Online:
+  https://webassembly.github.io/spec/versions/core/WebAssembly-3.0.pdf   (the release)
+  https://webassembly.github.io/spec/core/                               (living draft; tracks main, not the release)

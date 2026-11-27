@@ -5,7 +5,6 @@ import {
   "moonbitlang/core/json",
   "moonbitlang/core/string",
   "moonbitlang/core/debug",
-  "moonbitlang/async",
   "moonbitlang/async/fs",
   "moonbitlang/async/shell",
 }
